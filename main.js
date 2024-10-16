@@ -1,15 +1,18 @@
 import * as THREE from 'three';
+import * as misc from "./misc";
+import * as character from "./character";
+import * as cameraWrapper from "./camera";
 
 const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");
 let points = [];
 const spheres = []; // To keep track of created spheres
-const gravity = -0.01; // Adjusted gravity value
-let isJumping = false; // Track if the character is jumping
-let velocityY = 0; // Vertical velocity for jumping
+
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+const camera = new cameraWrapper.CameraClass( new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000))
+
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -38,66 +41,49 @@ const pointLightHelper1 = new THREE.PointLightHelper(pointLight1, 0.5);
 scene.add(pointLightHelper1);
 points.push(pointLight1);
 
-const ambientLight = new THREE.AmbientLight(0x404040, 0);
+const ambientLight = new THREE.AmbientLight(0x404040, 1.0);
 scene.add(ambientLight);
 
 
-const bottom = new THREE.Mesh(platformGeometry, platformMaterial);
-bottom.position.set(0, -0.5, 20);
-scene.add(bottom);
+let platforms = [
+    {geometry:platformGeometry, material:platformMaterial,position:{x:0,y:-0.5,z:20}}, //bot
+    // {geometry:platformGeometry, material:platformMaterial,position:{x:0,y:5,z:20}}, //top
+    // {geometry:sideWallGeometry, material:sideWallMaterial,position:{x:0,y:2,z:-5},rotation:{x:Math.PI/2,y:0,z:0}},//back
+    // {geometry:sideWallGeometry, material:sideWallMaterial,position:{x:0,y:2,z:-5},rotation:{x:Math.PI/2,y:0,z:0}}, //right
+    // {geometry:sideWallGeometry, material:sideWallMaterial,position:{x:5,y:0.8,z:15},rotation:{x:Math.PI/2,y:0,z:Math.PI / 2}} //left
+]
 
-const topThingy = new THREE.Mesh(platformGeometry, platformMaterial);
-topThingy.position.set(0, 5, 20);
-scene.add(topThingy);
-
-const backWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
-backWall.position.set(0, 2, -5);
-backWall.rotation.x = Math.PI / 2;
-scene.add(backWall);
-
-const left = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
-left.position.set(-5, 0.8, 15);
-left.rotation.set(Math.PI / 2, 0, Math.PI / 2);
-scene.add(left);
-
-const right = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
-right.position.set(5, 0.8, 15);
-right.rotation.set(Math.PI / 2, 0, Math.PI / 2);
-scene.add(right);
+platforms.forEach((platform)=>{
+    misc.generatePlatform(platform,scene);
+})
 
 scene.background = new THREE.Color(0x333333);
 
 
-const character = new THREE.Mesh(characterGeometry, characterMaterial);
-character.position.set(0, 0.5, 0);
-scene.add(character);
+const player = new character.CharacterModel(characterGeometry,characterMaterial)
+player.setPosition({x:0, y:0.5, z:0});
+scene.add(player.model);
+
 
 // Camera setup
-camera.position.set(0, 1, 0);
-character.rotation.y += Math.PI;
+camera.setPosition({x:0, y:1, z:0});
 
-// Variables for movement
-let moveSpeed = 0.1;
-let rotateSpeed = 0.05;
-let moveForward = false;
-let moveBackward = false;
-let rotateLeft = false;
-let rotateRight = false;
+player.setRotation({x:0,y:Math.PI,z:0});
 
 function createFallingSphere() {
-    const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32); // Create a sphere
-    const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red color
-    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    // const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32); // Create a sphere
+    // const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red color
+    // const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
     
-    // Calculate the spawn position based on player rotation
-    const spawnDistance = 3; // Distance in front of the character
-    sphere.position.x = character.position.x - Math.sin(character.rotation.y) * spawnDistance;
-    sphere.position.y = character.position.y ; // Start slightly above the ground
-    sphere.position.z = character.position.z + spawnDistance; // Move forward
+    // // Calculate the spawn position based on player rotation
+    // const spawnDistance = 3; // Distance in front of the character
+    // sphere.position.x = player.position.x - Math.sin(player.rotation.y) * spawnDistance;
+    // sphere.position.y = player.position.y ; // Start slightly above the ground
+    // sphere.position.z = player.position.z + spawnDistance; // Move forward
 
-    sphere.velocity = 0; // Initial velocity
-    spheres.push(sphere); // Add to spheres array
-    scene.add(sphere);
+    // sphere.velocity = 0; // Initial velocity
+    // spheres.push(sphere); // Add to spheres array
+    // scene.add(sphere);
 }
 
 function createPointLight(position) {
@@ -110,22 +96,22 @@ function createPointLight(position) {
 function onKeyDown(event) {
     switch (event.code) {
       case "ArrowUp":
-        moveForward = true;
+        player.moveForward = true;
         break;
       case "ArrowDown":
-        moveBackward = true;
+        player.moveBackward = true;
         break;
       case "ArrowLeft":
-        rotateLeft = true;
+        player.rotateLeft = true;
         break;
       case "ArrowRight":
-        rotateRight = true;
+        player.rotateRight = true;
         break;
       case "Space":
-        if (!isJumping) {
-          isJumping = true;
+        if (!player.isJumping()) {
+            player.setJumping(true);
           console.log("HERE");
-          velocityY = 0.15; // Set initial jump velocity
+          player.velocityY = 0.15; // Set initial jump velocity
         }
         break;
       case "KeyQ":
@@ -137,16 +123,16 @@ function onKeyDown(event) {
 function onKeyUp(event) {
 switch (event.code) {
     case "ArrowUp":
-    moveForward = false;
+        player.moveForward = false;
     break;
     case "ArrowDown":
-    moveBackward = false;
+        player.moveBackward = false;
     break;
     case "ArrowLeft":
-    rotateLeft = false;
+        player.rotateLeft = false;
     break;
     case "ArrowRight":
-    rotateRight = false;
+        player.rotateRight = false;
     break;
 }
 }
@@ -161,10 +147,10 @@ gameOverScreen.style.display = "block";
 }
 
 function restartGame() {
-gameOverScreen.style.display = "none";
-character.position.set(0, 0.5, 0);
-camera.position.set(0, 1, 0);
-character.rotation.y += Math.PI;
+    gameOverScreen.style.display = "none";
+    player.setPosition({x:0, y:0.5, z:0});
+    camera.setPosition({x:0, y:1, z:0});
+    player.setRotation({x:player.rotation.x,y:Math.PI,z:player.rotation.z});
 }
 
 restartButton.addEventListener("click", restartGame);
@@ -178,58 +164,33 @@ return distance <= 6;
 
 
 function animate() {
-requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
 
-// Light check
-let inLight = points.some(light =>
-        calcEuclid(character.position.x, character.position.z, light.position.x, light.position.z)
-    );
+    // Light check
+    // let inLight = points.some(light =>
+    //     calcEuclid(player.position.x, player.position.z, light.position.x, light.position.z)
+    // );
 
-    if (!inLight) {
-        handleCharacterDeath();
-        return;
-    }
+    // if (!inLight) {
+    //     handleCharacterDeath();
+    //     return;
+    // }
 
     // Sphere movement and deletion
-    spheres.forEach((sphere, index) => {
-        sphere.velocity += gravity; // Apply gravity to the sphere
-        sphere.position.y += sphere.velocity; // Update position based on velocity
-        createPointLight(sphere.position); // Create light at sphere's position
-        scene.remove(sphere); // Remove sphere after it hits the ground
-        spheres.splice(index, 1); // Remove from spheres array
-    });
+    // spheres.forEach((sphere, index) => {
+    //     sphere.velocity += gravity; // Apply gravity to the sphere
+    //     sphere.position.y += sphere.velocity; // Update position based on velocity
+    //     createPointLight(sphere.position); // Create light at sphere's position
+    //     scene.remove(sphere); // Remove sphere after it hits the ground
+    //     spheres.splice(index, 1); // Remove from spheres array
+    // });
 
     // Jumping and gravity application
-    if (isJumping) {
-        character.position.y += velocityY;
-        velocityY += gravity;
+    player.updatePlayerPosition();
 
-        if (character.position.y <= 0.5) {
-        character.position.y = 0.5;
-        isJumping = false;
-        velocityY = 0;
-        }
-    }
-
-    // Movement and rotation
-    if (moveForward) {
-        character.position.z -= Math.cos(character.rotation.y) * moveSpeed;
-        character.position.x -= Math.sin(character.rotation.y) * moveSpeed;
-    }
-    if (moveBackward) {
-        character.position.z += Math.cos(character.rotation.y) * moveSpeed;
-        character.position.x += Math.sin(character.rotation.y) * moveSpeed;
-    }
-    if (rotateLeft) {
-        character.rotation.y += rotateSpeed;
-    }
-    if (rotateRight) {
-        character.rotation.y -= rotateSpeed;
-    }
-
-    camera.position.copy(character.position);
-    camera.rotation.copy(character.rotation);
-    renderer.render(scene, camera);
+    camera.setPosition(player.getPosition());
+    camera.setRotation(player.getRotation());
+    renderer.render(scene, camera.camera);
 }
 
 animate();
