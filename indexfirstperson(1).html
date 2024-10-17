@@ -38,10 +38,27 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
+      //Texture for ground 
+       const textureLoader = new THREE.TextureLoader();
+      const texture = textureLoader.load('PavingStones.jpg', (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(1, 5);
+      });
+
+      //Texture for walls
+      const textureLoaderWall = new THREE.TextureLoader();
+      const textureWall = textureLoader.load('PavingStones.jpg', (texture) => {
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(4, 1);
+      });
+
       const sideWallGeometry = new THREE.BoxGeometry(50, 1, 10);
-      const sideWallMaterial = new THREE.MeshStandardMaterial({ color: 0x7ca687 });
+      //const sideWallMaterial = new THREE.MeshStandardMaterial({ color: 0x7ca687 });
+      const sideWallMaterial = new THREE.MeshStandardMaterial({ map: textureWall }); 
       const platformGeometry = new THREE.BoxGeometry(10, 1, 50);
-      const platformMaterial = new THREE.MeshStandardMaterial({ color: 0xa6baab });
+      const platformMaterial = new THREE.MeshStandardMaterial({ map: texture }); 
       const characterGeometry = new THREE.BoxGeometry(1, 1, 1);
       const characterMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
 
