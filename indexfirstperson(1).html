@@ -104,6 +104,11 @@
       right.rotation.set(Math.PI / 2, 0, Math.PI / 2);
       scene.add(right);
 
+      const end = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+      end.position.set(0, 2, 40); // Positioning the end wall at z = 20
+      end.rotation.x = Math.PI / 2; // Rotate to face the correct direction
+      scene.add(end);
+
       scene.background = new THREE.Color(0x333333);
 
       // Character setup
