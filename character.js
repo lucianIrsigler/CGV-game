@@ -62,13 +62,12 @@ export class CharacterModel {
 
 
     updatePlayerPosition(){
-
         if (this.isJumping()) {
             this.setPosition({x:this.position.x,y:this.position.y+this.velocityY,z:this.position.z})
             this.velocityY += this.gravity;
     
-            if (this.position.y <= 0.5) {
-                this.setPosition({x:this.position.x,y:0.5,z:this.position.z})
+            if (this.position.y <= 1) {
+                this.setPosition({x:this.position.x,y:1,z:this.position.z})
                 this.setJumping(false);
                 this.velocityY = 0;
             }
@@ -88,7 +87,7 @@ export class CharacterModel {
         }
 
         if (this.rotateLeft){
-            this.setRotation({x:this.rotation.x,y:this.rotation.y+this.getRotationSpeed(),z:this.rotation.z});
+            this.setRotation({x:this.rotation.x,y:this.rotation.y+this.rotateSpeed,z:this.rotation.z});
         }
         if (this.rotateRight) {
             this.setRotation({x:this.rotation.x,y:this.rotation.y-this.rotateSpeed,z:this.rotation.z})

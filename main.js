@@ -1,196 +1,290 @@
 import * as THREE from 'three';
-import * as misc from "./misc";
-import * as character from "./character";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';  // Correct ES6 import
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import * as dat from "dat.gui";
 import * as cameraWrapper from "./camera";
+import * as character from "./character";
+import {monsters} from "./monsters";
 
-const gameOverScreen = document.getElementById("gameOverScreen");
-const restartButton = document.getElementById("restartButton");
-let points = [];
-const spheres = []; // To keep track of created spheres
+let highestVelocity = 0.15;
 
 
+// Scene setup
 const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcccccc);
 
+// Camera setup
+// const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const camera = new cameraWrapper.CameraClass( new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000))
 
-const renderer = new THREE.WebGLRenderer();
+camera.setPosition({x:150,y:300,z:150}); 
+
+// Renderer setup
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled=true;
 document.body.appendChild(renderer.domElement);
 
+// OrbitControls for the camera
+const controls = new OrbitControls(camera.camera, renderer.domElement);  // Correct usage
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
 
 
-const sideWallGeometry = new THREE.BoxGeometry(50, 1, 10);
-const sideWallMaterial = new THREE.MeshStandardMaterial({ color: 0x7ca687 });
-const platformGeometry = new THREE.BoxGeometry(10, 1, 50);
-const platformMaterial = new THREE.MeshStandardMaterial({ color: 0xa6baab });
-const characterGeometry = new THREE.BoxGeometry(1, 1, 1);
-const characterMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
 
 
-const pointLight = new THREE.PointLight(0xffffff, 0.3, 8);
-pointLight.position.set(0, 4, 0);
-scene.add(pointLight);
-const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.5);
-scene.add(pointLightHelper);
-points.push(pointLight);
+let model;
+let currentMonster = monsters.anya;
+const loader = new GLTFLoader();
+loader.load(currentMonster.scene, function (gltf) {
+    model = gltf.scene;
+    scene.add(model);  // Add the loaded model to the scene
 
-const pointLight1 = new THREE.PointLight(0xffffff, 0.3, 9);
-pointLight1.position.set(-3.5, 4, 9);
-scene.add(pointLight1);
-const pointLightHelper1 = new THREE.PointLightHelper(pointLight1, 0.5);
-scene.add(pointLightHelper1);
-points.push(pointLight1);
+    model.position.set(0, currentMonster.positionY, 0);  // Optional: Set position of the model
+    model.scale.set(currentMonster.scaleX,currentMonster.scaleY,currentMonster.scaleZ);     // Optional: Set scale of the model
+    model.castShadow = true; 
+}, undefined, function (error) {
+    console.error('An error happened', error);  // Handle error if loading fails
+});
 
-const ambientLight = new THREE.AmbientLight(0x404040, 1.0);
+
+
+
+
+
+
+const planeGeometry = new THREE.PlaneGeometry(2000, 2000);
+const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x716c82});
+const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+plane.rotation.x = -Math.PI / 2;  // Rotate to lie flat
+plane.receiveShadow = true;  // Plane will receive shadows
+scene.add(plane);
+
+
+const BoxGeometry = new THREE.BoxGeometry(60,60,20);
+const boxMaterial = new THREE.MeshPhongMaterial({ color: 0x6942f5 });
+const box = new THREE.Mesh(BoxGeometry, boxMaterial);
+box.castShadow = true; 
+box.name="box";
+box.position.set(0,0,0); 
+scene.add(box);
+
+
+const BoxGeometry1 = new THREE.BoxGeometry(20,20,20);
+const boxMaterial1 = new THREE.MeshPhongMaterial({ color: 0x6942f5 });
+const box1 = new THREE.Mesh(BoxGeometry1, boxMaterial1);
+box1.castShadow = true; 
+box1.position.set(0,0,-30); 
+box1.name="player";
+scene.add(box1);
+
+
+
+//LIGHTS
+
+
+const ambientLight = new THREE.AmbientLight(0x404040, 20); // Soft white light
 scene.add(ambientLight);
 
 
-let platforms = [
-    {geometry:platformGeometry, material:platformMaterial,position:{x:0,y:-0.5,z:20}}, //bot
-    // {geometry:platformGeometry, material:platformMaterial,position:{x:0,y:5,z:20}}, //top
-    // {geometry:sideWallGeometry, material:sideWallMaterial,position:{x:0,y:2,z:-5},rotation:{x:Math.PI/2,y:0,z:0}},//back
-    // {geometry:sideWallGeometry, material:sideWallMaterial,position:{x:0,y:2,z:-5},rotation:{x:Math.PI/2,y:0,z:0}}, //right
-    // {geometry:sideWallGeometry, material:sideWallMaterial,position:{x:5,y:0.8,z:15},rotation:{x:Math.PI/2,y:0,z:Math.PI / 2}} //left
-]
+const SpotLight = new THREE.SpotLight(0xFF0000,1000000,0,0.25);
+SpotLight.position.set(10,10,10);
+SpotLight.castShadow=true;
+SpotLight.shadow.mapSize.width=2048;
+SpotLight.shadow.mapSize.height=2048;
+SpotLight.shadow.camera.near = 0.5;
+SpotLight.shadow.camera.far = 2000;
+SpotLight.shadow.camera.fov = 20
+scene.add(SpotLight);
+SpotLight.target = box1;
+scene.add(SpotLight.target);
 
-platforms.forEach((platform)=>{
-    misc.generatePlatform(platform,scene);
+
+const dSpotHelper = new THREE.SpotLightHelper(SpotLight);
+scene.add(dSpotHelper);
+
+scene.add(new THREE.CameraHelper(SpotLight.shadow.camera));
+
+
+
+// function onKeyDown(event) {
+//     switch (event.code) {
+//       case "ArrowUp":
+//         player.moveForward = true;
+//         break;
+//       case "ArrowDown":
+//         player.moveBackward = true;
+//         break;
+//       case "ArrowLeft":
+//         player.rotateLeft = true;
+//         break;
+//       case "ArrowRight":
+//         player.rotateRight = true;
+//         break;
+//       case "Space":
+//         if (!player.isJumping()) {
+//             player.setJumping(true);
+//           console.log("HERE");
+//           player.velocityY = highestVelocity; // Set initial jump velocity
+//         }
+//         break;
+//       case "KeyQ":
+//         createFallingSphere();
+//         break;
+//     }
+//   }
+
+// function onKeyUp(event) {
+// switch (event.code) {
+//     case "ArrowUp":
+//         player.moveForward = false;
+//     break;
+//     case "ArrowDown":
+//         player.moveBackward = false;
+//     break;
+//     case "ArrowLeft":
+//         player.rotateLeft = false;
+//     break;
+//     case "ArrowRight":
+//         player.rotateRight = false;
+//     break;
+// }
+// }
+
+// window.addEventListener("keydown", onKeyDown);
+// window.addEventListener("keyup", onKeyUp);
+
+
+/*
+    Sets a raycaster to make a vector from spotlight positon to the
+    spotlights target(the player), and checks the interactions.
+    Raycast works by creating an array, that is ordered by shortest distance to
+    longest distance. 
+    
+    If the box comes before the player, then hidden
+    If the box is -1, and player isnt, then found
+    If the player is -1, then hidden
+    If box comes after the player, then found
+
+*/
+function isObjectInSpotlight(spotLight) {
+    const rayCaster = new THREE.Raycaster();
+
+    // Get spotlight position (origin for the ray)
+    const spotLightPosition = new THREE.Vector3();
+    spotLight.getWorldPosition(spotLightPosition);
+
+    // Get the direction from the spotlight to its target
+    const spotLightTargetPosition = new THREE.Vector3();
+    spotLight.target.getWorldPosition(spotLightTargetPosition);
+
+    const rayDirection = new THREE.Vector3().subVectors(spotLightTargetPosition, spotLightPosition).normalize();
+
+    // Set the raycaster with the origin and direction
+    rayCaster.set(spotLightPosition, rayDirection);
+
+    // Check for intersections with objects in the scene
+    const intersects = rayCaster.intersectObjects(scene.children, true); // Second argument 'true' means recursive check for children objects
+
+    const boxIndex = intersects.findIndex(intersect => intersect.object.name === "box");
+    const playerIndex = intersects.findIndex(intersect => intersect.object.name === "player");
+
+    if ((boxIndex==-1 && playerIndex>0) || (playerIndex<boxIndex)){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+
+let angle = 0;
+let radius = 500;
+let speed = 0.003;
+
+const gui = new dat.GUI();
+
+const options = {
+    moveSpeed:0.1,
+    radius:radius,
+    speed:0.01,
+    angle:SpotLight.angle,
+    colour:"0xFF0000",
+    distance:SpotLight.distance,
+    intensity:SpotLight.intensity,
+}
+
+
+// gui.add(options,"moveSpeed").onChange(function(e){
+//     player.moveSpeed = e;
+//   })
+
+// gui.add(options,"radius").onChange(function(e){
+//     radius= e;
+// })
+
+gui.add(options,"speed").onChange(function(e){
+    speed= e;
 })
 
-scene.background = new THREE.Color(0x333333);
+gui.add(options,"angle").onChange(function(e){
+    SpotLight.angle = e;
+dSpotHelper.update();
 
+})
 
-const player = new character.CharacterModel(characterGeometry,characterMaterial)
-player.setPosition({x:0, y:0.5, z:0});
-scene.add(player.model);
+gui.add(options,"colour").onChange(function(e){
+    SpotLight.color = e;
+dSpotHelper.update();
 
+})
+gui.add(options,"distance").onChange(function(e){
+    SpotLight.distance = e;
+dSpotHelper.update();
 
-// Camera setup
-camera.setPosition({x:0, y:1, z:0});
-
-player.setRotation({x:0,y:Math.PI,z:0});
-
-function createFallingSphere() {
-    // const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32); // Create a sphere
-    // const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // Red color
-    // const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    
-    // // Calculate the spawn position based on player rotation
-    // const spawnDistance = 3; // Distance in front of the character
-    // sphere.position.x = player.position.x - Math.sin(player.rotation.y) * spawnDistance;
-    // sphere.position.y = player.position.y ; // Start slightly above the ground
-    // sphere.position.z = player.position.z + spawnDistance; // Move forward
-
-    // sphere.velocity = 0; // Initial velocity
-    // spheres.push(sphere); // Add to spheres array
-    // scene.add(sphere);
-}
-
-function createPointLight(position) {
-    let pointLight = new THREE.PointLight(0xffffff, 0.3, 12); // White light
-    pointLight.position.copy(position); // Set light position to where the sphere hits
-    points.push(pointLight)
-    scene.add(pointLight);
-}
-
-function onKeyDown(event) {
-    switch (event.code) {
-      case "ArrowUp":
-        player.moveForward = true;
-        break;
-      case "ArrowDown":
-        player.moveBackward = true;
-        break;
-      case "ArrowLeft":
-        player.rotateLeft = true;
-        break;
-      case "ArrowRight":
-        player.rotateRight = true;
-        break;
-      case "Space":
-        if (!player.isJumping()) {
-            player.setJumping(true);
-          console.log("HERE");
-          player.velocityY = 0.15; // Set initial jump velocity
-        }
-        break;
-      case "KeyQ":
-        createFallingSphere();
-        break;
-    }
-  }
-
-function onKeyUp(event) {
-switch (event.code) {
-    case "ArrowUp":
-        player.moveForward = false;
-    break;
-    case "ArrowDown":
-        player.moveBackward = false;
-    break;
-    case "ArrowLeft":
-        player.rotateLeft = false;
-    break;
-    case "ArrowRight":
-        player.rotateRight = false;
-    break;
-}
-}
-
-window.addEventListener("keydown", onKeyDown);
-window.addEventListener("keyup", onKeyUp);
+})
+gui.add(options,"intensity").onChange(function(e){
+    SpotLight.intensity = e;
+    dSpotHelper.update();
+})
 
 
 
-function handleCharacterDeath() {
-gameOverScreen.style.display = "block";
-}
-
-function restartGame() {
-    gameOverScreen.style.display = "none";
-    player.setPosition({x:0, y:0.5, z:0});
-    camera.setPosition({x:0, y:1, z:0});
-    player.setRotation({x:player.rotation.x,y:Math.PI,z:player.rotation.z});
-}
-
-restartButton.addEventListener("click", restartGame);
-
-
-
-function calcEuclid(x1, z1, x2, z2) {
-const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
-return distance <= 6;
-}
-
-
+// Animation loop
 function animate() {
     requestAnimationFrame(animate);
 
-    // Light check
-    // let inLight = points.some(light =>
-    //     calcEuclid(player.position.x, player.position.z, light.position.x, light.position.z)
-    // );
+    if (model){
+    angle+=speed;
+    model.position.x = radius * Math.cos(angle);
+    model.position.z = radius * Math.sin(angle);
 
-    // if (!inLight) {
-    //     handleCharacterDeath();
-    //     return;
-    // }
+    SpotLight.position.set(
+        model.position.x,
+        model.position.y+currentMonster.height_diff,
+        model.position.z
+    )
 
-    // Sphere movement and deletion
-    // spheres.forEach((sphere, index) => {
-    //     sphere.velocity += gravity; // Apply gravity to the sphere
-    //     sphere.position.y += sphere.velocity; // Update position based on velocity
-    //     createPointLight(sphere.position); // Create light at sphere's position
-    //     scene.remove(sphere); // Remove sphere after it hits the ground
-    //     spheres.splice(index, 1); // Remove from spheres array
-    // });
+    model.lookAt(box1.position)
+    }
 
-    // Jumping and gravity application
-    player.updatePlayerPosition();
+    if (isObjectInSpotlight(SpotLight)) {
+        box1.material.color.set(0x00FF00);  // Green if in spotlight
+    } else {
+        box1.material.color.set(0xFF0000);  // Red if not
+    }
 
-    camera.setPosition(player.getPosition());
-    camera.setRotation(player.getRotation());
+    dSpotHelper.update();
+
+    //  player.updatePlayerPosition();
+
+    box1.position.x = radius/10 * Math.cos(angle/10);
+    box1.position.z = radius/10 * Math.sin(angle/10);
+
+    // camera.setPosition(player.getPosition());
+    // camera.setRotation(player.getRotation());
+    controls.update();  // Required for damping to work
+
+
     renderer.render(scene, camera.camera);
 }
-
 animate();

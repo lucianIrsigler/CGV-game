@@ -1,0 +1,35 @@
+export const monsters = {
+    "monster_ignan":{
+        height_diff:270,
+        scene:"./public/assets/monster_ignan/scene.gltf",
+        scaleX:50,
+        scaleY:50,
+        scaleZ:50,
+        positionY:0,
+    },
+    "tall_monster":{
+       height_diff:150,
+       scene:"./public/assets/tall_monster/scene.gltf",
+       scaleX:300,
+       scaleY:300,
+       scaleZ:300,
+       positionY:145,
+    },
+    "toon_spike":{
+        height_diff:150,
+       scene:"./public/assets/toon_spike/scene.gltf",
+       scaleX:20,
+       scaleY:20,
+       scaleZ:20,
+       positionY:145,
+    },
+    "anya":{
+       height_diff:350,
+       scene:"./public/assets/anya/scene.gltf",
+       scaleX:400,
+       scaleY:400,
+       scaleZ:400,
+       positionY:145,
+    }
+
+}
