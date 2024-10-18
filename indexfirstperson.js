@@ -1,3 +1,4 @@
+import { door } from './doorPos.js';
 import { lamps } from './lampPos.js'; // Import the lamps object from lampPos.js
 
 // Scene setup
@@ -108,8 +109,51 @@ Object.values(lamps).forEach((currentLamp) => {
     });
   });
   
-  
-  
+// Door
+let Door;
+let doorMixer; 
+let doorAnimationAction; 
+const currentDoor = door.doorOne;
+
+const loader = new THREE.GLTFLoader();
+loader.load(currentDoor.scene, function (gltf) {
+    Door = gltf.scene;
+    scene.add(Door);
+
+    Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
+    Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
+    Door.castShadow = true;
+
+    doorMixer = new THREE.AnimationMixer(Door);
+
+    const animations = gltf.animations;
+    if (animations && animations.length > 0) {
+        doorAnimationAction = doorMixer.clipAction(animations[0]); 
+    }
+}, undefined, function (error) {
+    console.error('An error happened', error);
+});
+
+// Function to open the door
+// function openDoor() {
+//     if (doorAnimationAction) {
+//         doorAnimationAction.reset(); 
+//         doorAnimationAction.play(); 
+//     }
+// }
+
+// Declare a flag variable to track the door state
+let isDoorOpen = false;
+
+// Function to open the door
+function openDoor() {
+    if (!isDoorOpen && doorAnimationAction) { 
+        doorAnimationAction.reset(); 
+        doorAnimationAction.play(); 
+        isDoorOpen = true; // Set the flag to true so it won't open again
+    }
+}
+
 
 // Character setup
 const character = new THREE.Mesh(characterGeometry, characterMaterial);
@@ -178,6 +222,10 @@ function onKeyDown(event) {
     case "KeyQ":
       createFallingSphere();
       break;
+
+      case "KeyE": // Use "E" key to open the door
+      openDoor(); 
+      break;
   }
 }
 
@@ -222,6 +270,11 @@ function calcEuclid(x1, z1, x2, z2) {
 // Animation loop
 function animate() {
   requestAnimationFrame(animate);
+
+  // Update the door animation mixer if it exists
+  if (doorMixer) {
+    doorMixer.update(0.01); // Update the animation mixer
+}
 
   // Light check
   let inLight = points.some(light =>
