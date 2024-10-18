@@ -87,30 +87,15 @@ scene.add(end);
 
 scene.background = new THREE.Color(0x333333);
 
-// Lamp model setup
-let model;
-let currentLamp = lamps.lampOne; // Change lamp dynamically if needed
-// const loader = new THREE.GLTFLoader();
-// loader.load(currentLamp.scene, function (gltf) {
-//     model = gltf.scene;
-//     scene.add(model);
-  
-//     // Position the model using x, y, and z positions
-//     model.position.set(currentLamp.positionX, currentLamp.positionY, currentLamp.positionZ);
-//     model.scale.set(currentLamp.scaleX, currentLamp.scaleY, currentLamp.scaleZ);
-//     model.castShadow = true;
-//   }, undefined, function (error) {
-//     console.error('An error happened', error);
-//   });
+//Lamps 
+let currentLamp = lamps.lampOne; 
 
-// Loop through all lamps and load their models
 Object.values(lamps).forEach((currentLamp) => {
     const loader = new THREE.GLTFLoader();
     loader.load(currentLamp.scene, function (gltf) {
       let model = gltf.scene;
       scene.add(model);
   
-      // Position the model using x, y, and z positions
       model.position.set(currentLamp.positionX, currentLamp.positionY, currentLamp.positionZ);
       model.scale.set(currentLamp.scaleX, currentLamp.scaleY, currentLamp.scaleZ);
       model.castShadow = true;

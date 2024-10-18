@@ -4,9 +4,9 @@ const baseLamp = {
     scaleX: 0.003,
     scaleY: 0.003,
     scaleZ: 0.003,
-    positionX: 0, // Default x position
-    positionY: 0, // Default y position
-    positionZ: 0  // Default z position
+    positionX: 0, 
+    positionY: 0, 
+    positionZ: 0  
   };
   
   export const lamps = {
