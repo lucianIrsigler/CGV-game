@@ -50,10 +50,10 @@ function animate() {
     requestAnimationFrame(animate);
 
     // Rotate each crate for some basic animation
-    // crates.forEach(crate => {
-    //     crate.rotation.x += 0.01;
-    //     crate.rotation.y += 0.01;
-    // });
+    crates.forEach(crate => {
+        crate.rotation.x += 0.01;
+        crate.rotation.y += 0.01;
+    });
 
     // Render the scene from the perspective of the camera
     renderer.render(scene, camera);
