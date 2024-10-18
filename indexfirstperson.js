@@ -89,9 +89,9 @@ scene.background = new THREE.Color(0x333333);
 
 //Lamps 
 let currentLamp = lamps.lampOne; 
-
 Object.values(lamps).forEach((currentLamp) => {
     const loader = new THREE.GLTFLoader();
+    
     loader.load(currentLamp.scene, function (gltf) {
       let model = gltf.scene;
       scene.add(model);
@@ -99,10 +99,15 @@ Object.values(lamps).forEach((currentLamp) => {
       model.position.set(currentLamp.positionX, currentLamp.positionY, currentLamp.positionZ);
       model.scale.set(currentLamp.scaleX, currentLamp.scaleY, currentLamp.scaleZ);
       model.castShadow = true;
+  
+      const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
+      lampLight.position.set(currentLamp.positionX, currentLamp.positionY + 2, currentLamp.positionZ); 
+      scene.add(lampLight);
     }, undefined, function (error) {
       console.error('An error happened while loading the lamp model:', error);
     });
   });
+  
   
   
 
