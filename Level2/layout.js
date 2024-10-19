@@ -12,12 +12,12 @@ document.body.appendChild(renderer.domElement);
 
 // crates
 const textureLoader = new THREE.TextureLoader();
-const colorMap = textureLoader.load('../public/assets/Planks/PlanksColor.jpg');
-const aoMap = textureLoader.load('../public/assets/Planks/PlanksAmbientOcclusion.jpg');
-const displacementMap = textureLoader.load('../public/assets/Planks/PlanksDisplacement.jpg');
-const metalnessMap = textureLoader.load('../public/assets/Planks/PlanksMetalness.jpg');
-const normalMapDX = textureLoader.load('../public/assets/Planks/PlanksNormalDX.jpg');
-const roughnessMap = textureLoader.load('../public/assets/Planks/PlanksRoughness.jpg');
+const colorMap = textureLoader.load('Planks/PlanksColor.jpg');
+const aoMap = textureLoader.load('PlanksAmbientOcclusion.jpg');
+const displacementMap = textureLoader.load('PlanksDisplacement.jpg');
+const metalnessMap = textureLoader.load('PlanksMetalness.jpg');
+const normalMapDX = textureLoader.load('PlanksNormalDX.jpg');
+const roughnessMap = textureLoader.load('PlanksRoughness.jpg');
 
 [colorMap, aoMap, displacementMap, metalnessMap, normalMapDX, roughnessMap].forEach(texture => {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -50,13 +50,29 @@ function addCrate(x, y, z) {
     crates.push(crate);
 }
 
-// Create the circular base (cylinder)
+// Load textures for the base and platforms
+const platformTexture = textureLoader.load('PavingStones.jpg');
+const baseTexture = textureLoader.load('PavingStones.jpg');
+
+// Set texture wrapping and repeat if needed
+platformTexture.wrapS = platformTexture.wrapT = THREE.RepeatWrapping;
+baseTexture.wrapS = baseTexture.wrapT = THREE.RepeatWrapping;
+
+// Apply textures to the materials
+const platformMaterial = new THREE.MeshStandardMaterial({
+    map: platformTexture
+});
+
+const baseMaterial = new THREE.MeshStandardMaterial({
+    map: baseTexture
+});
+
+// Create the circular base (cylinder) with texture
 const radiusTop = 15;
 const radiusBottom = 15;
 const height = 2;
 const radialSegments = 32;
 const circularBaseGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
-const baseMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
 const circularBase = new THREE.Mesh(circularBaseGeometry, baseMaterial);
 scene.add(circularBase);
 
@@ -67,7 +83,7 @@ const sectorOuterRadius = sectorInnerRadius + 5; // widens the back of each plat
 const platformHeight = 1;
 const platformSpacing = 1;
 const spiralTurnAngle = Math.PI / 4;
-const sectorAngle = Math.PI /4.7; // changes length of each platform / changes gap between platforms
+const sectorAngle = Math.PI / 4.7; // changes length of each platform / changes gap between platforms
 
 // Lamp post details
 const lampPostHeight = 2;
@@ -89,8 +105,8 @@ for (let i = 0; i < numPlatforms; i++) {
         depth: platformHeight,
         bevelEnabled: false
     };
+
     const platformGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    const platformMaterial = new THREE.MeshBasicMaterial({ color: 0xff00ff });
     const platform = new THREE.Mesh(platformGeometry, platformMaterial);
 
     platform.rotation.x = Math.PI / 2;
@@ -111,10 +127,26 @@ for (let i = 0; i < numPlatforms; i++) {
     
         const bulbGeometry = new THREE.SphereGeometry(0.3, 16, 16);
         const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        if(i % 5 === 0) 
+        {
+            bulbMaterial.color.set(0x00ff00);
+        } 
+        else 
+        {
+            bulbMaterial.color.set(0xffff00);
+        }
         const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
         bulb.position.set(lampPost.position.x, platformY + platformHeight / 2 + lampPostHeight, lampPost.position.z);
     
         const light = new THREE.PointLight(0xffff00, 1, 10);
+        if(i % 5 === 0) 
+        {
+            light.color.set(0x00ff00);
+        } 
+        else 
+        {
+            light.color.set(0xffff00);
+        }
         light.position.set(lampPost.position.x, platformY + platformHeight / 2 + lampPostHeight, lampPost.position.z);
     
         // Offset positions for correct height
