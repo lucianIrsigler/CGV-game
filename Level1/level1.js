@@ -25,7 +25,7 @@ controls.lookSpeed = 0.01; // Lower look speed
 
 //Texture for ground 
 const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load('PavingStones.jpg', (texture) => {
+const texture = textureLoader.load('../PavingStones.jpg', (texture) => {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(1, 5);
