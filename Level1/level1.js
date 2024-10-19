@@ -240,7 +240,7 @@ scene.add(spotLightHelper6);
 points.push(spotLight6);
 
 // seven light
-const spotLight7 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
+const spotLight7 = new THREE.SpotLight(0x800080, 5, 10, Math.PI / 6, 0.5, 2);
 spotLight7.userData.originalIntensity = spotLight7.intensity; // Store original intensity
 spotLight7.position.set(3, 6, 30);
 // Create a target for the spotlight
@@ -353,7 +353,7 @@ const movement = { forward: 0, right: 0 };
 
 let health = 100;
 const healthNumberElement = document.getElementById('health-number');
-const damageRate = 20; // Define the damage rate
+const damageRate = 10; // Define the damage rate
 const healingRate = 10; // Define the healing rate
 
 // Event listeners for movement
