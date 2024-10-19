@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
-import { door } from '../doorPos.js';
-import { lamps } from '../lampPos.js'; // Import the lamps object from lampPos.js
+import { door } from './doorPos.js';
+import { lamps } from './lampPos.js'; // Import the lamps object from lampPos.js
 const loader = new GLTFLoader();
 let model;
 
@@ -40,10 +40,17 @@ const texture = textureLoader.load('PavingStones.jpg', (texture) => {
 });
 //Texture for walls
 const textureLoaderWall = new THREE.TextureLoader();
-const textureWall = textureLoader.load('PavingStones.jpg', (texture) => {
+const textureWall = textureLoaderWall.load('PavingStones.jpg', (texture) => {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(4, 1);
+});
+// Texture for platforms 
+const textureLoaderPlatforms = new THREE.TextureLoader();
+const texturePlatform = textureLoaderPlatforms.load('PavingStones.jpg', (texture) => {
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(3, 2);
 });
 const sideWallGeometry = new THREE.BoxGeometry(50, 1, 10);
 const sideWallMaterial = new THREE.MeshStandardMaterial({ map: textureWall }); 
@@ -55,6 +62,9 @@ const characterMaterial = new THREE.MeshStandardMaterial({
     transparent: true, 
     opacity: 0.0
 });
+const platformsMaterial = new THREE.MeshStandardMaterial({ map: texturePlatform });
+
+
 
 // Ground Plane
 const groundGeometry = new THREE.PlaneGeometry(20, 20);
@@ -211,6 +221,7 @@ topThingy.position.y = 5;
 topThingy.position.z = 20;
 scene.add(topThingy);
 
+
 const backWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
 backWall.position.y = 2;
 backWall.position.z = -5;
@@ -233,7 +244,36 @@ right.rotation.x = Math.PI / 2;
 right.rotation.z = Math.PI / 2;
 scene.add(right);
 
+const end = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+end.position.set(0, 2, 40);
+end.rotation.x = Math.PI / 2;
+scene.add(end);
+
+
+
 scene.background = new THREE.Color(0x333333);
+
+//Platforms 
+const platformsGeometry = new THREE.BoxGeometry(5, 0.5, 5);
+// const platformsMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color for platforms
+
+
+const platforms = [
+    { position: new THREE.Vector3(3, 2, 15), size: new THREE.Vector3(5, 0.5, 5) },
+    { position: new THREE.Vector3(-3, 4, 20), size: new THREE.Vector3(5, 0.5, 5) },
+    { position: new THREE.Vector3(3, 2, 30), size: new THREE.Vector3(3, 0.3, 3) },
+    { position: new THREE.Vector3(-3, 4, 35), size: new THREE.Vector3(3, 0.3, 10) }
+  ];
+
+platforms.forEach(platform => {
+  const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(platform.size.x, platform.size.y, platform.size.z),
+      platformsMaterial
+  );
+  mesh.position.copy(platform.position);
+  scene.add(mesh);
+});
+
 
 // Create a simple character (a cube)
 const character = new THREE.Mesh(characterGeometry, characterMaterial);
@@ -439,26 +479,58 @@ function flickerLight(light, index) {
 
 function animate() {
     requestAnimationFrame(animate);
-// Update the door animation mixer if it exists
-if (doorMixer) {
-    doorMixer.update(0.01); // Update the animation mixer
-}
-  // Update character vertical position for jumping
-  // Jumping and gravity application
-if (isJumping) {
-    character.position.y += velocityY;
-    velocityY += gravity;
-  
-    if (character.position.y <= 0.5) {
-      character.position.y = 0.5;
-      isJumping = false;
-      velocityY = 0;
-      jumpCount = 0; 
+    // Update the door animation mixer if it exists
+    if (doorMixer) {
+        doorMixer.update(0.01); // Update the animation mixer
     }
-  }
+
+    // Jumping and gravity application
+    if (isJumping) {
+        character.position.y += velocityY;
+        velocityY += gravity;
+    }
+
+    // Check for collisions with platforms
+    let onPlatform = false;
+    platforms.forEach(platform => {
+        if (
+            character.position.x >= platform.position.x - platform.size.x / 2 &&
+            character.position.x <= platform.position.x + platform.size.x / 2 &&
+            character.position.z >= platform.position.z - platform.size.z / 2 &&
+            character.position.z <= platform.position.z + platform.size.z / 2
+        ) {
+            if (
+                character.position.y + 0.5 >= platform.position.y &&
+                character.position.y <= platform.position.y + platform.size.y
+            ) {
+                character.position.y = platform.position.y + platform.size.y;
+                velocityY = 0;
+                isJumping = false;
+                jumpCount = 0; // Reset jump count when landing on a platform
+                onPlatform = true;
+            }
+        }
+    });
+
+    // Apply gravity if not on a platform
+    if (!onPlatform && !isJumping) {
+        character.position.y += velocityY;
+        velocityY += gravity;
+    }
+
+    // Prevent falling through the ground
+    if (character.position.y < 0.5) {
+        character.position.y = 0.5;
+        isJumping = false;
+        velocityY = 0;
+    }
+
     const forward = movement.forward;
     const right = movement.right;
-
+// Reset jump count when hitting the ground
+if (onPlatform || character.position.y === 0.5) {
+    jumpCount = 0; // Reset jump count only when on a platform
+}
     // Calculate the forward and right direction based on the camera's rotation
     const cameraDirection = new THREE.Vector3();
     camera.getWorldDirection(cameraDirection);
@@ -476,13 +548,11 @@ if (isJumping) {
     }
 
     updateCameraPosition();
-    //camera.position.y = character.position.y + jumpHeight; // Keep the camera above the character
-
-    
-   controls.update(0.7); // Update controls with delta time
+    controls.update(0.7); // Update controls with delta time
     // Render the scene
     renderer.render(scene, camera);
 }
+
 startDamageTimer();
 animate();
 
