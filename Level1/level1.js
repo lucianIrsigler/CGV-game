@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
+import { door } from '../doorPos.js';
+import { lamps } from '../lampPos.js'; // Import the lamps object from lampPos.js
 const loader = new GLTFLoader();
 let model;
 
@@ -9,6 +11,9 @@ let model;
 const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");
 let points = [];
+let velocityY = 2; // Initialize at the start
+
+
 const spheres = []; // To keep track of created spheres
 const gravity = -0.1; // Gravity value
 
@@ -25,14 +30,14 @@ controls.lookSpeed = 0.01; // Lower look speed
 
 //Texture for ground 
 const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load('../PavingStones.jpg', (texture) => {
+const texture = textureLoader.load('PavingStones.jpg', (texture) => {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(1, 5);
 });
 //Texture for walls
 const textureLoaderWall = new THREE.TextureLoader();
-const textureWall = textureLoader.load('../PavingStones.jpg', (texture) => {
+const textureWall = textureLoader.load('PavingStones.jpg', (texture) => {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(4, 1);
@@ -56,6 +61,72 @@ ground.rotation.x = -Math.PI / 2; // Rotate to make it horizontal
 ground.position.y = 0; // Position it at y = 0
 //scene.add(ground);
 
+
+// Convert lamps object to an array
+const lampsArray = Object.values(lamps);
+
+// Function to load lamps
+function loadLamps() {
+    lampsArray.forEach(lamp => {
+        loader.load(lamp.scene, function (gltf) {
+            let model = gltf.scene;
+            scene.add(model);
+
+            model.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
+            model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
+            model.castShadow = true;
+
+            const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
+            lampLight.position.set(lamp.positionX, lamp.positionY + 2, lamp.positionZ); 
+            scene.add(lampLight);
+        }, undefined, function (error) {
+            console.error('An error happened while loading the lamp model:', error);
+        });
+    });
+}
+
+
+
+// Load lamps into the scene
+loadLamps();
+// Door variables
+let Door;
+let doorMixer;
+let doorAnimationAction;
+const currentDoor = door.doorOne;
+
+// Load the door model
+
+loader.load(currentDoor.scene, function (gltf) {
+    Door = gltf.scene;
+    scene.add(Door);
+
+    Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
+    Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
+    Door.castShadow = true;
+
+    doorMixer = new THREE.AnimationMixer(Door);
+
+    const animations = gltf.animations;
+    if (animations && animations.length > 0) {
+        doorAnimationAction = doorMixer.clipAction(animations[0]);
+    }
+}, undefined, function (error) {
+    console.error('An error happened', error);
+});
+
+// Declare a flag variable to track the door state
+let isDoorOpen = false;
+
+// Function to open the door
+function openDoor() {
+    if (!isDoorOpen && doorAnimationAction) {
+        doorAnimationAction.reset();
+        doorAnimationAction.play();
+        isDoorOpen = true; // Set the flag to true so it won't open again
+    }
+}
+
 const spotLight = new THREE.SpotLight(0x0000ff,5, 50, Math.PI / 6, 0.5, 2);
 spotLight.userData.originalIntensity = spotLight.intensity; // Store original intensity
 spotLight.position.set(0, 4, 0);
@@ -71,10 +142,10 @@ points.push(spotLight);
 // First light
 const spotLight1 = new THREE.SpotLight(0xff0000, 5, 50, Math.PI / 6, 0.5, 2);
 spotLight1.userData.originalIntensity = spotLight1.intensity; // Store original intensity
-spotLight1.position.set(-3.5, 4, 9);
+spotLight1.position.set(-4, 4, 5);
 // Create a target for the spotlight
 const targetObject1 = new THREE.Object3D();
-targetObject1.position.set(-3.5, 0, 9); // Position it below the spotlight
+targetObject1.position.set(-4, 0, 5); // Position it below the spotlight
 scene.add(targetObject1);
 // Set the spotlight's target
 spotLight1.target = targetObject1;
@@ -105,6 +176,22 @@ scene.add(pointLight3);
 const pointLightHelper3 = new THREE.PointLightHelper(pointLight3, 0.5);
 scene.add(pointLightHelper3);
 points.push(pointLight3);
+
+// fourth light
+const spotLight4 = new THREE.SpotLight(0x800080, 5, 50, Math.PI / 6, 0.5, 2);
+spotLight4.userData.originalIntensity = spotLight4.intensity; // Store original intensity
+spotLight4.position.set(4, 4, 25);
+// Create a target for the spotlight
+const targetObject4 = new THREE.Object3D();
+targetObject4.position.set(4, 0, 25); // Position it below the spotlight
+scene.add(targetObject4);
+// Set the spotlight's target
+spotLight4.target = targetObject4;
+scene.add(spotLight4);
+const spotLightHelper4 = new THREE.SpotLightHelper(spotLight4);
+scene.add(spotLightHelper4);
+points.push(spotLight4);
+
 
 //add ambient light
 const ambientLight = new THREE.AmbientLight(0x404040);
@@ -171,7 +258,8 @@ const healingRate = 10; // Define the healing rate
 document.addEventListener('keydown', (e) => {
     switch (e.key) {
         case 'w':
-            movement.forward = 1; break; // Move forward
+            movement.forward = 1;
+            break; // Move forward
         case 's':
             movement.forward = -1; break; // Move backward
         case 'a':
@@ -180,8 +268,15 @@ document.addEventListener('keydown', (e) => {
             movement.right = 1; break; // Move right
         case "KeyQ": 
             createFallingSphere(); break;
+        case "KeyE": // Use "E" key to open the door
+            openDoor(); 
+            break;
+        case "Space":
+           
+            break;
     }
 });
+
 
 document.addEventListener('keyup', (e) => {
     switch (e.key) {
@@ -244,6 +339,7 @@ function updateCameraPosition() {
     camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
     camera.rotation.y = character.rotation.y;
     loaded = true;
+    
 }
 
 function takeDamage(amount) {
@@ -336,7 +432,10 @@ function flickerLight(light, index) {
 
 function animate() {
     requestAnimationFrame(animate);
-
+// Update the door animation mixer if it exists
+if (doorMixer) {
+    doorMixer.update(0.01); // Update the animation mixer
+}
     // if (loaded) {
     //     let valid = false;
     //     points.forEach((light) => {
@@ -371,6 +470,7 @@ function animate() {
     }
 
     updateCameraPosition();
+    
    controls.update(0.7); // Update controls with delta time
     // Render the scene
     renderer.render(scene, camera);
