@@ -32,7 +32,7 @@ const texture = textureLoader.load('../PavingStones.jpg', (texture) => {
 });
 //Texture for walls
 const textureLoaderWall = new THREE.TextureLoader();
-const textureWall = textureLoader.load('PavingStones.jpg', (texture) => {
+const textureWall = textureLoader.load('../PavingStones.jpg', (texture) => {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(4, 1);
