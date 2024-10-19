@@ -11,12 +11,15 @@ let model;
 const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");
 let points = [];
-let velocityY = 2; // Initialize at the start
-
-
 const spheres = []; // To keep track of created spheres
-const gravity = -0.1; // Gravity value
 
+//jump variables
+let jumpCount = 0; 
+const gravity = -0.01; // Adjusted gravity value
+let isJumping = false; // Track if the character is jumping
+let velocityY = 0; // Vertical velocity for jumping
+
+// Create a sphere
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
@@ -266,13 +269,17 @@ document.addEventListener('keydown', (e) => {
             movement.right = -1; break; // Move left
         case 'd':
             movement.right = 1; break; // Move right
-        case "KeyQ": 
+        case 'KeyQ': 
             createFallingSphere(); break;
-        case "KeyE": // Use "E" key to open the door
+        case 'KeyE': // Use "E" key to open the door
             openDoor(); 
             break;
-        case "Space":
-           
+        case ' ':
+            if (jumpCount < 2) { //Jumping twice
+                isJumping = true;
+                velocityY = 0.15;
+                jumpCount++; 
+            }
             break;
     }
 });
@@ -436,20 +443,19 @@ function animate() {
 if (doorMixer) {
     doorMixer.update(0.01); // Update the animation mixer
 }
-    // if (loaded) {
-    //     let valid = false;
-    //     points.forEach((light) => {
-    //         if (calcEuclid(character.position.x, character.position.z, light.position.x, light.position.z)) {
-    //             valid = true;
-    //         }
-    //     });
-
-    //     if (!valid) {
-    //         takeDamage(1); // Take damage if not within 3 units of any light source
-    //     }
-    // }
-
-    // Update character position based on WASD movement
+  // Update character vertical position for jumping
+  // Jumping and gravity application
+if (isJumping) {
+    character.position.y += velocityY;
+    velocityY += gravity;
+  
+    if (character.position.y <= 0.5) {
+      character.position.y = 0.5;
+      isJumping = false;
+      velocityY = 0;
+      jumpCount = 0; 
+    }
+  }
     const forward = movement.forward;
     const right = movement.right;
 
@@ -470,6 +476,8 @@ if (doorMixer) {
     }
 
     updateCameraPosition();
+    //camera.position.y = character.position.y + jumpHeight; // Keep the camera above the character
+
     
    controls.update(0.7); // Update controls with delta time
     // Render the scene
