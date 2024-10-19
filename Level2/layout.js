@@ -50,18 +50,18 @@ function addCrate(x, y, z) {
 }
 
 // Create the circular base (cylinder)
-const radiusTop = 5;
+const radiusTop = 15;
 const radiusBottom = 15;
-const height = 1;
+const height = 2;
 const radialSegments = 32;
 const circularBaseGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
-const baseMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const baseMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
 const circularBase = new THREE.Mesh(circularBaseGeometry, baseMaterial);
 scene.add(circularBase);
 
 // Define the number of platforms
 const numPlatforms = 30;
-const sectorInnerRadius = radiusTop + 10;
+const sectorInnerRadius = radiusTop; // Inner radius of the sector which determs how far platforms are from the base
 const sectorOuterRadius = sectorInnerRadius + 5;
 const platformHeight = 1;
 const platformSpacing = 2;
@@ -89,7 +89,7 @@ for (let i = 0; i < numPlatforms; i++) {
         bevelEnabled: false
     };
     const platformGeometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    const platformMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const platformMaterial = new THREE.MeshBasicMaterial({ color: 0xff00ff });
     const platform = new THREE.Mesh(platformGeometry, platformMaterial);
 
     platform.rotation.x = Math.PI / 2;
