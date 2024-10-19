@@ -24,7 +24,7 @@ const roughnessMap = textureLoader.load('../public/assets/Planks/PlanksRoughness
     texture.repeat.set(0.2, 0.2);
 });
 
-const crateGeometry = new THREE.BoxGeometry(2, 2, 2);
+const crateGeometry = new THREE.BoxGeometry(3, 3, 2);
 
 const crateMaterial = new THREE.MeshStandardMaterial({
     map: colorMap,
@@ -45,6 +45,7 @@ const crates = [];
 function addCrate(x, y, z) {
     const crate = new THREE.Mesh(crateGeometry, crateMaterial);
     crate.position.set(x, y, z);
+    crate.lookAt(0, y, 0); // Make the crate face the center
     scene.add(crate);
     crates.push(crate);
 }
@@ -61,12 +62,12 @@ scene.add(circularBase);
 
 // Define the number of platforms
 const numPlatforms = 30;
-const sectorInnerRadius = radiusTop; // Inner radius of the sector which determs how far platforms are from the base
-const sectorOuterRadius = sectorInnerRadius + 5;
+const sectorInnerRadius = radiusTop; // Inner radius of the sector which determines how far platforms are from the base
+const sectorOuterRadius = sectorInnerRadius + 5; // widens the back of each platform
 const platformHeight = 1;
-const platformSpacing = 2;
+const platformSpacing = 1;
 const spiralTurnAngle = Math.PI / 4;
-const sectorAngle = Math.PI / 6;
+const sectorAngle = Math.PI /4.7; // changes length of each platform / changes gap between platforms
 
 // Lamp post details
 const lampPostHeight = 2;
@@ -97,38 +98,47 @@ for (let i = 0; i < numPlatforms; i++) {
 
     scene.add(platform);
 
-    // Add a lamp post to the center of every third platform
     if (i % 3 === 0) {
         const lampPostGeometry = new THREE.CylinderGeometry(lampPostRadius, lampPostRadius, lampPostHeight, 16);
         const lampPostMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
         const lampPost = new THREE.Mesh(lampPostGeometry, lampPostMaterial);
-
+    
         lampPost.position.set(
             Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2,
             platformY + platformHeight / 2 + lampPostHeight / 2,
             Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2
         );
-
+    
         const bulbGeometry = new THREE.SphereGeometry(0.3, 16, 16);
         const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
         const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
         bulb.position.set(lampPost.position.x, platformY + platformHeight / 2 + lampPostHeight, lampPost.position.z);
-
+    
         const light = new THREE.PointLight(0xffff00, 1, 10);
         light.position.set(lampPost.position.x, platformY + platformHeight / 2 + lampPostHeight, lampPost.position.z);
-
-        lampPost.position.y = lampPost.position.y - 0.5;
-        bulb.position.y = bulb.position.y - 0.5;
-        light.position.y = light.position.y - 0.5;
-        light.intensity = 1 + Math.sin(Date.now() * 0.002) * 0.5;
-
+    
+        // Offset positions for correct height
+        lampPost.position.y -= 0.5;
+        bulb.position.y -= 0.5;
+        light.position.y -= 0.5;
+    
+        // Make the bulb and light face the center
+        light.lookAt(0, light.position.y, 0);
+        bulb.lookAt(0, bulb.position.y, 0);
+    
         scene.add(lampPost);
         scene.add(bulb);
         scene.add(light);
-
-        // Add crate in front of the lamp post
-        addCrate(lampPost.position.x - 1.5, lampPost.position.y, lampPost.position.z + 0.5);
+    
+        // Position crate on the side of the shorter arc (closer to the inner radius)
+        const cratex = Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + (sectorOuterRadius - sectorInnerRadius) / 4);
+        const cratey = platformY + platformHeight / 2 + lampPostHeight / 2 - 0.5;
+        const cratez = Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + (sectorOuterRadius - sectorInnerRadius) / 4);
+    
+        // Add crate in front of the lamp post, closer to the inner radius
+        addCrate(cratex, cratey, cratez);
     }
+    
 }
 
 // Calculate the min and max height for the circular base
