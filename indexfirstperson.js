@@ -196,6 +196,7 @@ function createPointLight(position) {
   scene.add(pointLight);
 }
 
+let jumpCount = 0; 
 
 // Key handling
 function onKeyDown(event) {
@@ -213,10 +214,10 @@ function onKeyDown(event) {
       rotateRight = true;
       break;
     case "Space":
-      if (!isJumping) {
+      if (jumpCount < 2) { //Jumping twice
         isJumping = true;
-        console.log("HERE");
-        velocityY = 0.15; // Set initial jump velocity
+        velocityY = 0.15;
+        jumpCount++; 
       }
       break;
     case "KeyQ":
@@ -295,17 +296,18 @@ function animate() {
       spheres.splice(index, 1); // Remove from spheres array
   });
 
-  // Jumping and gravity application
-  if (isJumping) {
-    character.position.y += velocityY;
-    velocityY += gravity;
+// Jumping and gravity application
+if (isJumping) {
+  character.position.y += velocityY;
+  velocityY += gravity;
 
-    if (character.position.y <= 0.5) {
-      character.position.y = 0.5;
-      isJumping = false;
-      velocityY = 0;
-    }
+  if (character.position.y <= 0.5) {
+    character.position.y = 0.5;
+    isJumping = false;
+    velocityY = 0;
+    jumpCount = 0; 
   }
+}
 
   // Movement and rotation
   if (moveForward) {
