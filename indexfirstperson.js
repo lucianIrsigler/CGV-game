@@ -26,11 +26,21 @@ const texture = textureLoader.load('PavingStones.jpg', (texture) => {
 
 // Texture for walls
 const textureLoaderWall = new THREE.TextureLoader();
-const textureWall = textureLoader.load('PavingStones.jpg', (texture) => {
+const textureWall = textureLoaderWall.load('PavingStones.jpg', (texture) => {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(4, 1);
 });
+
+
+// Texture for platforms 
+const textureLoaderPlatforms = new THREE.TextureLoader();
+const texturePlatform = textureLoaderPlatforms.load('PavingStones.jpg', (texture) => {
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(3, 2);
+});
+
 
 const sideWallGeometry = new THREE.BoxGeometry(50, 1, 15);
 const sideWallMaterial = new THREE.MeshStandardMaterial({ map: textureWall }); 
@@ -38,6 +48,7 @@ const platformGeometry = new THREE.BoxGeometry(10, 1, 50);
 const platformMaterial = new THREE.MeshStandardMaterial({ map: texture }); 
 const characterGeometry = new THREE.BoxGeometry(1, 1, 1);
 const characterMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+const platformsMaterial = new THREE.MeshStandardMaterial({ map: texturePlatform });
 
 // Lighting
 const pointLight = new THREE.PointLight(0xffffff, 0.3, 8);
@@ -90,7 +101,7 @@ scene.background = new THREE.Color(0x333333);
 
 //Platforms 
 const platformsGeometry = new THREE.BoxGeometry(5, 0.5, 5);
-const platformsMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color for platforms
+// const platformsMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color for platforms
 
 
 const platforms = [
@@ -102,7 +113,7 @@ const platforms = [
 platforms.forEach(platform => {
   const mesh = new THREE.Mesh(
       new THREE.BoxGeometry(platform.size.x, platform.size.y, platform.size.z),
-      platformMaterial
+      platformsMaterial
   );
   mesh.position.copy(platform.position);
   scene.add(mesh);
