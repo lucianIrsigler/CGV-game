@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
-import { door } from './doorPos.js';
-import { lamps } from './lampPos.js'; // Import the lamps object from lampPos.js
+import { door } from '../doorPos.js';
+import { lamps } from '../lampPos.js'; // Import the lamps object from lampPos.js
 const loader = new GLTFLoader();
 let model;
 
@@ -132,11 +132,27 @@ loader.load(currentDoor.scene, function (gltf) {
 let isDoorOpen = false;
 
 // Function to open the door
+const doorPrompt = document.getElementById('doorPrompt');
+const doorOpenDistance = 2; // Distance at which the prompt appears
+
+function checkDoorProximity() {
+    const distance = character.position.distanceTo(Door.position);
+    
+    if (distance <= doorOpenDistance) {
+        doorPrompt.style.display = 'block'; // Show prompt
+    } else {
+        doorPrompt.style.display = 'none'; // Hide prompt
+    }
+}
+
 function openDoor() {
     if (!isDoorOpen && doorAnimationAction) {
         doorAnimationAction.reset();
         doorAnimationAction.play();
         isDoorOpen = true; // Set the flag to true so it won't open again
+        // Transition to success screen
+        gameOverScreen.style.display = 'block'; // Assuming this is your success screen
+        gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>"; // Update success message
     }
 }
 
@@ -548,6 +564,19 @@ function animate() {
         character.position.y += velocityY;
         velocityY += gravity;
     }
+// Check proximity to the door
+checkDoorProximity();
+
+// Existing animation logic...
+
+// Handle the 'E' key press to open the door
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'e') {
+        if (doorPrompt.style.display === 'block') {
+            openDoor(); 
+        }
+    }
+});
 
     // Check for collisions with platforms
     let onPlatform = false;
