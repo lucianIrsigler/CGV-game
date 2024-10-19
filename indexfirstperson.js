@@ -18,7 +18,7 @@ document.body.appendChild(renderer.domElement);
 
 // Texture for ground 
 const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load('PavingStones.jpg', (texture) => {
+const texture = textureLoader.load('public/assests/PavingStones.jpg', (texture) => {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(1, 5);
@@ -26,7 +26,7 @@ const texture = textureLoader.load('PavingStones.jpg', (texture) => {
 
 // Texture for walls
 const textureLoaderWall = new THREE.TextureLoader();
-const textureWall = textureLoader.load('PavingStones.jpg', (texture) => {
+const textureWall = textureLoader.load('public/assests/PavingStones.jpg', (texture) => {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(4, 1);
