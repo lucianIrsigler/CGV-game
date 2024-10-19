@@ -52,7 +52,7 @@ const texturePlatform = textureLoaderPlatforms.load('PavingStones.jpg', (texture
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(3, 2);
 });
-const sideWallGeometry = new THREE.BoxGeometry(50, 1, 10);
+const sideWallGeometry = new THREE.BoxGeometry(50, 1, 20);
 const sideWallMaterial = new THREE.MeshStandardMaterial({ map: textureWall }); 
 const platformGeometry = new THREE.BoxGeometry(10, 1, 50);
 const platformMaterial = new THREE.MeshStandardMaterial({ map: texture }); 
@@ -205,10 +205,69 @@ const spotLightHelper4 = new THREE.SpotLightHelper(spotLight4);
 scene.add(spotLightHelper4);
 points.push(spotLight4);
 
+// five light
+const spotLight5 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
+spotLight5.userData.originalIntensity = spotLight5.intensity; // Store original intensity
+spotLight5.position.set(3, 4, 15);
+// Create a target for the spotlight
+const targetObject5 = new THREE.Object3D();
+targetObject5.position.set(3, 3, 15); // Position it below the spotlight
+scene.add(targetObject5);
+// Set the spotlight's target
+spotLight5.target = targetObject5;
+scene.add(spotLight5);
+const spotLightHelper5 = new THREE.SpotLightHelper(spotLight5);
+scene.add(spotLightHelper5);
+points.push(spotLight5);
 
-//add ambient light
-const ambientLight = new THREE.AmbientLight(0x404040);
+//add dark ambient light
+const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
 scene.add(ambientLight);
+
+// six light
+const spotLight6 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
+spotLight6.userData.originalIntensity = spotLight6.intensity; // Store original intensity
+spotLight6.position.set(-3, 6, 20);
+// Create a target for the spotlight
+const targetObject6 = new THREE.Object3D();
+targetObject6.position.set(-3, 3, 20); // Position it below the spotlight
+scene.add(targetObject6);
+// Set the spotlight's target
+spotLight6.target = targetObject6;
+scene.add(spotLight6);
+const spotLightHelper6 = new THREE.SpotLightHelper(spotLight6);
+scene.add(spotLightHelper6);
+points.push(spotLight6);
+
+// seven light
+const spotLight7 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
+spotLight7.userData.originalIntensity = spotLight7.intensity; // Store original intensity
+spotLight7.position.set(3, 6, 30);
+// Create a target for the spotlight
+const targetObject7 = new THREE.Object3D();
+targetObject7.position.set(3, 3, 30); // Position it below the spotlight
+scene.add(targetObject7);
+// Set the spotlight's target
+spotLight7.target = targetObject7;
+scene.add(spotLight7);
+const spotLightHelper7 = new THREE.SpotLightHelper(spotLight7);
+scene.add(spotLightHelper7);
+points.push(spotLight7);
+
+// eight light
+const spotLight8 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
+spotLight8.userData.originalIntensity = spotLight8.intensity; // Store original intensity
+spotLight8.position.set(-3, 6, 35);
+// Create a target for the spotlight
+const targetObject8 = new THREE.Object3D();
+targetObject8.position.set(-3, 3, 35); // Position it below the spotlight
+scene.add(targetObject8);
+// Set the spotlight's target
+spotLight8.target = targetObject8;
+scene.add(spotLight8);
+const spotLightHelper8 = new THREE.SpotLightHelper(spotLight8);
+scene.add(spotLightHelper8);
+points.push(spotLight8);
 
 // Walls
 const bottom = new THREE.Mesh(platformGeometry, platformMaterial);
@@ -217,7 +276,7 @@ bottom.position.z = 20;
 scene.add(bottom);
 
 const topThingy = new THREE.Mesh(platformGeometry, platformMaterial);
-topThingy.position.y = 5;
+topThingy.position.y = 10;
 topThingy.position.z = 20;
 scene.add(topThingy);
 
