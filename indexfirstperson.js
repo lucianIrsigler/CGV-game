@@ -1,14 +1,14 @@
 import { door } from './doorPos.js';
-import { lamps } from './lampPos.js'; // Import the lamps object from lampPos.js
+import { lamps } from './lampPos.js';
 
 // Scene setup
 const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");
 let points = [];
-const spheres = []; // To keep track of created spheres
-const gravity = -0.01; // Adjusted gravity value
-let isJumping = false; // Track if the character is jumping
-let velocityY = 0; // Vertical velocity for jumping
+const spheres = []; 
+const gravity = -0.01; 
+let isJumping = false; 
+let velocityY = 0; 
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -26,18 +26,29 @@ const texture = textureLoader.load('PavingStones.jpg', (texture) => {
 
 // Texture for walls
 const textureLoaderWall = new THREE.TextureLoader();
-const textureWall = textureLoader.load('PavingStones.jpg', (texture) => {
+const textureWall = textureLoaderWall.load('PavingStones.jpg', (texture) => {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(4, 1);
 });
 
-const sideWallGeometry = new THREE.BoxGeometry(50, 1, 10);
+
+// Texture for platforms 
+const textureLoaderPlatforms = new THREE.TextureLoader();
+const texturePlatform = textureLoaderPlatforms.load('PavingStones.jpg', (texture) => {
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(3, 2);
+});
+
+
+const sideWallGeometry = new THREE.BoxGeometry(50, 1, 15);
 const sideWallMaterial = new THREE.MeshStandardMaterial({ map: textureWall }); 
 const platformGeometry = new THREE.BoxGeometry(10, 1, 50);
 const platformMaterial = new THREE.MeshStandardMaterial({ map: texture }); 
 const characterGeometry = new THREE.BoxGeometry(1, 1, 1);
 const characterMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+const platformsMaterial = new THREE.MeshStandardMaterial({ map: texturePlatform });
 
 // Lighting
 const pointLight = new THREE.PointLight(0xffffff, 0.3, 8);
@@ -63,7 +74,7 @@ bottom.position.set(0, -0.5, 20);
 scene.add(bottom);
 
 const topThingy = new THREE.Mesh(platformGeometry, platformMaterial);
-topThingy.position.set(0, 5, 20);
+topThingy.position.set(0, 9, 20);
 scene.add(topThingy);
 
 const backWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
@@ -87,6 +98,76 @@ end.rotation.x = Math.PI / 2;
 scene.add(end);
 
 scene.background = new THREE.Color(0x333333);
+
+//Platforms 
+const platformsGeometry = new THREE.BoxGeometry(5, 0.5, 5);
+// const platformsMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color for platforms
+
+
+const platforms = [
+  { position: new THREE.Vector3(3, 2, 15), size: new THREE.Vector3(5, 0.5, 5) },
+  { position: new THREE.Vector3(-3, 4, 20), size: new THREE.Vector3(5, 0.5, 5) },
+  { position: new THREE.Vector3(3, 2, 30), size: new THREE.Vector3(3, 0.3, 3) },
+  { position: new THREE.Vector3(-3, 4, 35), size: new THREE.Vector3(3, 0.3, 10) }
+];
+
+platforms.forEach(platform => {
+  const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(platform.size.x, platform.size.y, platform.size.z),
+      platformsMaterial
+  );
+  mesh.position.copy(platform.position);
+  scene.add(mesh);
+});
+
+function updateCharacterPosition() {
+  const oldPosition = character.position.clone();
+
+  if (moveForward) {
+      character.position.z -= Math.cos(character.rotation.y) * moveSpeed;
+      character.position.x -= Math.sin(character.rotation.y) * moveSpeed;
+  }
+  if (moveBackward) {
+      character.position.z += Math.cos(character.rotation.y) * moveSpeed;
+      character.position.x += Math.sin(character.rotation.y) * moveSpeed;
+  }
+
+  // Check for collisions with platforms
+  let onPlatform = false;
+  platforms.forEach(platform => {
+      if (
+          character.position.x >= platform.position.x - platform.size.x / 2 &&
+          character.position.x <= platform.position.x + platform.size.x / 2 &&
+          character.position.z >= platform.position.z - platform.size.z / 2 &&
+          character.position.z <= platform.position.z + platform.size.z / 2
+      ) {
+          if (
+              oldPosition.y + 0.5 >= platform.position.y &&
+              character.position.y <= platform.position.y + platform.size.y
+          ) {
+              character.position.y = platform.position.y + platform.size.y;
+              velocityY = 0;
+              isJumping = false;
+              jumpCount = 0; // Reset jump count when landing on a platform
+              onPlatform = true;
+          }
+      }
+  });
+
+  // Apply gravity if not on a platform
+  if (!onPlatform && !isJumping) {
+      character.position.y += velocityY;
+      velocityY += gravity;
+  }
+
+  // Prevent falling through the ground
+  if (character.position.y < 0.5) {
+      character.position.y = 0.5;
+      isJumping = false;
+      velocityY = 0;
+  }
+}
+
 
 //Lamps 
 let currentLamp = lamps.lampOne; 
@@ -295,29 +376,32 @@ function animate() {
       scene.remove(sphere); // Remove sphere after it hits the ground
       spheres.splice(index, 1); // Remove from spheres array
   });
-
+  updateCharacterPosition();
 // Jumping and gravity application
 if (isJumping) {
   character.position.y += velocityY;
   velocityY += gravity;
 
   if (character.position.y <= 0.5) {
-    character.position.y = 0.5;
-    isJumping = false;
-    velocityY = 0;
-    jumpCount = 0; 
+      character.position.y = 0.5;
+      isJumping = false;
+      velocityY = 0;
+      jumpCount = 0;
   }
 }
 
+
+
+
   // Movement and rotation
-  if (moveForward) {
-    character.position.z -= Math.cos(character.rotation.y) * moveSpeed;
-    character.position.x -= Math.sin(character.rotation.y) * moveSpeed;
-  }
-  if (moveBackward) {
-    character.position.z += Math.cos(character.rotation.y) * moveSpeed;
-    character.position.x += Math.sin(character.rotation.y) * moveSpeed;
-  }
+  // if (moveForward) {
+  //   character.position.z -= Math.cos(character.rotation.y) * moveSpeed;
+  //   character.position.x -= Math.sin(character.rotation.y) * moveSpeed;
+  // }
+  // if (moveBackward) {
+  //   character.position.z += Math.cos(character.rotation.y) * moveSpeed;
+  //   character.position.x += Math.sin(character.rotation.y) * moveSpeed;
+  // }
   if (rotateLeft) {
     character.rotation.y += rotateSpeed;
   }
