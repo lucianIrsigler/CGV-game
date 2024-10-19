@@ -1,14 +1,14 @@
 import { door } from './doorPos.js';
-import { lamps } from './lampPos.js'; // Import the lamps object from lampPos.js
+import { lamps } from './lampPos.js';
 
 // Scene setup
 const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");
 let points = [];
-const spheres = []; // To keep track of created spheres
-const gravity = -0.01; // Adjusted gravity value
-let isJumping = false; // Track if the character is jumping
-let velocityY = 0; // Vertical velocity for jumping
+const spheres = []; 
+const gravity = -0.01; 
+let isJumping = false; 
+let velocityY = 0; 
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -107,7 +107,8 @@ const platformsGeometry = new THREE.BoxGeometry(5, 0.5, 5);
 const platforms = [
   { position: new THREE.Vector3(3, 2, 15), size: new THREE.Vector3(5, 0.5, 5) },
   { position: new THREE.Vector3(-3, 4, 20), size: new THREE.Vector3(5, 0.5, 5) },
-  // { position: new THREE.Vector3(3, 6, 30), size: new THREE.Vector3(5, 0.5, 5) }
+  { position: new THREE.Vector3(3, 2, 30), size: new THREE.Vector3(3, 0.3, 3) },
+  { position: new THREE.Vector3(-3, 4, 35), size: new THREE.Vector3(3, 0.3, 10) }
 ];
 
 platforms.forEach(platform => {

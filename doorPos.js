@@ -5,8 +5,8 @@ export const door = {
         scaleX:0.003,
         scaleY:0.003,
         scaleZ:0.003,
-        positionX:0, 
-        positionY:0,
+        positionX:-3, 
+        positionY:4,
         positionZ:39,
     },
     "doorTwo":{
