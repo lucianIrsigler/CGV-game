@@ -12,6 +12,6 @@ const baseLamp = {
   export const lamps = {
     lampOne: Object.assign({}, baseLamp, { positionY: 0, positionX: -4, positionZ: 5 }),
     lampTwo: Object.assign({}, baseLamp, { positionY: 0, positionX: 4, positionZ: 10 }),
-    lampThree: Object.assign({}, baseLamp, { positionY: 0, positionX: 4, positionZ: 25 }),
+    lampThree: Object.assign({}, baseLamp, { positionY: 4, positionX: -4, positionZ: 20 }),
   };
   
