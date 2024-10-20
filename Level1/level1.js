@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
-import { door } from '../doorPos.js';
-import { lamps } from '../lampPos.js'; // Import the lamps object from lampPos.js
+import { door } from './doorPos1.js';
+import { lamps } from './lampPos1.js'; // Import the lamps object from lampPos.js
 const loader = new GLTFLoader();
 let model;
 
@@ -105,7 +105,7 @@ function loadLamps() {
         loader.load(lamp.scene, function (gltf) {
             let model = gltf.scene;
             scene.add(model);
-
+            console.log("lamplaoded")
             model.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
             model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
             model.castShadow = true;
