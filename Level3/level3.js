@@ -9,26 +9,29 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");
+let isGamePaused = false; // Flag to track if the game is paused
+let isEnemyAsleep = true;
 
 restartButton.addEventListener("click", restartGame);
 
 // Restart Game Function
 function restartGame() {
+    isEnemyAsleep = true;
+    isGamePaused = false; // Unpause the game
     gameOverScreen.style.display = "none";
 
     // Reset character and enemy positions
     cube.position.set(0, 1.5, 0); // Reset player position
     cubeEnemy.position.set(10, 2, 5); // Reset enemy position
-    cubeEnemy.material.color.set(0x040405); // Reset enemy color to original
+    cubeEnemy.material.color.set(0x040405); // Reset enemy color to original'
+    enemyLight.position.copy(cubeEnemy.position); // Reset light position to enemy position
 
     // Reset health
     enemyCurrentHealth = enemyMaxHealth; // Reset current health to max
     enemyHits = 0; // Reset hit counter
-    document.getElementById('health-bar').style.display = 'block';
+    document.getElementById('health-bar-container').style.display = 'block';
     updateHealthBar(); // Update health bar to full width
     // make bar full
-    
-
 
     // make enemy visible again
     cubeEnemy.visible = true;
@@ -36,6 +39,7 @@ function restartGame() {
 
     // crosshair
     crosshair.showCrosshair();
+
 }
 
 // Renderer Setup
@@ -62,7 +66,7 @@ scene.add(cubeEnemy);
 
 // Create a point light to simulate the enemy emitting light
 const enemyLight = new THREE.PointLight(0xff0400, 1, 100); // Color, intensity, distance
-enemyLight.position.copy(cubeEnemy.position); // Set the light position to the cube's position
+enemyLight.position.set(10, 2, 5);  // Set the light position to the cube's position
 scene.add(enemyLight);
 
 // Enemy movement variables
@@ -263,7 +267,7 @@ document.addEventListener('mousedown', (event) => {
     if (event.button === 0 && !isSettingsMenuOpen) { // Only shoot if menu is not open
         const position = camera.position.clone();
         // position.x -= 1.3;
-        const bullet = new Bullet(position); // Create bullet at the cube's position
+        const bullet = new Bullet(position, 0xA96CC3); // Create bullet at the cube's position
 
         // Calculate the bullet direction based on the camera's forward direction
         const direction = new THREE.Vector3(); // Create a new vector for direction
@@ -331,9 +335,14 @@ function movePlayer() {
 
 // Animation Loop
 function animate() {
+    if (isGamePaused) return; // Skip updates if the game is paused
     movePlayer();  // Update player movement
     updateCamera();  // Update camera to follow the player
-    updateEnemyMovement(); // Update enemy's random movement
+    if(!isEnemyAsleep){
+        updateEnemyMovement(); // Update enemy's random movement
+        enemyShoot(); // Enemy shooting logic
+    }
+    
 
     // Update bullets
     for (let i = bullets.length - 1; i >= 0; i--) {
@@ -347,6 +356,22 @@ function animate() {
             bullets.splice(i, 1); // Remove bullet from array
         } else if (!isActive) {
             bullets.splice(i, 1); // Remove bullet if it traveled max distance
+        }
+    }
+
+    // Update enemy bullets
+    for (let i = enemyBullets.length - 1; i >= 0; i--) {
+        const isActive = enemyBullets[i].update(scene); // Pass scene to update the bullet
+
+        // Check for collision with the player cube
+        if (detectCollision(enemyBullets[i], cube)) {
+            console.log("Player has been hit!");
+            youLose(); // Call the lose condition function
+            scene.remove(enemyBullets[i].mesh); // Remove bullet from the scene
+            scene.remove(enemyBullets[i].light); // Remove bullet light from the scene
+            enemyBullets.splice(i, 1); // Remove bullet from array
+        } else if (!isActive) {
+            enemyBullets.splice(i, 1); // Remove bullet if it traveled max distance
         }
     }
 
@@ -419,6 +444,7 @@ function updateHealthBar() {
 
 // Function to handle when enemy gets hit
 function handleEnemyHit() {
+    isEnemyAsleep = false;
     if (!enemyHitCooldown) {
         enemyHits++; // Increment hit counter
         console.log(`Enemy has been hit ${enemyHits} times!`);
@@ -445,22 +471,63 @@ function handleEnemyHit() {
 }
 
 // Function to detect collision between bullet and enemy
-function detectCollision(bullet, enemy) {
+function detectCollision(bullet, character) {
     const bulletBoundingBox = new THREE.Box3().setFromObject(bullet.mesh);
-    const enemyBoundingBox = new THREE.Box3().setFromObject(enemy);
+    const enemyBoundingBox = new THREE.Box3().setFromObject(character);
 
     return bulletBoundingBox.intersectsBox(enemyBoundingBox);
 }
 
 // Function to handle win condition
 function youWin() {
+    document.getElementById('header-end').innerText = "You Win!";
+    isEnemyAsleep = true;
+    isGamePaused = true; // Pause the game
     console.log("You win!"); // Display win message if health reaches zero
     enemyCurrentHealth = 0; // Prevent negative health
     gameOverScreen.style.display = "block"; // Show game over screen
     document.exitPointerLock(); // Exit mouse lock
-    document.getElementById('health-bar').style.display = 'none';
+    document.getElementById('health-bar-container').style.display = 'none';
     crosshair.hideCrosshair();
     cubeEnemy.visible = false;
     enemyLight.visible = false;
+}
 
+// Function to handle loss condition
+function youLose() {
+    document.getElementById('header-end').innerText = "You Lose!";
+    isEnemyAsleep = true;
+    isGamePaused = true; // Pause the game
+    console.log("You lose!"); // Display lose message if health reaches zero
+    gameOverScreen.style.display = "block"; // Show game over screen
+    document.exitPointerLock(); // Exit mouse lock
+    crosshair.hideCrosshair();
+    document.getElementById('health-bar-container').style.display = 'none';
+    cubeEnemy.visible = false;
+    enemyLight.visible = false;
+}
+
+// Enemy shooting at user
+// Variables for enemy shooting
+let enemyShootCooldown = false; // Cooldown flag to prevent rapid shooting
+let enemyBullets = []; // Array to hold enemy bullets
+
+// Function to handle enemy shooting
+function enemyShoot() {
+    if (!enemyShootCooldown) {
+        const position = cubeEnemy.position.clone();
+        const bullet = new Bullet(position, 0xff0000); // Create bullet at the enemy's position
+
+        // Calculate the bullet direction based on the player's position
+        const direction = cube.position.clone().sub(cubeEnemy.position).normalize();
+        bullet.velocity.copy(direction); // Set bullet velocity to point at the player
+        enemyBullets.push(bullet); // Add bullet to the array
+        scene.add(bullet.mesh); // Add bullet mesh to the scene
+        scene.add(bullet.light); // Add bullet light to the scene
+
+        enemyShootCooldown = true; // Set cooldown flag
+        setTimeout(() => {
+            enemyShootCooldown = false; // Reset cooldown flag after 1 second
+        }, 1000); // milliseconds delay
+    }
 }
