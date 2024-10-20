@@ -36,6 +36,28 @@
 			font-size: 24px;
 			cursor: pointer;
 		}
+
+		#health-bar-container {
+			position: fixed;  /* Fixed position to stay at the bottom of the screen */
+			bottom: 20px;     /* Space from the bottom of the screen */
+			left: 50%;        /* Center horizontally */
+			transform: translateX(-50%); /* Adjust to center */
+			width: 80%;       /* Width of the health bar */
+			height: 20px;     /* Height of the health bar container */
+			background-color: rgba(255, 255, 255, 0.3); /* Background color (optional) */
+			border: 2px solid #000000; /* Border color */
+			border-radius: 5px; /* Rounded corners */
+			overflow: hidden; /* Hide overflow to create a filling effect */
+		}
+
+		#health-bar {
+			height: 100%;     /* Fill the height of the container */
+			background-color: red; /* Color of the health bar */
+			width: 100%;      /* Start at full width */
+			transition: width 0.3s ease; /* Smooth transition for width change */
+		}
+
+
 	</style>
 </head>
 <body>
@@ -55,6 +77,16 @@
 			</label>
 		</div>
 	</div>
+
+	<div id="gameOverScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); color: white; text-align: center; padding-top: 20%;">
+        <h1>GG</h1>
+        <button id="restartButton" style="padding: 10px 20px; font-size: 20px;">Restart</button>
+    </div>
+
+	<div id="health-bar-container">
+		<div id="health-bar"></div>
+	</div>
+	
 
 	<script type="module" src="/level3.js"></script>
 </body>
