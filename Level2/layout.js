@@ -100,68 +100,42 @@ Object.values(gun).forEach((currentGun) => {
     });
 });
 
-//Lamp Stuff
-// let currentLamp = lamps.lampOne; 
-// Object.values(lamps).forEach((currentLamp) => {
-//     const loader = new GLTFLoader();  // Use GLTFLoader directly, not THREE.GLTFLoader
-    
-//     loader.load(currentLamp.scene, function (gltf) {
-//       let model = gltf.scene;
-//       scene.add(model);
-  
-//       model.position.set(currentLamp.positionX, currentLamp.positionY, currentLamp.positionZ);
-//       model.scale.set(currentLamp.scaleX, currentLamp.scaleY, currentLamp.scaleZ);
-//       model.castShadow = true;
-  
-//       const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
-//       lampLight.position.set(currentLamp.positionX, currentLamp.positionY + 2, currentLamp.positionZ); 
-//       scene.add(lampLight);
-//     }, undefined, function (error) {
-//       console.error('An error happened while loading the lamp model:', error);
-//     });
+// const doorLoader = new GLTFLoader();
+// doorLoader.load(currentDoor.scene, function (gltf) {
+//     Door = gltf.scene;
+//     scene.add(Door);
+
+//     Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
+//     Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
+//     Door.castShadow = true;
+
+//     doorMixer = new THREE.AnimationMixer(Door);
+
+//     const animations = gltf.animations;
+//     if (animations && animations.length > 0) {
+//         doorAnimationAction = doorMixer.clipAction(animations[0]); 
+//     }
+// }, undefined, function (error) {
+//     console.error('An error happened', error);
 // });
+// let isDoorOpen = false;
 
-// let Door;
-// let doorMixer; 
-// let doorAnimationAction; 
-// const currentDoor = door.doorOne;
-
-const doorLoader = new GLTFLoader();
-doorLoader.load(currentDoor.scene, function (gltf) {
-    Door = gltf.scene;
-    scene.add(Door);
-
-    Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
-    Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
-    Door.castShadow = true;
-
-    doorMixer = new THREE.AnimationMixer(Door);
-
-    const animations = gltf.animations;
-    if (animations && animations.length > 0) {
-        doorAnimationAction = doorMixer.clipAction(animations[0]); 
-    }
-}, undefined, function (error) {
-    console.error('An error happened', error);
-});
-let isDoorOpen = false;
-
-function onKeyDown(event) {
-    switch (event.code) {
-        case "KeyE": // Use "E" key to open the door
-        openDoor(); 
-        break;
-    }
-  }
-window.addEventListener("keydown", onKeyDown);
-// Function to open the door
-function openDoor() {
-    if (!isDoorOpen && doorAnimationAction) { 
-        doorAnimationAction.reset(); 
-        doorAnimationAction.play(); 
-        isDoorOpen = true; // Set the flag to true so it won't open again
-    }
-}
+// function onKeyDown(event) {
+//     switch (event.code) {
+//         case "KeyE": // Use "E" key to open the door
+//         openDoor(); 
+//         break;
+//     }
+//   }
+// window.addEventListener("keydown", onKeyDown);
+// // Function to open the door
+// function openDoor() {
+//     if (!isDoorOpen && doorAnimationAction) { 
+//         doorAnimationAction.reset(); 
+//         doorAnimationAction.play(); 
+//         isDoorOpen = true; // Set the flag to true so it won't open again
+//     }
+// }
 // Create the circular base (cylinder) with texture
 const radiusTop = 50;
 const radiusBottom = 50;
