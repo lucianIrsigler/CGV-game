@@ -13,7 +13,7 @@ export function initLevel1() {
     document.body.appendChild(renderer.domElement);
 
     // Create the cube
-    let geometry = new THREE.BoxGeometry();
+  let geometry = new THREE.BoxGeometry();
     let material = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
     cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
@@ -40,7 +40,6 @@ export function disposeLevel(){
     }catch(e){
         
     }
-
     levelContinue = false;
 }
 
