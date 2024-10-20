@@ -60,12 +60,12 @@ function definePlatformAction(platformIndex, action) {
     platformActions[platformIndex] = action;
 }
 
-function addCrate(x, y, z) {
-    const crate = new THREE.Mesh(crateGeometry, crateMaterial);
-    crate.position.set(x, y, z);
-    crate.lookAt(0, y, 0); // Make the crate face the center
-    platformGroup.add(crate); // Add the crate to the group
-}
+// function addCrate(x, y, z) {
+//     const crate = new THREE.Mesh(crateGeometry, crateMaterial);
+//     crate.position.set(x, y, z);
+//     crate.lookAt(0, y, 0); // Make the crate face the center
+//     platformGroup.add(crate); // Add the crate to the group
+// }
 
 // Load textures for the base and platforms
 const platformTexture = textureLoader.load('PavingStones.jpg');
@@ -86,25 +86,25 @@ const baseMaterial = new THREE.MeshStandardMaterial({
 
 
 //Lamp Stuff
-let currentLamp = lamps.lampOne; 
-Object.values(lamps).forEach((currentLamp) => {
-    const loader = new GLTFLoader();  // Use GLTFLoader directly, not THREE.GLTFLoader
+// let currentLamp = lamps.lampOne; 
+// Object.values(lamps).forEach((currentLamp) => {
+//     const loader = new GLTFLoader();  // Use GLTFLoader directly, not THREE.GLTFLoader
     
-    loader.load(currentLamp.scene, function (gltf) {
-      let model = gltf.scene;
-      scene.add(model);
+//     loader.load(currentLamp.scene, function (gltf) {
+//       let model = gltf.scene;
+//       scene.add(model);
   
-      model.position.set(currentLamp.positionX, currentLamp.positionY, currentLamp.positionZ);
-      model.scale.set(currentLamp.scaleX, currentLamp.scaleY, currentLamp.scaleZ);
-      model.castShadow = true;
+//       model.position.set(currentLamp.positionX, currentLamp.positionY, currentLamp.positionZ);
+//       model.scale.set(currentLamp.scaleX, currentLamp.scaleY, currentLamp.scaleZ);
+//       model.castShadow = true;
   
-      const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
-      lampLight.position.set(currentLamp.positionX, currentLamp.positionY + 2, currentLamp.positionZ); 
-      scene.add(lampLight);
-    }, undefined, function (error) {
-      console.error('An error happened while loading the lamp model:', error);
-    });
-});
+//       const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
+//       lampLight.position.set(currentLamp.positionX, currentLamp.positionY + 2, currentLamp.positionZ); 
+//       scene.add(lampLight);
+//     }, undefined, function (error) {
+//       console.error('An error happened while loading the lamp model:', error);
+//     });
+// });
 
 // Create the circular base (cylinder) with texture
 const radiusTop = 50;
@@ -123,10 +123,6 @@ const platformHeight = 1;
 const platformSpacing = 1;
 const spiralTurnAngle = Math.PI / 4.2; // changes distance between platforms
 const sectorAngle = Math.PI / 4.7; // changes length of each platform
-
-// Lamp post details
-const lampPostHeight = 2;
-const lampPostRadius = 0.1;
 
 for (let i = 0; i < numPlatforms; i++) {
     const angle = i * spiralTurnAngle;
@@ -159,48 +155,30 @@ for (let i = 0; i < numPlatforms; i++) {
     // Push the combinedGroup to the platformArray
     platformArray.push(combinedGroup);
 
+    // if (i % 3 === 0) {
+    //     const lampPostGeometry = new THREE.CylinderGeometry(lampPostRadius, lampPostRadius, lampPostHeight, 16);
+    //     const lampPostMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
+    //     const lampPost = new THREE.Mesh(lampPostGeometry, lampPostMaterial);
+
+    //     lampPost.position.set(
+    //         Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2,
+    //         platformY + platformHeight / 2 + lampPostHeight / 2,
+    //         Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2
+    //     );
+
     if (i % 3 === 0) {
-        const lampPostGeometry = new THREE.CylinderGeometry(lampPostRadius, lampPostRadius, lampPostHeight, 16);
-        const lampPostMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
-        const lampPost = new THREE.Mesh(lampPostGeometry, lampPostMaterial);
+        const lampX = Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2;
+        const lampY = platformY + platformHeight / 2;
+        const lampZ = Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2;
 
-        lampPost.position.set(
-            Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2,
-            platformY + platformHeight / 2 + lampPostHeight / 2,
-            Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2
-        );
-
-        const bulbGeometry = new THREE.SphereGeometry(0.3, 16, 16);
-        const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-        bulbMaterial.color.set(i % 5 === 0 ? 0x00ff00 : 0xffff00);
-        const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
-        bulb.position.set(lampPost.position.x, platformY + platformHeight / 2 + lampPostHeight, lampPost.position.z);
-
-        const light = new THREE.PointLight(0xffff00, 1, 10);
-        if (i % 5 === 0) {
-            light.color.set(0x9A94F0);
-        } else {
-            light.color.set(0x9A94F0);
-        }
-        light.position.set(lampPost.position.x, platformY + platformHeight / 2 + lampPostHeight, lampPost.position.z);
-
-        // Offset positions for correct height
-        lampPost.position.y -= 0.5;
-        bulb.position.y -= 0.5;
-        light.position.y -= 0.5;
-
-        // Make the bulb and light face the center
-        light.lookAt(0, light.position.y, 0);
-        bulb.lookAt(0, bulb.position.y, 0);
-
-        // Add lamp post, bulb, and light to the combined group
-        combinedGroup.add(lampPost);
-        combinedGroup.add(bulb);
-        combinedGroup.add(light);
+        combinedGroup.userData = {
+            lampPosition: new THREE.Vector3(lampX, lampY, lampZ),
+            platformIndex: i
+        };
 
         // Position crate on the side of the shorter arc (closer to the inner radius)
         const cratex = Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + (sectorOuterRadius - sectorInnerRadius) / 4);
-        const cratey = platformY + platformHeight / 2 + lampPostHeight / 2 - 0.5;
+        const cratey = platformY + platformHeight / 2; 
         const cratez = Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + (sectorOuterRadius - sectorInnerRadius) / 4);
 
         // Add crate in front of the lamp post, closer to the inner radius
@@ -227,6 +205,42 @@ for (let i = 0; i < numPlatforms; i++) {
         definePlatformAction(i, { type: 'rightleft', speed: 0.002, range: 2 });
     }
 }
+
+const loader = new GLTFLoader();
+let lampIndex = 0;
+
+Object.values(lamps).forEach((currentLamp) => {
+    loader.load(currentLamp.scene, function (gltf) {
+        let model = gltf.scene;
+        
+        // Find the next platform that should have a lamp
+        while (lampIndex < platformArray.length) {
+            const platform = platformArray[lampIndex];
+            if (platform.userData && platform.userData.lampPosition) {
+                const lampPos = platform.userData.lampPosition;
+                
+                model.position.copy(lampPos);
+                model.scale.set(currentLamp.scaleX, currentLamp.scaleY, currentLamp.scaleZ);
+                model.castShadow = true;
+
+                // Make the lamp face the center
+                model.lookAt(0, model.position.y, 0);
+
+                platform.add(model);
+
+                const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
+                lampLight.position.set(0, 2, 0); // Position relative to the lamp model
+                model.add(lampLight);
+
+                break; // Move to the next lamp
+            }
+            lampIndex++;
+        }
+        lampIndex++; // Prepare for the next lamp
+    }, undefined, function (error) {
+        console.error('An error happened while loading the lamp model:', error);
+    });
+});
 
 // Calculate the min and max height for the circular base
 const minHeight = 0;
