@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
-import { door } from '../doorPos.js';
-import { lamps } from '../lampPos.js'; // Import the lamps object from lampPos.js
+import { door } from './doorPos1.js';
+import { lamps } from './lampPos1.js'; // Import the lamps object from lampPos.js
 const loader = new GLTFLoader();
 let model;
 
@@ -25,6 +25,27 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+// Mini-map setup
+const miniMapCamera = new THREE.OrthographicCamera(
+    window.innerWidth / -2, window.innerWidth / 2,
+    window.innerHeight / 2, window.innerHeight / -2,
+    0.1, 1000
+);
+miniMapCamera.position.set(0, 100, 0); // Position the mini-map camera above the scene
+miniMapCamera.lookAt(0,0,15); // Look at the center of the scene
+
+// Set the zoom factor
+miniMapCamera.zoom = 12.5; // Increase this value to zoom in
+miniMapCamera.updateProjectionMatrix(); // Update the projection matrix after changing the zoom
+
+const miniMapRenderer = new THREE.WebGLRenderer({ alpha: true });
+miniMapRenderer.setSize(200, 200); // Set the size of the mini-map
+miniMapRenderer.domElement.style.position = 'absolute';
+miniMapRenderer.domElement.style.top = '10px';
+miniMapRenderer.domElement.style.right = '10px';
+document.body.appendChild(miniMapRenderer.domElement);
+
 
 // First Person Controls
 const controls = new FirstPersonControls(camera, renderer.domElement);
@@ -84,7 +105,7 @@ function loadLamps() {
         loader.load(lamp.scene, function (gltf) {
             let model = gltf.scene;
             scene.add(model);
-
+            console.log("lamplaoded")
             model.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
             model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
             model.castShadow = true;
@@ -155,23 +176,25 @@ function openDoor() {
         gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>"; // Update success message
     }
 }
-
-const spotLight = new THREE.SpotLight(0x0000ff,5, 50, Math.PI / 6, 0.5, 2);
+//give me orange hexa code: #FFA500
+//w
+const spotLight = new THREE.SpotLight(0xfcf4dc,10, 6, Math.PI / 6, 0.5, 2);//colour: orange
 spotLight.userData.originalIntensity = spotLight.intensity; // Store original intensity
 spotLight.position.set(0, 4, 0);
 const targetObject = new THREE.Object3D();
-targetObject.position.set(0, 0, 1); // Position it below the spotlight
+targetObject.position.set(0, 0, 0); // Position it below the spotlight
 scene.add(targetObject);
 spotLight.target = targetObject;
 scene.add(spotLight);
 const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-scene.add(spotLightHelper);
+//scene.add(spotLightHelper);
 points.push(spotLight);
 
 // First light
-const spotLight1 = new THREE.SpotLight(0xff0000, 5, 50, Math.PI / 6, 0.5, 2);
+//musky white hexa code: 0x800080
+const spotLight1 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);//colour: red
 spotLight1.userData.originalIntensity = spotLight1.intensity; // Store original intensity
-spotLight1.position.set(-4, 4, 5);
+spotLight1.position.set(-4, 3, 5);
 // Create a target for the spotlight
 const targetObject1 = new THREE.Object3D();
 targetObject1.position.set(-4, 0, 5); // Position it below the spotlight
@@ -180,36 +203,36 @@ scene.add(targetObject1);
 spotLight1.target = targetObject1;
 scene.add(spotLight1);
 const spotLightHelper1 = new THREE.SpotLightHelper(spotLight1);
-scene.add(spotLightHelper1);
+//scene.add(spotLightHelper1);
 points.push(spotLight1);
-
+//orange hexa: 0xffa500
 // Second light
-const spotLight2 = new THREE.SpotLight(0x0000ff, 5, 50, Math.PI / 6, 0.5, 2);
+const spotLight2 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
 spotLight2.userData.originalIntensity = spotLight2.intensity; // Store original intensity
-spotLight2.position.set(3.5, 4, 9);
+spotLight2.position.set(4, 3, 10);
 // Create a target for the spotlight
 const targetObject2 = new THREE.Object3D();
-targetObject2.position.set(3.5, 0, 9); // Position it below the spotlight
+targetObject2.position.set(4, 0, 10); // Position it below the spotlight
 scene.add(targetObject2);
 // Set the spotlight's target
 spotLight2.target = targetObject2;
 scene.add(spotLight2);
 const spotLightHelper2 = new THREE.SpotLightHelper(spotLight2);
-scene.add(spotLightHelper2);
+//scene.add(spotLightHelper2);
 points.push(spotLight2);
 
 // Third light
-const pointLight3 = new THREE.PointLight(0xffffff, 1, 20);
-pointLight3.position.set(0, 4, -9);
+const pointLight3 = new THREE.PointLight(0xffffff, 1, 4);
+pointLight3.position.set(0, 6, -9);
 scene.add(pointLight3);
 const pointLightHelper3 = new THREE.PointLightHelper(pointLight3, 0.5);
 scene.add(pointLightHelper3);
 points.push(pointLight3);
 
 // fourth light
-const spotLight4 = new THREE.SpotLight(0x800080, 5, 50, Math.PI / 6, 0.5, 2);
+const spotLight4 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
 spotLight4.userData.originalIntensity = spotLight4.intensity; // Store original intensity
-spotLight4.position.set(4, 4, 25);
+spotLight4.position.set(4, 3, 25);
 // Create a target for the spotlight
 const targetObject4 = new THREE.Object3D();
 targetObject4.position.set(4, 0, 25); // Position it below the spotlight
@@ -218,22 +241,22 @@ scene.add(targetObject4);
 spotLight4.target = targetObject4;
 scene.add(spotLight4);
 const spotLightHelper4 = new THREE.SpotLightHelper(spotLight4);
-scene.add(spotLightHelper4);
+//scene.add(spotLightHelper4);
 points.push(spotLight4);
 
 // five light
 const spotLight5 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
 spotLight5.userData.originalIntensity = spotLight5.intensity; // Store original intensity
-spotLight5.position.set(3, 4, 15);
+spotLight5.position.set(3, 5, 15);
 // Create a target for the spotlight
 const targetObject5 = new THREE.Object3D();
-targetObject5.position.set(3, 3, 15); // Position it below the spotlight
+targetObject5.position.set(3, 2, 15); // Position it below the spotlight
 scene.add(targetObject5);
 // Set the spotlight's target
 spotLight5.target = targetObject5;
 scene.add(spotLight5);
 const spotLightHelper5 = new THREE.SpotLightHelper(spotLight5);
-scene.add(spotLightHelper5);
+//scene.add(spotLightHelper5);
 points.push(spotLight5);
 
 //add dark ambient light
@@ -243,7 +266,7 @@ scene.add(ambientLight);
 // six light
 const spotLight6 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
 spotLight6.userData.originalIntensity = spotLight6.intensity; // Store original intensity
-spotLight6.position.set(-3, 6, 20);
+spotLight6.position.set(-3, 7, 20);
 // Create a target for the spotlight
 const targetObject6 = new THREE.Object3D();
 targetObject6.position.set(-3, 3, 20); // Position it below the spotlight
@@ -252,37 +275,38 @@ scene.add(targetObject6);
 spotLight6.target = targetObject6;
 scene.add(spotLight6);
 const spotLightHelper6 = new THREE.SpotLightHelper(spotLight6);
-scene.add(spotLightHelper6);
+//scene.add(spotLightHelper6);
 points.push(spotLight6);
 
-// seven light
-const spotLight7 = new THREE.SpotLight(0x800080, 5, 10, Math.PI / 6, 0.5, 2);
+// seven light 0xffa500
+//green hexa code: 0x800080
+const spotLight7 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
 spotLight7.userData.originalIntensity = spotLight7.intensity; // Store original intensity
-spotLight7.position.set(3, 6, 30);
+spotLight7.position.set(3, 5, 30);
 // Create a target for the spotlight
 const targetObject7 = new THREE.Object3D();
-targetObject7.position.set(3, 3, 30); // Position it below the spotlight
+targetObject7.position.set(3, 2, 30); // Position it below the spotlight
 scene.add(targetObject7);
 // Set the spotlight's target
 spotLight7.target = targetObject7;
 scene.add(spotLight7);
 const spotLightHelper7 = new THREE.SpotLightHelper(spotLight7);
-scene.add(spotLightHelper7);
+//scene.add(spotLightHelper7);
 points.push(spotLight7);
 
-// eight light
-const spotLight8 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
+// eight light 0x800080
+const spotLight8 = new THREE.SpotLight(0x008000, 5, 4, Math.PI / 6, 0.5, 2);
 spotLight8.userData.originalIntensity = spotLight8.intensity; // Store original intensity
-spotLight8.position.set(-3, 6, 35);
+spotLight8.position.set(-3, 7, 35);
 // Create a target for the spotlight
 const targetObject8 = new THREE.Object3D();
-targetObject8.position.set(-3, 3, 35); // Position it below the spotlight
+targetObject8.position.set(-3, 4, 35); // Position it below the spotlight
 scene.add(targetObject8);
 // Set the spotlight's target
 spotLight8.target = targetObject8;
 scene.add(spotLight8);
 const spotLightHelper8 = new THREE.SpotLightHelper(spotLight8);
-scene.add(spotLightHelper8);
+//scene.add(spotLightHelper8);
 points.push(spotLight8);
 
 // Walls
@@ -361,7 +385,7 @@ character.rotation.y += Math.PI;
 
 // Variables to track movement and rotation
 let moveSpeed = 0.1;
-let rotateSpeed = 0.05;
+let rotateSpeed = 0.1;
 let loaded = false;
 
 // Movement state
@@ -429,13 +453,6 @@ function restartGame() {
     health = 100;
     healthNumberElement.textContent = health; // Reset health number in the HTML
 
-    
-
-    // Reset all lights to their original intensity
-    // points.forEach(light => {
-    //     light.intensity = light.userData.originalIntensity; // Set back to original intensity
-    // });
-
     // Reload textures
     textures.forEach(texture => {
         texture.needsUpdate = true; // Mark texture for update
@@ -446,7 +463,7 @@ function restartGame() {
         scene.add(light); // Ensure light is added to the scene
     });
 
-    // Optional: Reset any other states or objects here as needed
+ 
 }
 
 
@@ -550,7 +567,8 @@ function flickerLight(light, index) {
 }
 
 
-
+let lastMiniMapRenderTime = 0; // To track the last time the mini-map was rendered
+const miniMapRenderInterval = 100; // 100ms interval for mini-map rendering
 
 function animate() {
     requestAnimationFrame(animate);
@@ -639,11 +657,15 @@ if (onPlatform || character.position.y === 0.5) {
     controls.update(0.7); // Update controls with delta time
     // Render the scene
     renderer.render(scene, camera);
+    // Only update the mini-map at the defined interval
+    const currentTime = Date.now();
+    if (currentTime - lastMiniMapRenderTime >= miniMapRenderInterval) {
+        miniMapRenderer.render(scene, miniMapCamera);
+        lastMiniMapRenderTime = currentTime; // Update the time of last render
+    }
 }
-
 startDamageTimer();
 animate();
-
 // Resize the renderer with the window size
 window.addEventListener("resize", () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
