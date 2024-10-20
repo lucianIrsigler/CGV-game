@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ThirdPersonInputController } from '../InputController/ThirdPersonInputController';
+import { ThirdPersonInputController } from "../InputController/ThirdPersonInputController";
 
 //https://www.youtube.com/watch?v=UuNPHOJ_V5o&ab_channel=SimonDev
 export class ThirdPersonCamera{
@@ -11,7 +11,7 @@ export class ThirdPersonCamera{
     }
 
     calculateIdealOffset_(){
-        const idealOffset =  new THREE.Vector3(0,5,-15);
+        const idealOffset =  new THREE.Vector3(-1,3,-3);
 
         const qR = new THREE.Quaternion();
         qR.setFromEuler(this.input_.target_.rotation); 
@@ -23,7 +23,7 @@ export class ThirdPersonCamera{
     }
 
     calculateIdealLookAt_(){
-        const idealLookAt = new THREE.Vector3(0,0,0);
+        const idealLookAt = new THREE.Vector3(0,0,5);
 
         const qR = new THREE.Quaternion();
         qR.setFromEuler(this.input_.target_.rotation); 
@@ -35,6 +35,8 @@ export class ThirdPersonCamera{
     }
 
     update(timeElapsedS){
+        this.input_.target_.visible=true;
+
         this.input_.update();
         const idealOffset = this.calculateIdealOffset_();
 
@@ -51,7 +53,7 @@ export class ThirdPersonCamera{
         this.currentLookat_.copy(idealLookAt);
 
         this.camera_.position.copy(this.currentPositon_);
-        this.camera_.lookAt(this.input_.target_.position);
+        this.camera_.lookAt(this.currentLookat_);
 
         // console.log("camera:",this.currentPositon_);
 

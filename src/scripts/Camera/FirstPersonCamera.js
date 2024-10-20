@@ -19,16 +19,13 @@ export class FirstPersonCamera {
       this.input_ = new FirstPersonInputController();
       this.scene = scene;
 
-
-
       this.rotation_ = new THREE.Quaternion();
       this.translation_ = new THREE.Vector3();
       this.phi_ = 0;
       this.theta_ = 0;
-      this.headBobActive_ = false;
-      this.headBobTimer_ = 0;
       this.movementspeed_ = 5;
       this.target_ = target;
+
       this.sensitivity=5;
 
       this.jumpSpeed_ = 6;
@@ -49,8 +46,12 @@ export class FirstPersonCamera {
     }
   
     updateCamera_(_) {
+      console.log(this.camera_.position,this.target_.position)
       this.camera_.quaternion.copy(this.rotation_);
       this.camera_.position.copy(this.translation_);
+      this.camera_.position.y = 1.2;
+      this.target_.visible=false;
+
 
       this.target_.quaternion.copy(this.rotation_);
       this.target_.position.copy(this.translation_);
@@ -94,16 +95,17 @@ export class FirstPersonCamera {
       const forwardVelocity = (this.input_.keys_[KEYS.w] ? 1 : 0) + (this.input_.keys_[KEYS.s] ? -1 : 0);
       const strafeVelocity = (this.input_.keys_[KEYS.a] ? 1 : 0) + (this.input_.keys_[KEYS.d] ? -1 : 0);
 
+      // if (this.input_.keys_[KEYS.space] && this.isGrounded_ && !this.jumpAlready_) {
+      // console.log(this.input_.keys_[KEYS.space])
 
-      if (this.input_.keys_[KEYS.space] && this.isGrounded_ && !this.jumpAlready_) {
-        this.input_.keys_[KEYS.space] = false;
-        this.verticalVelocity_ = this.jumpSpeed_; // Start the jump
-        this.isGrounded_ = false; // The player is now in the air
-      }
+      //   this.input_.keys_[KEYS.space] = false;
+      //   this.verticalVelocity_ = this.jumpSpeed_; // Start the jump
+      //   this.isGrounded_ = false; // The player is now in the air
+      // }
 
-      if (!this.isGrounded_) {
-        this.verticalVelocity_ += -0.50; // Apply gravity over time
-      }
+      // if (!this.isGrounded_) {
+      //   this.verticalVelocity_ += -0.50; // Apply gravity over time
+      // }
 
       const qx = new THREE.Quaternion();
       qx.setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.phi_);
@@ -115,20 +117,19 @@ export class FirstPersonCamera {
       const left = new THREE.Vector3(-1*this.movementspeed_, 0, 0);
       left.applyQuaternion(qx);
       left.multiplyScalar(strafeVelocity * timeElapsedS * 10);
-  
+      
       this.translation_.add(forward);
       this.translation_.add(left);
 
-      if (!this.jumpAlready_){
-        this.translation_.y += this.verticalVelocity_;
-        this.jumpAlready_=true;
-      }else if (!this.isGrounded_){
-        this.translation_.y += this.verticalVelocity_;
+      // if (!this.isGrounded_ || !this.jumpAlready_){
+      //   this.translation_.y += this.verticalVelocity_;
+      //   this.jumpAlready_=true;
 
-      }
 
-      // Perform raycasting to check if grounded
-      this.checkGrounded();
+      // }
+
+      // // Perform raycasting to check if grounded
+      // this.checkGrounded();
     }
   
 
