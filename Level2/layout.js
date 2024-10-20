@@ -214,17 +214,17 @@ for (let i = 0; i < numPlatforms; i++) {
     platformGroup.add(combinedGroup);
 
     // Define specific actions for platforms
-    if (i === 2) {
-        definePlatformAction(i, { type: 'updown', speed: 0.002, range: 2 }); // Limit range to 1 unit
+    if(i % 5 === 0) {
+        definePlatformAction(i, { type: 'updown', speed: 0.002, range: 2 });
     }
-    if (i === 10) {
-        definePlatformAction(i, { type: 'leftright', speed: 0.002, range: 2 }); // Limit range to 1 unit
+    if(i % 6 === 0) {
+        definePlatformAction(i, { type: 'downup', speed: 0.002, range: 2 });
     }
-    if (i === 15) {
-        definePlatformAction(i, { type: 'updown', speed: 0.002, range: 2 }); // Limit range to 1 unit
+    if(i % 4 === 0) {
+        definePlatformAction(i, { type: 'leftright', speed: 0.002, range: 2 });
     }
-    if (i === 21) {
-        definePlatformAction(i, { type: 'leftright', speed: 0.002, range: 2 }); // Limit range to 1 unit
+    if(i % 3 === 0) {
+        definePlatformAction(i, { type: 'rightleft', speed: 0.002, range: 2 });
     }
 }
 
@@ -278,6 +278,13 @@ function animate(time) {
                         }
                         group.position.y = Math.sin(Date.now() * speed) * range;
                         break;
+                    case 'downup':
+                        // Reset the group position to the original position
+                        if (group.position.y !== originalPosition.y) {
+                            group.position.y = originalPosition.y; // Set to original position
+                        }
+                        group.position.y = -Math.sin(Date.now() * speed) * range;
+                        break;
                     case 'leftright':
                         // Reset the group position to the original position
                         if (group.position.x !== originalPosition.x) {
@@ -285,7 +292,13 @@ function animate(time) {
                         }
                         group.position.x = Math.sin(Date.now() * speed) * range;
                         break;
-                    // Add more action types as needed
+                    case 'rightleft':
+                        // Reset the group position to the original position
+                        if (group.position.x !== originalPosition.x) {
+                            group.position.x = originalPosition.x; // Set to original position
+                        }
+                        group.position.x = -Math.sin(Date.now() * speed) * range;
+                        break;
                 }
             }
         });
