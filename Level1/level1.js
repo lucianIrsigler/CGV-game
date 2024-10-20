@@ -565,7 +565,7 @@ function animate() {
         velocityY += gravity;
     }
 // Check proximity to the door
-checkDoorProximity();
+//checkDoorProximity();
 
 // Existing animation logic...
 
