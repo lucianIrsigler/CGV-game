@@ -11,6 +11,7 @@ const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");
 let isGamePaused = false; // Flag to track if the game is paused
 let isEnemyAsleep = true;
+document.getElementById('health-bar-container').style.display = 'none';
 
 restartButton.addEventListener("click", restartGame);
 
@@ -29,7 +30,7 @@ function restartGame() {
     // Reset health
     enemyCurrentHealth = enemyMaxHealth; // Reset current health to max
     enemyHits = 0; // Reset hit counter
-    document.getElementById('health-bar-container').style.display = 'block';
+    document.getElementById('health-bar-container').style.display = 'none';
     updateHealthBar(); // Update health bar to full width
     // make bar full
 
@@ -267,6 +268,9 @@ document.addEventListener('mousedown', (event) => {
     if (event.button === 0 && !isSettingsMenuOpen) { // Only shoot if menu is not open
         const position = camera.position.clone();
         // position.x -= 1.3;
+        const bulletSound = new Audio('bullet_sound.mp3'); // Load the sound
+        bulletSound.volume = 0.2; // Set volume for the sound (adjust as needed)
+        bulletSound.play(); // Play the sound
         const bullet = new Bullet(position, 0xA96CC3); // Create bullet at the cube's position
 
         // Calculate the bullet direction based on the camera's forward direction
@@ -341,6 +345,7 @@ function animate() {
     if(!isEnemyAsleep){
         updateEnemyMovement(); // Update enemy's random movement
         enemyShoot(); // Enemy shooting logic
+        document.getElementById('health-bar-container').style.display = 'block';
     }
     
 
@@ -516,6 +521,9 @@ let enemyBullets = []; // Array to hold enemy bullets
 function enemyShoot() {
     if (!enemyShootCooldown) {
         const position = cubeEnemy.position.clone();
+        const bulletSound = new Audio('bullet_sound.mp3'); // Load the sound
+        bulletSound.volume = 0.1; // Set volume for the sound (adjust as needed)
+        bulletSound.play(); // Play the sound
         const bullet = new Bullet(position, 0xff0000); // Create bullet at the enemy's position
 
         // Calculate the bullet direction based on the player's position
