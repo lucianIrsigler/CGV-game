@@ -23,6 +23,13 @@ const cube = new THREE.Mesh(geometry, material);
 cube.position.set(0, 1.5, 0); // Set initial position of the cube
 scene.add(cube);
 
+// Cube (enemy)
+const geometryEnemy = new THREE.BoxGeometry(2, 4, 2);
+const materialEnemy = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+const cubeEnemy = new THREE.Mesh(geometryEnemy, materialEnemy);
+cubeEnemy.position.set(10, 2, 5); // Set initial position of the cube
+scene.add(cubeEnemy);
+
 // Ground
 //Texture for ground 
 const textureLoader = new THREE.TextureLoader();
@@ -187,11 +194,14 @@ let bullets = [];
 
 document.addEventListener('mousedown', (event) => {
     if (event.button === 0 && !isSettingsMenuOpen) { // Only shoot if menu is not open
-        const bullet = new Bullet(cube.position.clone()); // Create bullet at the cube's position
+        const position = camera.position.clone();
+        // position.x -= 1.3;
+        const bullet = new Bullet(position); // Create bullet at the cube's position
 
         // Calculate the bullet direction based on the camera's forward direction
         const direction = new THREE.Vector3(); // Create a new vector for direction
         camera.getWorldDirection(direction); // Get the direction the camera is facing
+
         direction.normalize(); // Normalize the direction vector
 
         bullet.velocity.copy(direction); // Set bullet velocity to point in the camera's direction
@@ -205,7 +215,7 @@ document.addEventListener('mousedown', (event) => {
 // Update camera position to always follow the cube
 function updateCamera() {
     // Calculate the new camera position based on cube's rotation around the Y-axis
-    const offset = new THREE.Vector3(-2, 1.5, -2); // Adjust this for the right shoulder view
+    const offset = new THREE.Vector3(0, 1.5, -2.5); // Adjust this for the right shoulder view (left right, up down, front back)
     offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), cubeRotationY); // Rotate offset based on cube's Y rotation
 
     // Set camera position based on the cube's position plus the rotated offset
@@ -315,3 +325,8 @@ window.addEventListener('keydown', (event) => {
 
 // Create Crosshair
 const crosshair = new Crosshair(5, 'red');
+
+// Shooting the enemy
+let enemyHitCount = 0;
+const maxHits = 10;
+
