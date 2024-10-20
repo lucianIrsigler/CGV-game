@@ -166,7 +166,7 @@ for (let i = 0; i < numPlatforms; i++) {
     //         Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2
     //     );
 
-    if (i % 3 === 0) {
+    if (i % 3 === 0 || i === numPlatforms - 1) {
         const lampX = Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2;
         const lampY = platformY + platformHeight / 2;
         const lampZ = Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2;

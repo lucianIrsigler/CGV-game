@@ -17,5 +17,9 @@ const baseLamp = {
     lampFive: Object.assign({}, baseLamp, { positionY: 4, positionX: -3, positionZ: 20 }),
     lampSix: Object.assign({}, baseLamp, { positionY: 2, positionX: 3, positionZ: 30 }),
     lampSeven: Object.assign({}, baseLamp, { positionY: 4, positionX: -3, positionZ: 35 }),
+    lampEight: Object.assign({}, baseLamp, { positionY: 4, positionX: -3, positionZ: 35 }),
+    lampNine: Object.assign({}, baseLamp, { positionY: 4, positionX: -3, positionZ: 35 }),
+    lampTen: Object.assign({}, baseLamp, { positionY: 4, positionX: -3, positionZ: 35 }),
+    lampEleven: Object.assign({}, baseLamp, { positionY: 4, positionX: -3, positionZ: 35 }),
   };
   
