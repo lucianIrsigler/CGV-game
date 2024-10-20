@@ -179,6 +179,7 @@ function openDoor() {
         gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>"; // Update success message
     }
 }
+
 //give me orange hexa code: #FFA500
 //w
 const spotLight = new THREE.SpotLight(0xfcf4dc,10, 6, Math.PI / 6, 0.5, 2);//colour: orange
@@ -460,7 +461,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-
 document.addEventListener('keyup', (e) => {
     switch (e.key) {
         case 'w':
@@ -471,7 +471,6 @@ document.addEventListener('keyup', (e) => {
             movement.right = 0; break;
     }
 });
-
 
 
 function handleCharacterDeath() {
