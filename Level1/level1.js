@@ -8,8 +8,6 @@ import { lights } from 'three/webgpu';
 const loader = new GLTFLoader();
 let model;
 
-let characterLight;
-
 // Scene setup
 const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");
@@ -263,7 +261,7 @@ const spotLightHelper5 = new THREE.SpotLightHelper(spotLight5);
 points.push(spotLight5);
 
 //add dark ambient light
-const ambientLight = new THREE.AmbientLight(0x101010, 0.75); // Soft white light
+const ambientLight = new THREE.AmbientLight(0x404040, 0.75); // Soft white light
 scene.add(ambientLight);
 
 // six light
@@ -322,6 +320,32 @@ const topThingy = new THREE.Mesh(platformGeometry, platformMaterial);
 topThingy.position.y = 10;
 topThingy.position.z = 20;
 scene.add(topThingy);
+
+// Create a red cube
+const redCubeGeometry = new THREE.BoxGeometry(3, 1, 3);
+const redCubeMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+const redCube = new THREE.Mesh(redCubeGeometry, redCubeMaterial);
+
+// Set the red cube's initial position to match topThingy
+redCube.position.set(topThingy.position.x, topThingy.position.y+2, topThingy.position.z);
+
+// Add the red cube to the scene
+scene.add(redCube);
+
+
+function updateRedCubePosition() {
+    redCube.position.x = character.position.x;
+    redCube.position.z = character.position.z;
+  }
+  
+
+
+  // Green block above topThingy at x = -3 and z = 35
+const greenBlockGeometry = new THREE.BoxGeometry(3, 1, 3);
+const greenBlockMaterial = new THREE.MeshBasicMaterial({ color: 0x008000 });
+const greenBlock = new THREE.Mesh(greenBlockGeometry, greenBlockMaterial);
+greenBlock.position.set(-3, topThingy.position.y + 2, 39);
+scene.add(greenBlock);
 
 
 const backWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
@@ -382,15 +406,6 @@ const character = new THREE.Mesh(characterGeometry, characterMaterial);
 character.position.y = 0.5;
 scene.add(character);
 
-//charcter light 
-function setupCharacterLight() {
-    characterLight = new THREE.PointLight(0xffffff, 1, 5);
-    characterLight.position.set(0, 1, 0); // Slightly above the character
-    character.add(characterLight); // Attach the light to the character
-}
-
-setupCharacterLight();
-
 // Position camera initially at the same place as the character
 camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
 character.rotation.y += Math.PI;
@@ -405,7 +420,7 @@ const movement = { forward: 0, right: 0 };
 
 let health = 100;
 const healthNumberElement = document.getElementById('health-number');
-const damageRate = 20; // Define the damage rate
+const damageRate = 10; // Define the damage rate
 const healingRate = 10; // Define the healing rate
 
 // Event listeners for movement
@@ -468,20 +483,11 @@ function restartGame() {
     // Reload textures
     textures.forEach(texture => {
         texture.needsUpdate = true; // Mark texture for update
-    });
+    });  
 
-     // Use the toggleLightIntensity function to turn on all lights at intensity 5
-     points.forEach(light => toggleLightIntensity(light));
-     lampLights.forEach(lampLight => {
-        lampLight.intensity = 0.5; // Reset to original intensity
-    });
-     updateCharacterLight();
- 
+    
 }
 
-function toggleLightIntensity(light) {
-    light.intensity = 5;
-}
 
 restartButton.addEventListener("click", restartGame);
 
@@ -497,26 +503,9 @@ function updateCameraPosition() {
     
 }
 
-function updateCharacterLight() {
-    if (characterLight) {
-        // Calculate light intensity and distance based on health
-        const maxIntensity = 1;
-        const maxDistance = 5;
-        const minIntensity = 0.2;
-        const minDistance = 1;
-
-        const healthPercentage = health / 100;
-        
-        characterLight.intensity = minIntensity + (maxIntensity - minIntensity) * healthPercentage;
-        characterLight.distance = minDistance + (maxDistance - minDistance) * healthPercentage;
-    }
-}
-
 function takeDamage(amount) {
     health -= amount;
-    health = Math.max(0, health); // Ensure health doesn't go below 0
-    healthNumberElement.textContent = health;
-    updateCharacterLight(); // Update light when health changes
+    healthNumberElement.textContent = health; // Update the health number in the HTML
     if (health <= 0) {
         handleCharacterDeath();
     }
@@ -524,25 +513,9 @@ function takeDamage(amount) {
 
 function heal(amount) {
     health += amount;
-    health = Math.min(100, health); // Cap health at 100
-    healthNumberElement.textContent = health;
-    updateCharacterLight(); // Update light when health changes
+    if (health > 100) health = 100; // Cap health at 100
+    healthNumberElement.textContent = health; // Update the health number in the HTML
 }
-
-
-// function takeDamage(amount) {
-//     health -= amount;
-//     healthNumberElement.textContent = health; // Update the health number in the HTML
-//     if (health <= 0) {
-//         handleCharacterDeath();
-//     }
-// }
-
-// function heal(amount) {
-//     health += amount;
-//     if (health > 100) health = 100; // Cap health at 100
-//     healthNumberElement.textContent = health; // Update the health number in the HTML
-// }
 
 const lightTimers = {}; // Track time spent near lights
 
@@ -634,7 +607,8 @@ function animate() {
 // Check proximity to the door
 checkDoorProximity();
 
-// Existing animation logic...
+ // Update the red cube's position
+ updateRedCubePosition();
 
 // Handle the 'E' key press to open the door
 document.addEventListener('keydown', (e) => {
