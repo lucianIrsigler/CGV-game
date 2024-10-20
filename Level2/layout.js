@@ -13,9 +13,9 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // Directional light for testing
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(10, 10, 10); // Position the light
-scene.add(directionalLight);
+// const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+// directionalLight.position.set(10, 10, 10); // Position the light
+// scene.add(directionalLight);
 
 // Crates
 const textureLoader = new THREE.TextureLoader();
@@ -273,7 +273,7 @@ Object.values(lamps).forEach((currentLamp) => {
 
                 platform.add(model);
 
-                const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
+                const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 30); // Purple light 
                 lampLight.position.set(0, 2, 0); // Position relative to the lamp model
                 model.add(lampLight);
 
