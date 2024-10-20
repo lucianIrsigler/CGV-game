@@ -190,9 +190,15 @@ let moveLeft = false;
 let moveRight = false;
 
 // Mouse control to rotate cube and camera
-let rotationSpeed = 0.005; // Sensitivity of mouse movement
+let rotationSpeed = 0.001; // Sensitivity of mouse movement
 let cubeRotationY = 0; // Track rotation around the Y-axis
 let verticalLook = 0; // Track vertical rotation
+
+// user changing sensitivity
+const sensitivitySlider = document.getElementById('sensitivitySlider');
+sensitivitySlider.addEventListener('input', (event) => {
+    rotationSpeed = event.target.value / 1000; // Adjust rotation speed based on slider value
+});
 
 // Raycaster setup
 const raycaster = new THREE.Raycaster();
@@ -233,6 +239,10 @@ document.addEventListener('keyup', (event) => {
     }
 });
 
+// Define limits for vertical look 
+const MAX_LOOK_UP = Math.PI / 4; // 135 degrees up
+const MAX_LOOK_DOWN = -Math.PI / 1.6; // to look up
+
 // Mouse movement for rotating the cube and camera
 document.addEventListener('mousemove', (event) => {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1; // Normalize x
@@ -242,6 +252,8 @@ document.addEventListener('mousemove', (event) => {
     let deltaY = -event.movementY * rotationSpeed; // Invert vertical mouse movement
     cubeRotationY -= deltaX; // Adjust cube's rotation Y value
     verticalLook -= deltaY; // Adjust vertical look
+
+    verticalLook = THREE.MathUtils.clamp(verticalLook, MAX_LOOK_DOWN, MAX_LOOK_UP);
 });
 
 // Array to hold bullets

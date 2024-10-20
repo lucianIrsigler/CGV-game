@@ -8,11 +8,13 @@ import { lights } from 'three/webgpu';
 const loader = new GLTFLoader();
 let model;
 
+let characterLight; 
 
-
-//Screens
+// Scene setup
 const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");
+let points = [];
+const spheres = []; // To keep track of created spheres
 
 //jump variables
 let jumpCount = 0; 
@@ -20,7 +22,7 @@ const gravity = -0.01; // Adjusted gravity value
 let isJumping = false; // Track if the character is jumping
 let velocityY = 0; // Vertical velocity for jumping
 
-// Create a scene
+// Create a sphere
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
@@ -35,9 +37,11 @@ const miniMapCamera = new THREE.OrthographicCamera(
 );
 miniMapCamera.position.set(0, 100, 0); // Position the mini-map camera above the scene
 miniMapCamera.lookAt(0,0,15); // Look at the center of the scene
+
 // Set the zoom factor
 miniMapCamera.zoom = 12.5; // Increase this value to zoom in
 miniMapCamera.updateProjectionMatrix(); // Update the projection matrix after changing the zoom
+
 const miniMapRenderer = new THREE.WebGLRenderer({ alpha: true });
 miniMapRenderer.setSize(200, 200); // Set the size of the mini-map
 miniMapRenderer.domElement.style.position = 'absolute';
@@ -51,8 +55,7 @@ const controls = new FirstPersonControls(camera, renderer.domElement);
 //controls.movementSpeed = 2; // Lower movement speed
 controls.lookSpeed = 0.01; // Lower look speed
 
-//Textures
-//ground textures 
+//Texture for ground 
 const textureLoader = new THREE.TextureLoader();
 const texture = textureLoader.load('PavingStones.jpg', (texture) => {
   texture.wrapS = THREE.RepeatWrapping;
@@ -85,9 +88,98 @@ const characterMaterial = new THREE.MeshStandardMaterial({
 });
 const platformsMaterial = new THREE.MeshStandardMaterial({ map: texturePlatform });
 
-//Lights
-let characterLight; 
-let points = [];
+
+
+// Ground Plane
+const groundGeometry = new THREE.PlaneGeometry(20, 20);
+const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+ground.rotation.x = -Math.PI / 2; // Rotate to make it horizontal
+ground.position.y = 0; // Position it at y = 0
+//scene.add(ground);
+
+
+// Convert lamps object to an array
+const lampsArray = Object.values(lamps);
+
+// Function to load lamps
+function loadLamps() {
+    lampsArray.forEach(lamp => {
+        loader.load(lamp.scene, function (gltf) {
+            let model = gltf.scene;
+            scene.add(model);
+            console.log("lamplaoded")
+            model.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
+            model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
+            model.castShadow = true;
+
+            const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
+            lampLight.position.set(lamp.positionX, lamp.positionY + 2, lamp.positionZ); 
+            scene.add(lampLight);
+        }, undefined, function (error) {
+            console.error('An error happened while loading the lamp model:', error);
+        });
+    });
+}
+
+
+
+// Load lamps into the scene
+loadLamps();
+// Door variables
+let Door;
+let doorMixer;
+let doorAnimationAction;
+const currentDoor = door.doorOne;
+
+// Load the door model
+
+loader.load(currentDoor.scene, function (gltf) {
+    Door = gltf.scene;
+    scene.add(Door);
+
+    Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
+    Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
+    Door.castShadow = true;
+
+    doorMixer = new THREE.AnimationMixer(Door);
+
+    const animations = gltf.animations;
+    if (animations && animations.length > 0) {
+        doorAnimationAction = doorMixer.clipAction(animations[0]);
+    }
+}, undefined, function (error) {
+    console.error('An error happened', error);
+});
+
+// Declare a flag variable to track the door state
+let isDoorOpen = false;
+
+// Function to open the door
+const doorPrompt = document.getElementById('doorPrompt');
+const doorOpenDistance = 2; // Distance at which the prompt appears
+
+function checkDoorProximity() {
+    const distance = character.position.distanceTo(Door.position);
+    
+    if (distance <= doorOpenDistance) {
+        doorPrompt.style.display = 'block'; // Show prompt
+    } else {
+        doorPrompt.style.display = 'none'; // Hide prompt
+    }
+}
+
+function openDoor() {
+    if (!isDoorOpen && doorAnimationAction) {
+        doorAnimationAction.reset();
+        doorAnimationAction.play();
+        isDoorOpen = true; // Set the flag to true so it won't open again
+        // Transition to success screen
+        gameOverScreen.style.display = 'block'; // Assuming this is your success screen
+        gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>"; // Update success message
+    }
+}
+
 //give me orange hexa code: #FFA500
 //w
 const spotLight = new THREE.SpotLight(0xfcf4dc,10, 6, Math.PI / 6, 0.5, 2);//colour: orange
@@ -220,29 +312,263 @@ scene.add(spotLight8);
 const spotLightHelper8 = new THREE.SpotLightHelper(spotLight8);
 //scene.add(spotLightHelper8);
 points.push(spotLight8);
-// Convert lamps object to an array
-const lampsArray = Object.values(lamps);
-// Function to load lamps
-function loadLamps() {
-    lampsArray.forEach(lamp => {
-        loader.load(lamp.scene, function (gltf) {
-            let model = gltf.scene;
-            scene.add(model);
-            console.log("lamplaoded")
-            model.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
-            model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
-            model.castShadow = true;
 
-            const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
-            lampLight.position.set(lamp.positionX, lamp.positionY + 2, lamp.positionZ); 
-            scene.add(lampLight);
-        }, undefined, function (error) {
-            console.error('An error happened while loading the lamp model:', error);
-        });
-    });
+// Walls
+const bottom = new THREE.Mesh(platformGeometry, platformMaterial);
+bottom.position.y = -0.5;
+bottom.position.z = 20;
+scene.add(bottom);
+
+const topThingy = new THREE.Mesh(platformGeometry, platformMaterial);
+topThingy.position.y = 10;
+topThingy.position.z = 20;
+scene.add(topThingy);
+
+// Create a red cube
+const redCubeGeometry = new THREE.BoxGeometry(3, 1, 3);
+const redCubeMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+const redCube = new THREE.Mesh(redCubeGeometry, redCubeMaterial);
+
+// Set the red cube's initial position to match topThingy
+redCube.position.set(topThingy.position.x, topThingy.position.y+2, topThingy.position.z);
+
+// Add the red cube to the scene
+scene.add(redCube);
+
+
+function updateRedCubePosition() {
+    redCube.position.x = character.position.x;
+    redCube.position.z = character.position.z;
+  }
+  
+
+
+  // Green block above topThingy at x = -3 and z = 35
+const greenBlockGeometry = new THREE.BoxGeometry(3, 1, 3);
+const greenBlockMaterial = new THREE.MeshBasicMaterial({ color: 0x008000 });
+const greenBlock = new THREE.Mesh(greenBlockGeometry, greenBlockMaterial);
+greenBlock.position.set(-3, topThingy.position.y + 2, 39);
+scene.add(greenBlock);
+
+
+const backWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+backWall.position.y = 2;
+backWall.position.z = -5;
+backWall.rotation.x = Math.PI / 2;
+scene.add(backWall);
+
+const left = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+left.position.y = 0.8;
+left.position.x = -5;
+left.position.z = 15;
+left.rotation.x = Math.PI / 2;
+left.rotation.z = Math.PI / 2;
+scene.add(left);
+
+const right = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+right.position.y = 0.8;
+right.position.x = 5;
+right.position.z = 15;
+right.rotation.x = Math.PI / 2;
+right.rotation.z = Math.PI / 2;
+scene.add(right);
+
+const end = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+end.position.set(0, 2, 40);
+end.rotation.x = Math.PI / 2;
+scene.add(end);
+
+
+
+scene.background = new THREE.Color(0x333333);
+
+//Platforms 
+const platformsGeometry = new THREE.BoxGeometry(5, 0.5, 5);
+// const platformsMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color for platforms
+
+
+const platforms = [
+    { position: new THREE.Vector3(3, 2, 15), size: new THREE.Vector3(5, 0.5, 5) },
+    { position: new THREE.Vector3(-3, 4, 20), size: new THREE.Vector3(5, 0.5, 5) },
+    { position: new THREE.Vector3(3, 2, 30), size: new THREE.Vector3(3, 0.3, 3) },
+    { position: new THREE.Vector3(-3, 4, 35), size: new THREE.Vector3(3, 0.3, 10) }
+  ];
+
+platforms.forEach(platform => {
+  const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(platform.size.x, platform.size.y, platform.size.z),
+      platformsMaterial
+  );
+  mesh.position.copy(platform.position);
+  scene.add(mesh);
+});
+
+
+// Create a simple character (a cube)
+const character = new THREE.Mesh(characterGeometry, characterMaterial);
+character.position.y = 0.5;
+scene.add(character);
+
+//charcter light 
+function setupCharacterLight() {
+    characterLight = new THREE.PointLight(0xffffff, 1, 5);
+    characterLight.position.set(0, 1, 0); // Slightly above the character
+    character.add(characterLight); // Attach the light to the character
 }
-// Load lamps into the scene
-loadLamps();
+setupCharacterLight();
+
+// Position camera initially at the same place as the character
+camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
+character.rotation.y += Math.PI;
+
+// Variables to track movement and rotation
+let moveSpeed = 0.1;
+let rotateSpeed = 0.1;
+let loaded = false;
+
+// Movement state
+const movement = { forward: 0, right: 0 };
+
+let health = 100;
+const healthNumberElement = document.getElementById('health-number');
+const damageRate = 20; // Define the damage rate
+const healingRate = 10; // Define the healing rate
+
+// Event listeners for movement
+document.addEventListener('keydown', (e) => {
+    switch (e.key) {
+        case 'w':
+            movement.forward = 1;
+            break; // Move forward
+        case 's':
+            movement.forward = -1; break; // Move backward
+        case 'a':
+            movement.right = -1; break; // Move left
+        case 'd':
+            movement.right = 1; break; // Move right
+        case 'KeyQ': 
+            createFallingSphere(); break;
+        case 'KeyE': // Use "E" key to open the door
+            openDoor(); 
+            break;
+        case ' ':
+            if (jumpCount < 2) { //Jumping twice
+                isJumping = true;
+                velocityY = 0.15;
+                jumpCount++; 
+            }
+            break;
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    switch (e.key) {
+        case 'w':
+        case 's':
+            movement.forward = 0; break;
+        case 'a':
+        case 'd':
+            movement.right = 0; break;
+    }
+});
+
+
+function handleCharacterDeath() {
+    gameOverScreen.style.display = "block";
+}
+
+function restartGame() {
+    gameOverScreen.style.display = "none";
+
+    // Reset character position and camera
+    character.position.set(0, 0.5, 0);
+    camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
+    character.rotation.y = Math.PI;
+
+    // Reset health
+    health = 100;
+    healthNumberElement.textContent = health; // Reset health number in the HTML
+
+    // Reload textures
+    textures.forEach(texture => {
+        texture.needsUpdate = true; // Mark texture for update
+    });  
+
+         // Use the toggleLightIntensity function to turn on all lights at intensity 5
+         points.forEach(light => toggleLightIntensity(light));
+         lampLights.forEach(lampLight => {
+            lampLight.intensity = 0.5; // Reset to original intensity
+        });
+         updateCharacterLight();
+}
+
+function toggleLightIntensity(light) {
+    light.intensity = 5;
+}
+
+function updateCharacterLight() {
+    if (characterLight) {
+        // Calculate light intensity and distance based on health
+        const maxIntensity = 1;
+        const maxDistance = 5;
+        const minIntensity = 0.2;
+        const minDistance = 1;
+
+        const healthPercentage = health / 100;
+        
+        characterLight.intensity = minIntensity + (maxIntensity - minIntensity) * healthPercentage;
+        characterLight.distance = minDistance + (maxDistance - minDistance) * healthPercentage;
+    }
+}
+
+function takeDamage(amount) {
+    health -= amount;
+    health = Math.max(0, health); // Ensure health doesn't go below 0
+    healthNumberElement.textContent = health;
+    updateCharacterLight(); // Update light when health changes
+    if (health <= 0) {
+        handleCharacterDeath();
+    }
+}
+
+function heal(amount) {
+    health += amount;
+    health = Math.min(100, health); // Cap health at 100
+    healthNumberElement.textContent = health;
+    updateCharacterLight(); // Update light when health changes
+}
+
+
+
+
+restartButton.addEventListener("click", restartGame);
+
+function calcEuclid(x1, z1, x2, z2) {
+    const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
+    return distance <= 2;
+}
+
+function updateCameraPosition() {
+    camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
+    camera.rotation.y = character.rotation.y;
+    loaded = true;
+    
+}
+
+// function takeDamage(amount) {
+//     health -= amount;
+//     healthNumberElement.textContent = health; // Update the health number in the HTML
+//     if (health <= 0) {
+//         handleCharacterDeath();
+//     }
+// }
+
+// function heal(amount) {
+//     health += amount;
+//     if (health > 100) health = 100; // Cap health at 100
+//     healthNumberElement.textContent = health; // Update the health number in the HTML
+// }
+
 const lightTimers = {}; // Track time spent near lights
 
 function startDamageTimer() {
@@ -315,285 +641,6 @@ function flickerLight(light, index) {
 }
 
 
-
-
-
-// Door variables
-let Door;
-let doorMixer;
-let doorAnimationAction;
-const currentDoor = door.doorOne;
-// Load the door model
-
-loader.load(currentDoor.scene, function (gltf) {
-    Door = gltf.scene;
-    scene.add(Door);
-
-    Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
-    Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
-    Door.castShadow = true;
-
-    doorMixer = new THREE.AnimationMixer(Door);
-
-    const animations = gltf.animations;
-    if (animations && animations.length > 0) {
-        doorAnimationAction = doorMixer.clipAction(animations[0]);
-    }
-}, undefined, function (error) {
-    console.error('An error happened', error);
-});
-// Declare a flag variable to track the door state
-let isDoorOpen = false;
-// Function to open the door
-const doorPrompt = document.getElementById('doorPrompt');
-const doorOpenDistance = 2; // Distance at which the prompt appears
-
-function checkDoorProximity() {
-    const distance = character.position.distanceTo(Door.position);
-    
-    if (distance <= doorOpenDistance) {
-        doorPrompt.style.display = 'block'; // Show prompt
-    } else {
-        doorPrompt.style.display = 'none'; // Hide prompt
-    }
-}
-
-function openDoor() {
-    if (!isDoorOpen && doorAnimationAction) {
-        doorAnimationAction.reset();
-        doorAnimationAction.play();
-        isDoorOpen = true; // Set the flag to true so it won't open again
-        // Transition to success screen
-        gameOverScreen.style.display = 'block'; // Assuming this is your success screen
-        gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>"; // Update success message
-    }
-}
-
-
-// Walls + Platforms
-const bottom = new THREE.Mesh(platformGeometry, platformMaterial);
-bottom.position.y = -0.5;
-bottom.position.z = 20;
-scene.add(bottom);
-
-const topThingy = new THREE.Mesh(platformGeometry, platformMaterial);
-topThingy.position.y = 10;
-topThingy.position.z = 20;
-scene.add(topThingy);
-const backWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
-backWall.position.y = 2;
-backWall.position.z = -5;
-backWall.rotation.x = Math.PI / 2;
-scene.add(backWall);
-
-const left = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
-left.position.y = 0.8;
-left.position.x = -5;
-left.position.z = 15;
-left.rotation.x = Math.PI / 2;
-left.rotation.z = Math.PI / 2;
-scene.add(left);
-
-const right = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
-right.position.y = 0.8;
-right.position.x = 5;
-right.position.z = 15;
-right.rotation.x = Math.PI / 2;
-right.rotation.z = Math.PI / 2;
-scene.add(right);
-
-const end = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
-end.position.set(0, 2, 40);
-end.rotation.x = Math.PI / 2;
-scene.add(end);
-scene.background = new THREE.Color(0x333333);
-
-//Platforms 
-const platformsGeometry = new THREE.BoxGeometry(5, 0.5, 5);
-// const platformsMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color for platforms
-const platforms = [
-    { position: new THREE.Vector3(3, 2, 15), size: new THREE.Vector3(5, 0.5, 5) },
-    { position: new THREE.Vector3(-3, 4, 20), size: new THREE.Vector3(5, 0.5, 5) },
-    { position: new THREE.Vector3(3, 2, 30), size: new THREE.Vector3(3, 0.3, 3) },
-    { position: new THREE.Vector3(-3, 4, 35), size: new THREE.Vector3(3, 0.3, 10) }
-  ];
-platforms.forEach(platform => {
-  const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(platform.size.x, platform.size.y, platform.size.z),
-      platformsMaterial
-  );
-  mesh.position.copy(platform.position);
-  scene.add(mesh);
-});
-
-//CHARACTER
-// Create a simple character (a cube)
-const character = new THREE.Mesh(characterGeometry, characterMaterial);
-character.position.y = 0.5;
-scene.add(character);
-
-//charcter light 
-function setupCharacterLight() {
-    characterLight = new THREE.PointLight(0xffffff, 1, 5);
-    characterLight.position.set(0, 1, 0); // Slightly above the character
-    character.add(characterLight); // Attach the light to the character
-}
-setupCharacterLight();
-// Position camera initially at the same place as the character
-camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
-character.rotation.y += Math.PI;
-// Variables to track movement and rotation
-let moveSpeed = 0.1;
-let rotateSpeed = 0.1;
-let loaded = false;
-// Movement state
-const movement = { forward: 0, right: 0 };
-let health = 100;
-const healthNumberElement = document.getElementById('health-number');
-const damageRate = 20; // Define the damage rate
-const healingRate = 10; // Define the healing rate
-function handleCharacterDeath() {
-    gameOverScreen.style.display = "block";
-}
-function updateCharacterLight() {
-    if (characterLight) {
-        // Calculate light intensity and distance based on health
-        const maxIntensity = 1;
-        const maxDistance = 5;
-        const minIntensity = 0.2;
-        const minDistance = 1;
-
-        const healthPercentage = health / 100;
-        
-        characterLight.intensity = minIntensity + (maxIntensity - minIntensity) * healthPercentage;
-        characterLight.distance = minDistance + (maxDistance - minDistance) * healthPercentage;
-    }
-}
-function takeDamage(amount) {
-    health -= amount;
-    health = Math.max(0, health); // Ensure health doesn't go below 0
-    healthNumberElement.textContent = health;
-    updateCharacterLight(); // Update light when health changes
-    if (health <= 0) {
-        handleCharacterDeath();
-    }
-}
-function heal(amount) {
-    health += amount;
-    health = Math.min(100, health); // Cap health at 100
-    healthNumberElement.textContent = health;
-    updateCharacterLight(); // Update light when health changes
-}
-function calcEuclid(x1, z1, x2, z2) {
-    const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
-    return distance <= 2;
-}
-
-function updateCameraPosition() {
-    camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
-    camera.rotation.y = character.rotation.y;
-    loaded = true;
-    
-}
-startDamageTimer();
-
-
-
-//INPUTS
-// Event listeners for movement
-document.addEventListener('keydown', (e) => {
-    switch (e.key) {
-        case 'w':
-            movement.forward = 1;
-            break; // Move forward
-        case 's':
-            movement.forward = -1; break; // Move backward
-        case 'a':
-            movement.right = -1; break; // Move left
-        case 'd':
-            movement.right = 1; break; // Move right
-        case 'KeyQ': 
-            createFallingSphere(); break;
-        case 'KeyE': // Use "E" key to open the door
-            openDoor(); 
-            break;
-        case ' ':
-            if (jumpCount < 2) { //Jumping twice
-                isJumping = true;
-                velocityY = 0.15;
-                jumpCount++; 
-            }
-            break;
-    }
-});
-document.addEventListener('keyup', (e) => {
-    switch (e.key) {
-        case 'w':
-        case 's':
-            movement.forward = 0; break;
-        case 'a':
-        case 'd':
-            movement.right = 0; break;
-    }
-});
-
-
-//restart button
-restartButton.addEventListener("click", restartGame);
-function restartGame() {
-    gameOverScreen.style.display = "none";
-
-    // Reset character position and camera
-    character.position.set(0, 0.5, 0);
-    camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
-    character.rotation.y = Math.PI;
-
-    // Reset health
-    health = 100;
-    healthNumberElement.textContent = health; // Reset health number in the HTML
-
-    // Reload textures
-    textures.forEach(texture => {
-        texture.needsUpdate = true; // Mark texture for update
-    });  
-
-         // Use the toggleLightIntensity function to turn on all lights at intensity 5
-         points.forEach(light => toggleLightIntensity(light));
-         lampLights.forEach(lampLight => {
-            lampLight.intensity = 0.5; // Reset to original intensity
-        });
-         updateCharacterLight();
-}
-function toggleLightIntensity(light) {
-    light.intensity = 5;
-}
-
-
-
-//MiniMAP
-// Create a red cube
-const redCubeGeometry = new THREE.BoxGeometry(3, 1, 3);
-const redCubeMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-const redCube = new THREE.Mesh(redCubeGeometry, redCubeMaterial);
-
-// Set the red cube's initial position to match topThingy
-redCube.position.set(topThingy.position.x, topThingy.position.y+2, topThingy.position.z);
-
-// Add the red cube to the scene
-scene.add(redCube);
-
-
-function updateRedCubePosition() {
-    redCube.position.x = character.position.x;
-    redCube.position.z = character.position.z;
-  }
-
-  // Green block above topThingy at x = -3 and z = 35
-const greenBlockGeometry = new THREE.BoxGeometry(3, 1, 3);
-const greenBlockMaterial = new THREE.MeshBasicMaterial({ color: 0x008000 });
-const greenBlock = new THREE.Mesh(greenBlockGeometry, greenBlockMaterial);
-greenBlock.position.set(-3, topThingy.position.y + 2, 39);
-scene.add(greenBlock);
 let lastMiniMapRenderTime = 0; // To track the last time the mini-map was rendered
 const miniMapRenderInterval = 100; // 100ms interval for mini-map rendering
 
@@ -692,7 +739,7 @@ if (onPlatform || character.position.y === 0.5) {
         lastMiniMapRenderTime = currentTime; // Update the time of last render
     }
 }
-
+startDamageTimer();
 animate();
 // Resize the renderer with the window size
 window.addEventListener("resize", () => {
