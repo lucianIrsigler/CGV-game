@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 import { Bullet } from './bullet.js'; // Import the Bullet class
+import Crosshair from './crosshair.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { lamps } from './lampPos1.js'; // Import the lamps object from lampPos.js
 
 // Scene and Camera Setup
 const scene = new THREE.Scene();
@@ -11,24 +14,114 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setAnimationLoop(animate);
 document.body.appendChild(renderer.domElement);
 
+scene.background = new THREE.Color(0x333333);
+
 // Cube (Player)
-const geometry = new THREE.BoxGeometry(1, 2, 1);
+const geometry = new THREE.BoxGeometry(0.5, 2, 0.5);
 const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
-cube.position.set(0, 1, 0); // Set initial position of the cube
+cube.position.set(0, 1.5, 0); // Set initial position of the cube
 scene.add(cube);
 
-// Platform (Ground)
-const platformGeometry = new THREE.PlaneGeometry(50, 50);
-const platformMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
+// Cube (enemy)
+const geometryEnemy = new THREE.BoxGeometry(2, 4, 2);
+const materialEnemy = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+const cubeEnemy = new THREE.Mesh(geometryEnemy, materialEnemy);
+cubeEnemy.position.set(10, 2, 5); // Set initial position of the cube
+scene.add(cubeEnemy);
+
+// Ground
+//Texture for ground 
+const textureLoader = new THREE.TextureLoader();
+const texture = textureLoader.load('PavingStones.jpg', (texture) => {
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(10, 10);
+});
+const platformMaterial = new THREE.MeshStandardMaterial({ map: texture }); 
+const platformGeometry = new THREE.BoxGeometry(100, 1, 100);
 const platform = new THREE.Mesh(platformGeometry, platformMaterial);
-platform.rotation.x = -Math.PI / 2; // Make the plane horizontal
 scene.add(platform);
 
+// Walls
+const textureLoaderWall = new THREE.TextureLoader();
+const textureWall = textureLoaderWall.load('PavingStones.jpg', (texture) => {
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(10,10);
+});
+const sideWallGeometry = new THREE.BoxGeometry(1, 100, 100);
+const sideWallMaterial = new THREE.MeshStandardMaterial({ map: textureWall }); 
+const wall1 = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+wall1.position.set(0, 50, -50); 
+wall1.rotation.y = Math.PI / 2; // Rotate the wall 90 degrees
+scene.add(wall1);
+
+const wall2 = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+wall2.position.set(50, 50, 0);
+scene.add(wall2);
+
+const wall3 = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+wall3.position.set(0, 50, 50);
+wall3.rotation.y = Math.PI / 2; // Rotate the wall 90 degrees
+scene.add(wall3);
+
+const wall4 = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+wall4.position.set(-50, 50, 0);
+scene.add(wall4);
+
 // Lighting
-const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(0, 10, 5); // Light above the scene
-scene.add(light);
+// const light = new THREE.DirectionalLight(0xffffff, 0.3); // (color, intensity)
+// light.position.set(0, 100, 0); // Light above the scene - (x, y, z)
+// scene.add(light);
+
+// Create Ambient Light
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Soft white light, 0.5 is the intensity
+scene.add(ambientLight);
+
+// Convert lamps object to an array
+const lampsArray = Object.values(lamps);
+const loader = new GLTFLoader();
+// Function to load lamps
+function loadLamps() {
+    lampsArray.forEach(lamp => {
+        loader.load(lamp.scene, function (gltf) {
+            let model = gltf.scene;
+            scene.add(model);
+            console.log("lamplaoded")
+            model.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
+            model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
+            model.castShadow = true;
+
+            const lampLight = new THREE.PointLight(0xA96CC3, 5, 5); // Purple light - (color, intensity, distance)
+            lampLight.position.set(lamp.positionX, lamp.positionY + 2, lamp.positionZ); 
+            model.add(lampLight);
+            scene.add(lampLight);
+            // Add the point light to the lamp model
+            
+
+        }, undefined, function (error) {
+            console.error('An error happened while loading the lamp model:', error);
+        });
+    });
+}
+
+// Load lamps into the scene
+loadLamps();
+
+// let points = [];
+// const spotLight = new THREE.SpotLight(0x0000ff,5, 4, Math.PI / 6, 0.5, 2);
+// spotLight.userData.originalIntensity = spotLight.intensity; // Store original intensity
+// spotLight.position.set(0, 4, 0);
+// const targetObject = new THREE.Object3D();
+// targetObject.position.set(0, 0, 1); // Position it below the spotlight
+// scene.add(targetObject);
+// spotLight.target = targetObject;
+// scene.add(spotLight);
+// const spotLightHelper = new THREE.SpotLightHelper(spotLight);
+// scene.add(spotLightHelper);
+// points.push(spotLight);
+
 
 // Camera Initial Position (behind the cube)
 let cameraOffset = new THREE.Vector3(0, 1.5, -3); // Behind and above the cube
@@ -101,11 +194,14 @@ let bullets = [];
 
 document.addEventListener('mousedown', (event) => {
     if (event.button === 0 && !isSettingsMenuOpen) { // Only shoot if menu is not open
-        const bullet = new Bullet(cube.position.clone()); // Create bullet at the cube's position
+        const position = camera.position.clone();
+        // position.x -= 1.3;
+        const bullet = new Bullet(position); // Create bullet at the cube's position
 
         // Calculate the bullet direction based on the camera's forward direction
         const direction = new THREE.Vector3(); // Create a new vector for direction
         camera.getWorldDirection(direction); // Get the direction the camera is facing
+
         direction.normalize(); // Normalize the direction vector
 
         bullet.velocity.copy(direction); // Set bullet velocity to point in the camera's direction
@@ -119,7 +215,7 @@ document.addEventListener('mousedown', (event) => {
 // Update camera position to always follow the cube
 function updateCamera() {
     // Calculate the new camera position based on cube's rotation around the Y-axis
-    const offset = new THREE.Vector3(-2, 1.5, -2); // Adjust this for the right shoulder view
+    const offset = new THREE.Vector3(0, 1.5, -2.5); // Adjust this for the right shoulder view (left right, up down, front back)
     offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), cubeRotationY); // Rotate offset based on cube's Y rotation
 
     // Set camera position based on the cube's position plus the rotated offset
@@ -202,9 +298,6 @@ document.addEventListener('click', () => {
     lockPointer(); // Attempt to lock pointer on click
 });
 
-// Update settingsMenu.js to toggle the isSettingsMenuOpen flag
-// settingsMenu.js
-
 // Function to open settings modal
 function openSettings() {
     settingsModal.style.display = 'block';
@@ -231,14 +324,9 @@ window.addEventListener('keydown', (event) => {
 });
 
 // Create Crosshair
-const crosshair = document.createElement('div');
-crosshair.style.width = '10px'; // Width of the crosshair
-crosshair.style.height = '10px'; // Height of the crosshair
-crosshair.style.backgroundColor = 'red'; // Color of the crosshair
-crosshair.style.borderRadius = '50%'; // Make it round
-crosshair.style.position = 'absolute';
-crosshair.style.top = '50%'; // Center vertically
-crosshair.style.left = '50%'; // Center horizontally
-crosshair.style.transform = 'translate(-50%, -50%)'; // Adjust position to center
-crosshair.style.pointerEvents = 'none'; // Make sure it doesn't block mouse events
-document.body.appendChild(crosshair);
+const crosshair = new Crosshair(5, 'red');
+
+// Shooting the enemy
+let enemyHitCount = 0;
+const maxHits = 10;
+
