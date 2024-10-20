@@ -376,3 +376,5 @@ window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 });
+
+//to do: rotate door, stop lamps from clipping, move gun
