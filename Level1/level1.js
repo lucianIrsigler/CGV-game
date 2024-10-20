@@ -177,7 +177,7 @@ function openDoor() {
     }
 }
 
-const spotLight = new THREE.SpotLight(0x0000ff,5, 50, Math.PI / 6, 0.5, 2);
+const spotLight = new THREE.SpotLight(0x0000ff,5, 4, Math.PI / 6, 0.5, 2);
 spotLight.userData.originalIntensity = spotLight.intensity; // Store original intensity
 spotLight.position.set(0, 4, 0);
 const targetObject = new THREE.Object3D();
@@ -190,7 +190,7 @@ scene.add(spotLightHelper);
 points.push(spotLight);
 
 // First light
-const spotLight1 = new THREE.SpotLight(0xff0000, 5, 50, Math.PI / 6, 0.5, 2);
+const spotLight1 = new THREE.SpotLight(0xff0000, 5, 4, Math.PI / 6, 0.5, 2);
 spotLight1.userData.originalIntensity = spotLight1.intensity; // Store original intensity
 spotLight1.position.set(-4, 4, 5);
 // Create a target for the spotlight
@@ -205,7 +205,7 @@ scene.add(spotLightHelper1);
 points.push(spotLight1);
 
 // Second light
-const spotLight2 = new THREE.SpotLight(0x0000ff, 5, 50, Math.PI / 6, 0.5, 2);
+const spotLight2 = new THREE.SpotLight(0x0000ff, 5, 4, Math.PI / 6, 0.5, 2);
 spotLight2.userData.originalIntensity = spotLight2.intensity; // Store original intensity
 spotLight2.position.set(3.5, 4, 9);
 // Create a target for the spotlight
@@ -220,7 +220,7 @@ scene.add(spotLightHelper2);
 points.push(spotLight2);
 
 // Third light
-const pointLight3 = new THREE.PointLight(0xffffff, 1, 20);
+const pointLight3 = new THREE.PointLight(0xffffff, 1, 4);
 pointLight3.position.set(0, 4, -9);
 scene.add(pointLight3);
 const pointLightHelper3 = new THREE.PointLightHelper(pointLight3, 0.5);
@@ -228,7 +228,7 @@ scene.add(pointLightHelper3);
 points.push(pointLight3);
 
 // fourth light
-const spotLight4 = new THREE.SpotLight(0x800080, 5, 50, Math.PI / 6, 0.5, 2);
+const spotLight4 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
 spotLight4.userData.originalIntensity = spotLight4.intensity; // Store original intensity
 spotLight4.position.set(4, 4, 25);
 // Create a target for the spotlight
@@ -277,7 +277,7 @@ scene.add(spotLightHelper6);
 points.push(spotLight6);
 
 // seven light
-const spotLight7 = new THREE.SpotLight(0x800080, 5, 10, Math.PI / 6, 0.5, 2);
+const spotLight7 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
 spotLight7.userData.originalIntensity = spotLight7.intensity; // Store original intensity
 spotLight7.position.set(3, 6, 30);
 // Create a target for the spotlight
