@@ -7,7 +7,6 @@ import { lamps } from './lampPos1.js'; // Import the lamps object from lampPos.j
 import { lights } from 'three/webgpu';
 const loader = new GLTFLoader();
 let model;
-
 let characterLight; 
 
 // Scene setup
@@ -22,7 +21,7 @@ const gravity = -0.01; // Adjusted gravity value
 let isJumping = false; // Track if the character is jumping
 let velocityY = 0; // Vertical velocity for jumping
 
-// Create a sphere
+// Create scene, camera, and renderer
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
@@ -55,6 +54,7 @@ const controls = new FirstPersonControls(camera, renderer.domElement);
 //controls.movementSpeed = 2; // Lower movement speed
 controls.lookSpeed = 0.01; // Lower look speed
 
+//TExtures
 //Texture for ground 
 const textureLoader = new THREE.TextureLoader();
 const texture = textureLoader.load('PavingStones.jpg', (texture) => {
@@ -89,16 +89,6 @@ const characterMaterial = new THREE.MeshStandardMaterial({
 const platformsMaterial = new THREE.MeshStandardMaterial({ map: texturePlatform });
 
 
-
-// Ground Plane
-const groundGeometry = new THREE.PlaneGeometry(20, 20);
-const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
-const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-ground.rotation.x = -Math.PI / 2; // Rotate to make it horizontal
-ground.position.y = 0; // Position it at y = 0
-//scene.add(ground);
-
-
 // Convert lamps object to an array
 const lampsArray = Object.values(lamps);
 
@@ -122,10 +112,11 @@ function loadLamps() {
     });
 }
 
-
-
 // Load lamps into the scene
 loadLamps();
+
+
+
 // Door variables
 let Door;
 let doorMixer;
@@ -180,8 +171,8 @@ function openDoor() {
     }
 }
 
-//give me orange hexa code: #FFA500
-//w
+
+//LIGHTS
 const spotLight = new THREE.SpotLight(0xfcf4dc,10, 6, Math.PI / 6, 0.5, 2);//colour: orange
 spotLight.userData.originalIntensity = spotLight.intensity; // Store original intensity
 spotLight.position.set(0, 4, 0);
@@ -324,33 +315,6 @@ topThingy.position.y = 10;
 topThingy.position.z = 20;
 scene.add(topThingy);
 
-// Create a red cube
-const redCubeGeometry = new THREE.BoxGeometry(3, 1, 3);
-const redCubeMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-const redCube = new THREE.Mesh(redCubeGeometry, redCubeMaterial);
-
-// Set the red cube's initial position to match topThingy
-redCube.position.set(topThingy.position.x, topThingy.position.y+2, topThingy.position.z);
-
-// Add the red cube to the scene
-scene.add(redCube);
-
-
-function updateRedCubePosition() {
-    redCube.position.x = character.position.x;
-    redCube.position.z = character.position.z;
-  }
-  
-
-
-  // Green block above topThingy at x = -3 and z = 35
-const greenBlockGeometry = new THREE.BoxGeometry(3, 1, 3);
-const greenBlockMaterial = new THREE.MeshBasicMaterial({ color: 0x008000 });
-const greenBlock = new THREE.Mesh(greenBlockGeometry, greenBlockMaterial);
-greenBlock.position.set(-3, topThingy.position.y + 2, 39);
-scene.add(greenBlock);
-
-
 const backWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
 backWall.position.y = 2;
 backWall.position.z = -5;
@@ -378,8 +342,6 @@ end.position.set(0, 2, 40);
 end.rotation.x = Math.PI / 2;
 scene.add(end);
 
-
-
 scene.background = new THREE.Color(0x333333);
 
 //Platforms 
@@ -403,7 +365,7 @@ platforms.forEach(platform => {
   scene.add(mesh);
 });
 
-
+//character
 // Create a simple character (a cube)
 const character = new THREE.Mesh(characterGeometry, characterMaterial);
 character.position.y = 0.5;
@@ -434,6 +396,7 @@ const healthNumberElement = document.getElementById('health-number');
 const damageRate = 20; // Define the damage rate
 const healingRate = 10; // Define the healing rate
 
+//inputs
 // Event listeners for movement
 document.addEventListener('keydown', (e) => {
     switch (e.key) {
@@ -555,19 +518,6 @@ function updateCameraPosition() {
     
 }
 
-// function takeDamage(amount) {
-//     health -= amount;
-//     healthNumberElement.textContent = health; // Update the health number in the HTML
-//     if (health <= 0) {
-//         handleCharacterDeath();
-//     }
-// }
-
-// function heal(amount) {
-//     health += amount;
-//     if (health > 100) health = 100; // Cap health at 100
-//     healthNumberElement.textContent = health; // Update the health number in the HTML
-// }
 
 const lightTimers = {}; // Track time spent near lights
 
@@ -640,9 +590,31 @@ function flickerLight(light, index) {
     }, flickerInterval);
 }
 
-
+//minimap stuff
 let lastMiniMapRenderTime = 0; // To track the last time the mini-map was rendered
 const miniMapRenderInterval = 100; // 100ms interval for mini-map rendering
+// Create a red cube
+const redCubeGeometry = new THREE.BoxGeometry(3, 1, 3);
+const redCubeMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+const redCube = new THREE.Mesh(redCubeGeometry, redCubeMaterial);
+
+// Set the red cube's initial position to match topThingy
+redCube.position.set(topThingy.position.x, topThingy.position.y+2, topThingy.position.z);
+
+// Add the red cube to the scene
+scene.add(redCube);
+function updateRedCubePosition() {
+    redCube.position.x = character.position.x;
+    redCube.position.z = character.position.z;
+  }
+  // Green block above topThingy at x = -3 and z = 35
+const greenBlockGeometry = new THREE.BoxGeometry(3, 1, 3);
+const greenBlockMaterial = new THREE.MeshBasicMaterial({ color: 0x008000 });
+const greenBlock = new THREE.Mesh(greenBlockGeometry, greenBlockMaterial);
+greenBlock.position.set(-3, topThingy.position.y + 2, 39);
+scene.add(greenBlock);
+
+
 
 function animate() {
     requestAnimationFrame(animate);
