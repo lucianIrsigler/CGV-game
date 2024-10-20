@@ -86,9 +86,9 @@ export class FirstPersonCamera {
 
     calculateEdge_(mouseX,mouseY,edgeThreshold,halfViewPortW,halfViewPortH){
         if (mouseX < -1*halfViewPortW + edgeThreshold) { // Mouse is near the left edge
-          this.phi_ += 0.05 // Rotate left
+          this.phi_ += 0.01 // Rotate left
       } else if (mouseX > halfViewPortW-edgeThreshold ) { // Mouse is near the right edge
-          this.phi_ -= 0.05 // Rotate right
+          this.phi_ -= 0.01 // Rotate right
       }
     }
 
@@ -121,18 +121,13 @@ export class FirstPersonCamera {
       ){  
           edge=true;
           rotate=true;
-          console.log("here");
       }
 
 
     if (rotate){
         if (isNaN(xh) || isNaN(yh)) {
-          console.error("Invalid mouse delta values:", { xh, yh });
-          return;  // Stop the function if invalid values are found
+          return; 
         } 
-
-
-
 
         if (edge){
           this.calculateEdge_(mouseX,mouseY,edgeThreshold,halfViewPortW,halfViewPortH)

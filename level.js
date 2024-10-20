@@ -4,7 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as dat from "dat.gui";
 import * as cameraWrapper from "./camera";
 import * as character from "./character";
-import {monsters} from "./monsters";
+import {monsters} from "./objects/monsters";
 
 let highestVelocity = 0.15;
 

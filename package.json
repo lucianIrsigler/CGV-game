@@ -1,0 +1,22 @@
+{
+  "name": "cgv-game",
+  "version": "1.0.0",
+  "description": "## Installation guide ``` npm install ``` To run the server: ``` npx vite ``` Click on the localhost server generated.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucianIrsigler/CGV-game.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lucianIrsigler/CGV-game/issues"
+  },
+  "homepage": "https://github.com/lucianIrsigler/CGV-game#readme",
+  "dependencies": {
+    "three": "^0.169.0"
+  }
+}
