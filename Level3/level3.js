@@ -7,6 +7,24 @@ import { lamps } from './lampPos1.js'; // Import the lamps object from lampPos.j
 // Scene and Camera Setup
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const gameOverScreen = document.getElementById("gameOverScreen");
+const restartButton = document.getElementById("restartButton");
+
+restartButton.addEventListener("click", restartGame);
+
+// Restart Game Function
+function restartGame() {
+    gameOverScreen.style.display = "none";
+
+    // Reset character and enemy positions
+    cube.position.set(0, 1.5, 0); // Reset player position
+    cubeEnemy.position.set(10, 2, 5); // Reset enemy position
+    cubeEnemy.material.color.set(0x040405); // Reset enemy color to original
+
+    // Reset health
+    enemyCurrentHealth = enemyMaxHealth; // Reset current health to max
+    updateHealthBar(); // Update health bar to full width
+}
 
 // Renderer Setup
 const renderer = new THREE.WebGLRenderer();
@@ -25,7 +43,7 @@ scene.add(cube);
 
 // Cube (enemy)
 const geometryEnemy = new THREE.BoxGeometry(2, 4, 2);
-const materialEnemy = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+const materialEnemy = new THREE.MeshStandardMaterial({ color: 0x040405 });
 const cubeEnemy = new THREE.Mesh(geometryEnemy, materialEnemy);
 cubeEnemy.position.set(10, 2, 5); // Set initial position of the cube
 scene.add(cubeEnemy);
@@ -270,13 +288,21 @@ function animate() {
     // Update bullets
     for (let i = bullets.length - 1; i >= 0; i--) {
         const isActive = bullets[i].update(scene); // Pass scene to update the bullet
-        if (!isActive) {
-            bullets.splice(i, 1); // Remove bullet from the array if inactive (traveled max distance)
+
+        // Check for collision with the enemy cube
+        if (detectCollision(bullets[i], cubeEnemy)) {
+            handleEnemyHit(); // Handle enemy hit logic
+            scene.remove(bullets[i].mesh); // Remove bullet from the scene
+            scene.remove(bullets[i].light); // Remove bullet light from the scene
+            bullets.splice(i, 1); // Remove bullet from array
+        } else if (!isActive) {
+            bullets.splice(i, 1); // Remove bullet if it traveled max distance
         }
     }
 
     renderer.render(scene, camera);  // Render the scene
 }
+
 
 // Resize the renderer with window size
 window.addEventListener("resize", () => {
@@ -327,6 +353,54 @@ window.addEventListener('keydown', (event) => {
 const crosshair = new Crosshair(5, 'red');
 
 // Shooting the enemy
-let enemyHitCount = 0;
-const maxHits = 10;
+// Enemy health variables
+const enemyMaxHealth = 100; // Max health of the enemy
+let enemyCurrentHealth = enemyMaxHealth; // Current health starts at max
 
+let enemyHits = 0; // Initialize hit counter
+let enemyHitCooldown = false; // Flag to check if enemy is already hit and waiting to reset color
+
+// Function to update the health bar based on current health
+function updateHealthBar() {
+    const healthBar = document.getElementById('health-bar');
+    const healthPercentage = (enemyCurrentHealth / enemyMaxHealth) * 100; // Calculate percentage
+    healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
+}
+
+// Function to handle when enemy gets hit
+function handleEnemyHit() {
+    if (!enemyHitCooldown) {
+        enemyHits++; // Increment hit counter
+        console.log(`Enemy has been hit ${enemyHits} times!`);
+
+        // Reduce enemy health
+        enemyCurrentHealth -= 10; // Reduce health by 10 (or any amount you choose)
+        updateHealthBar(); // Update the health bar after taking damage
+
+        if (enemyCurrentHealth <= 0) {
+            console.log("You win!"); // Display win message if health reaches zero
+            enemyCurrentHealth = 0; // Prevent negative health
+            gameOverScreen.style.display = "block"; // Show game over screen
+            document.exitPointerLock(); // Exit mouse lock
+        } 
+        else {
+            // Change the enemy color to a lighter red temporarily
+            cubeEnemy.material.color.set(0xff6666); // Lighter red color
+            enemyHitCooldown = true; // Set cooldown flag
+
+            // Reset color after 200ms
+            setTimeout(() => {
+                cubeEnemy.material.color.set(0x040405); // Reset to original red color
+                enemyHitCooldown = false; // Reset cooldown flag
+            }, 50); // milliseconds delay
+        }
+    }
+}
+
+// Function to detect collision between bullet and enemy
+function detectCollision(bullet, enemy) {
+    const bulletBoundingBox = new THREE.Box3().setFromObject(bullet.mesh);
+    const enemyBoundingBox = new THREE.Box3().setFromObject(enemy);
+
+    return bulletBoundingBox.intersectsBox(enemyBoundingBox);
+}
