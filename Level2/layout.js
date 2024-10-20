@@ -107,47 +107,47 @@ const baseMaterial = new THREE.MeshStandardMaterial({
 //     });
 // });
 
-let Door;
-let doorMixer; 
-let doorAnimationAction; 
-const currentDoor = door.doorOne;
+// let Door;
+// let doorMixer; 
+// let doorAnimationAction; 
+// const currentDoor = door.doorOne;
 
-const loader = new GLTFLoader();
-loader.load(currentDoor.scene, function (gltf) {
-    Door = gltf.scene;
-    scene.add(Door);
+// const loader = new GLTFLoader();
+// loader.load(currentDoor.scene, function (gltf) {
+//     Door = gltf.scene;
+//     scene.add(Door);
 
-    Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
-    Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
-    Door.castShadow = true;
+//     Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
+//     Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
+//     Door.castShadow = true;
 
-    doorMixer = new THREE.AnimationMixer(Door);
+//     doorMixer = new THREE.AnimationMixer(Door);
 
-    const animations = gltf.animations;
-    if (animations && animations.length > 0) {
-        doorAnimationAction = doorMixer.clipAction(animations[0]); 
-    }
-}, undefined, function (error) {
-    console.error('An error happened', error);
-});
-let isDoorOpen = false;
+//     const animations = gltf.animations;
+//     if (animations && animations.length > 0) {
+//         doorAnimationAction = doorMixer.clipAction(animations[0]); 
+//     }
+// }, undefined, function (error) {
+//     console.error('An error happened', error);
+// });
+// let isDoorOpen = false;
 
-function onKeyDown(event) {
-    switch (event.code) {
-        case "KeyE": // Use "E" key to open the door
-        openDoor(); 
-        break;
-    }
-  }
-window.addEventListener("keydown", onKeyDown);
-// Function to open the door
-function openDoor() {
-    if (!isDoorOpen && doorAnimationAction) { 
-        doorAnimationAction.reset(); 
-        doorAnimationAction.play(); 
-        isDoorOpen = true; // Set the flag to true so it won't open again
-    }
-}
+// function onKeyDown(event) {
+//     switch (event.code) {
+//         case "KeyE": // Use "E" key to open the door
+//         openDoor(); 
+//         break;
+//     }
+//   }
+// window.addEventListener("keydown", onKeyDown);
+// // Function to open the door
+// function openDoor() {
+//     if (!isDoorOpen && doorAnimationAction) { 
+//         doorAnimationAction.reset(); 
+//         doorAnimationAction.play(); 
+//         isDoorOpen = true; // Set the flag to true so it won't open again
+//     }
+// }
 // Create the circular base (cylinder) with texture
 const radiusTop = 50;
 const radiusBottom = 50;
@@ -307,9 +307,9 @@ const updateInterval = 1; // Time in milliseconds for each update
 
 function animate(time) {
     requestAnimationFrame(animate);
-    if (doorMixer) {
-        doorMixer.update(0.01); // Update the animation mixer
-    }
+    // if (doorMixer) {
+    //     doorMixer.update(0.01); // Update the animation mixer
+    // }
     // Check if 100ms has passed since the last update
     if (time - lastUpdate >= updateInterval) {
         lastUpdate = time; // Update the last update time
