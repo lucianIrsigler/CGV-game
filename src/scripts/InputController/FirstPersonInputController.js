@@ -71,6 +71,9 @@ export class FirstPersonInputController {
     }
   
     onKeyUp_(e) {
+      if (e.keyCode==32){
+        return;
+      }
       this.keys_[e.keyCode] = false;
     }
   
