@@ -5,8 +5,8 @@ export const gun = {
         scaleX:0.005,
         scaleY:0.005,
         scaleZ:0.005,
-        positionX:0, 
-        positionY:0,
-        positionZ:0,
+        positionX:-51.5, 
+        positionY:31,
+        positionZ:-13,
     },
 }
