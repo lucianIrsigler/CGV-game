@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { lamps } from './lampPos2';
 import { door } from './doorPos';
+import { gun } from './gunPos';
 
 // Set up the scene, camera, and renderer
 const scene = new THREE.Scene();
@@ -12,10 +13,10 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Directional light for testing
-// const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-// directionalLight.position.set(10, 10, 10); // Position the light
-// scene.add(directionalLight);
+//Directional light for testing
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(10, 10, 10); // Position the light
+scene.add(directionalLight);
 
 // Crates
 const textureLoader = new THREE.TextureLoader();
@@ -85,6 +86,26 @@ const baseMaterial = new THREE.MeshStandardMaterial({
     map: baseTexture
 });
 
+//Gun Stuff
+let currentGun = gun.gunOne; 
+Object.values(gun).forEach((currentGun) => {
+    const loader = new GLTFLoader();  // Use GLTFLoader directly, not THREE.GLTFLoader
+    
+    loader.load(currentGun.scene, function (gltf) {
+      let model = gltf.scene;
+      scene.add(model);
+  
+      model.position.set(currentGun.positionX, currentGun.positionY, currentGun.positionZ);
+      model.scale.set(currentGun.scaleX, currentGun.scaleY, currentGun.scaleZ);
+      model.castShadow = true;
+  
+      const gunLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
+      gunLight.position.set(currentGun.positionX, currentGun.positionY + 2, currentGun.positionZ); 
+      scene.add(gunLight);
+    }, undefined, function (error) {
+      console.error('An error happened while loading the gun model:', error);
+    });
+});
 
 //Lamp Stuff
 // let currentLamp = lamps.lampOne; 
