@@ -430,7 +430,7 @@ const movement = { forward: 0, right: 0 };
 
 let health = 100;
 const healthNumberElement = document.getElementById('health-number');
-const damageRate = 10; // Define the damage rate
+const damageRate = 20; // Define the damage rate
 const healingRate = 10; // Define the healing rate
 
 // Event listeners for movement
