@@ -321,6 +321,32 @@ topThingy.position.y = 10;
 topThingy.position.z = 20;
 scene.add(topThingy);
 
+// Create a red cube
+const redCubeGeometry = new THREE.BoxGeometry(3, 1, 3);
+const redCubeMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+const redCube = new THREE.Mesh(redCubeGeometry, redCubeMaterial);
+
+// Set the red cube's initial position to match topThingy
+redCube.position.set(topThingy.position.x, topThingy.position.y+2, topThingy.position.z);
+
+// Add the red cube to the scene
+scene.add(redCube);
+
+
+function updateRedCubePosition() {
+    redCube.position.x = character.position.x;
+    redCube.position.z = character.position.z;
+  }
+  
+
+
+  // Green block above topThingy at x = -3 and z = 35
+const greenBlockGeometry = new THREE.BoxGeometry(3, 1, 3);
+const greenBlockMaterial = new THREE.MeshBasicMaterial({ color: 0x008000 });
+const greenBlock = new THREE.Mesh(greenBlockGeometry, greenBlockMaterial);
+greenBlock.position.set(-3, topThingy.position.y + 2, 35);
+scene.add(greenBlock);
+
 
 const backWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
 backWall.position.y = 2;
@@ -457,18 +483,11 @@ function restartGame() {
     // Reload textures
     textures.forEach(texture => {
         texture.needsUpdate = true; // Mark texture for update
-    });
+    });  
 
-     // Use the toggleLightIntensity function to turn on all lights at intensity 5
-     points.forEach(light => toggleLightIntensity(light));
     
-
- 
 }
 
-function toggleLightIntensity(light) {
-    light.intensity = 5;
-}
 
 restartButton.addEventListener("click", restartGame);
 
@@ -588,7 +607,8 @@ function animate() {
 // Check proximity to the door
 checkDoorProximity();
 
-// Existing animation logic...
+ // Update the red cube's position
+ updateRedCubePosition();
 
 // Handle the 'E' key press to open the door
 document.addEventListener('keydown', (e) => {
