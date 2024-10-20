@@ -2,6 +2,7 @@ import * as THREE from 'https://unpkg.com/three@0.153.0/build/three.module.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { lamps } from './lampPos2';
+import { door } from './doorPos';
 
 // Set up the scene, camera, and renderer
 const scene = new THREE.Scene();
@@ -30,7 +31,7 @@ const roughnessMap = textureLoader.load('Planks/PlanksRoughness.jpg');
     texture.repeat.set(0.2, 0.2);
 });
 
-const crateGeometry = new THREE.BoxGeometry(3, 3, 2);
+const crateGeometry = new THREE.BoxGeometry(7, 4, 2);
 
 const crateMaterial = new THREE.MeshStandardMaterial({
     map: colorMap,
@@ -106,6 +107,47 @@ const baseMaterial = new THREE.MeshStandardMaterial({
 //     });
 // });
 
+// let Door;
+// let doorMixer; 
+// let doorAnimationAction; 
+// const currentDoor = door.doorOne;
+
+// const loader = new GLTFLoader();
+// loader.load(currentDoor.scene, function (gltf) {
+//     Door = gltf.scene;
+//     scene.add(Door);
+
+//     Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
+//     Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
+//     Door.castShadow = true;
+
+//     doorMixer = new THREE.AnimationMixer(Door);
+
+//     const animations = gltf.animations;
+//     if (animations && animations.length > 0) {
+//         doorAnimationAction = doorMixer.clipAction(animations[0]); 
+//     }
+// }, undefined, function (error) {
+//     console.error('An error happened', error);
+// });
+// let isDoorOpen = false;
+
+// function onKeyDown(event) {
+//     switch (event.code) {
+//         case "KeyE": // Use "E" key to open the door
+//         openDoor(); 
+//         break;
+//     }
+//   }
+// window.addEventListener("keydown", onKeyDown);
+// // Function to open the door
+// function openDoor() {
+//     if (!isDoorOpen && doorAnimationAction) { 
+//         doorAnimationAction.reset(); 
+//         doorAnimationAction.play(); 
+//         isDoorOpen = true; // Set the flag to true so it won't open again
+//     }
+// }
 // Create the circular base (cylinder) with texture
 const radiusTop = 50;
 const radiusBottom = 50;
@@ -192,16 +234,19 @@ for (let i = 0; i < numPlatforms; i++) {
     platformGroup.add(combinedGroup);
 
     // Define specific actions for platforms
-    if(i % 5 === 0) {
+    if(i === 0) {
+        continue; // Skip the first platform
+    }
+    else if(i % 5 === 0) {
         definePlatformAction(i, { type: 'updown', speed: 0.002, range: 2 });
     }
-    if(i % 6 === 0) {
+    else if(i % 6 === 0) {
         definePlatformAction(i, { type: 'downup', speed: 0.002, range: 2 });
     }
-    if(i % 4 === 0) {
+    else if(i % 4 === 0) {
         definePlatformAction(i, { type: 'leftright', speed: 0.002, range: 2 });
     }
-    if(i % 3 === 0) {
+    else if(i % 7 === 0) {
         definePlatformAction(i, { type: 'rightleft', speed: 0.002, range: 2 });
     }
 }
@@ -262,7 +307,9 @@ const updateInterval = 1; // Time in milliseconds for each update
 
 function animate(time) {
     requestAnimationFrame(animate);
-
+    // if (doorMixer) {
+    //     doorMixer.update(0.01); // Update the animation mixer
+    // }
     // Check if 100ms has passed since the last update
     if (time - lastUpdate >= updateInterval) {
         lastUpdate = time; // Update the last update time
@@ -271,7 +318,7 @@ function animate(time) {
         controls.update();
 
         // Constrain camera's Y position between minHeight and maxHeight
-        camera.position.y = Math.min(Math.max(camera.position.y, minHeight), maxHeight);
+        // camera.position.y = Math.min(Math.max(camera.position.y, minHeight), maxHeight);
 
         // Update circular base's height to match the camera's Y position
         circularBase.position.y = camera.position.y - 4;
