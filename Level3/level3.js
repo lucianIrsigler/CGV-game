@@ -48,6 +48,42 @@ const cubeEnemy = new THREE.Mesh(geometryEnemy, materialEnemy);
 cubeEnemy.position.set(10, 2, 5); // Set initial position of the cube
 scene.add(cubeEnemy);
 
+// Enemy movement variables
+const enemyMovementSpeed = 0.1; // Adjusted speed for slower movement
+const moveDistance = 20; // Distance to move in one direction before changing
+let distanceMoved = 0; // Track how far the enemy has moved
+let enemyDirection = new THREE.Vector3(); // Current movement direction
+let changeDirectionTimer = 0; // Timer for changing direction
+const enemyMovementRange = 1; // Range of movement in any direction
+
+// Function to update the enemy's position
+function updateEnemyMovement() {
+    if (changeDirectionTimer <= 0) {
+        // Choose a random direction and normalize it
+        enemyDirection.set(
+            (Math.random() - 0.5) * enemyMovementRange,
+            0,
+            (Math.random() - 0.5) * enemyMovementRange
+        ).normalize();
+
+        changeDirectionTimer = Math.random() * 2 + 1; // Random timer for changing direction (1 to 3 seconds)
+    } else {
+        // Move the enemy in the current direction
+        cubeEnemy.position.add(enemyDirection.clone().multiplyScalar(enemyMovementSpeed));
+        distanceMoved += enemyMovementSpeed;
+
+        // Check if the enemy has moved the specified distance
+        if (distanceMoved >= moveDistance) {
+            distanceMoved = 0; // Reset the distance moved
+            changeDirectionTimer = 0; // Reset timer to change direction
+        }
+    }
+
+    // Optionally: Add bounds to keep the enemy within a certain area
+    cubeEnemy.position.x = THREE.MathUtils.clamp(cubeEnemy.position.x, -49, 49); // Adjust bounds as necessary
+    cubeEnemy.position.z = THREE.MathUtils.clamp(cubeEnemy.position.z, -49, 49); // Adjust bounds as necessary
+}
+
 // Ground
 //Texture for ground 
 const textureLoader = new THREE.TextureLoader();
@@ -88,17 +124,12 @@ const wall4 = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
 wall4.position.set(-50, 50, 0);
 scene.add(wall4);
 
-// Lighting
-// const light = new THREE.DirectionalLight(0xffffff, 0.3); // (color, intensity)
-// light.position.set(0, 100, 0); // Light above the scene - (x, y, z)
-// scene.add(light);
-
 // Create Ambient Light
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // Soft white light, 0.5 is the intensity
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.03); // Soft white light, 0.5 is the intensity
 scene.add(ambientLight);
 
 // Convert lamps object to an array
-const lampsArray = Object.values(lamps);
+const lampsArray = Object.values(lamps); 
 const loader = new GLTFLoader();
 // Function to load lamps
 function loadLamps() {
@@ -111,7 +142,7 @@ function loadLamps() {
             model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
             model.castShadow = true;
 
-            const lampLight = new THREE.PointLight(0xA96CC3, 5, 5); // Purple light - (color, intensity, distance)
+            const lampLight = new THREE.PointLight(0xA96CC3, 30, 10); // Purple light - (color, intensity, distance)
             lampLight.position.set(lamp.positionX, lamp.positionY + 2, lamp.positionZ); 
             model.add(lampLight);
             scene.add(lampLight);
@@ -126,20 +157,6 @@ function loadLamps() {
 
 // Load lamps into the scene
 loadLamps();
-
-// let points = [];
-// const spotLight = new THREE.SpotLight(0x0000ff,5, 4, Math.PI / 6, 0.5, 2);
-// spotLight.userData.originalIntensity = spotLight.intensity; // Store original intensity
-// spotLight.position.set(0, 4, 0);
-// const targetObject = new THREE.Object3D();
-// targetObject.position.set(0, 0, 1); // Position it below the spotlight
-// scene.add(targetObject);
-// spotLight.target = targetObject;
-// scene.add(spotLight);
-// const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-// scene.add(spotLightHelper);
-// points.push(spotLight);
-
 
 // Camera Initial Position (behind the cube)
 let cameraOffset = new THREE.Vector3(0, 1.5, -3); // Behind and above the cube
@@ -284,6 +301,7 @@ function movePlayer() {
 function animate() {
     movePlayer();  // Update player movement
     updateCamera();  // Update camera to follow the player
+    updateEnemyMovement(); // Update enemy's random movement
 
     // Update bullets
     for (let i = bullets.length - 1; i >= 0; i--) {
@@ -350,7 +368,7 @@ window.addEventListener('keydown', (event) => {
 });
 
 // Create Crosshair
-const crosshair = new Crosshair(5, 'red');
+const crosshair = new Crosshair(5, 'white');
 
 // Shooting the enemy
 // Enemy health variables

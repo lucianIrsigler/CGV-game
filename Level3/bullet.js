@@ -4,7 +4,7 @@ import * as THREE from 'three'; // Import necessary modules
 export class Bullet {
     constructor(position) {
         this.geometry = new THREE.SphereGeometry(0.05, 10, 10); // Small sphere as bullet
-        this.material = new THREE.MeshBasicMaterial({ color: 0xffffff }); // White color
+        this.material = new THREE.MeshBasicMaterial({ color: 0xA96CC3 }); // White color
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.position.copy(position); // Set initial position
         this.velocity = new THREE.Vector3(0, 0, -1); // Direction of bullet movement
@@ -13,7 +13,7 @@ export class Bullet {
         this.maxDistance = 50; // Set maximum travel distance for the bullet
 
         // Create ambient light for bullet
-        this.light = new THREE.PointLight(0xffffff, 0, 10); // Start with intensity 0
+        this.light = new THREE.PointLight(0xA96CC3, 0, 10); // Start with intensity 0
         this.light.position.copy(this.mesh.position); // Light starts at bullet's position
 
         this.intensityGrowthRate = 0.1; // Control how quickly the light intensity grows
