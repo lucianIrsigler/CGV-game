@@ -40,12 +40,19 @@ const texture = textureLoader.load('PavingStones.jpg', (texture) => {
 });
 //Texture for walls
 const textureLoaderWall = new THREE.TextureLoader();
-const textureWall = textureLoader.load('PavingStones.jpg', (texture) => {
+const textureWall = textureLoaderWall.load('PavingStones.jpg', (texture) => {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(4, 1);
 });
-const sideWallGeometry = new THREE.BoxGeometry(50, 1, 10);
+// Texture for platforms 
+const textureLoaderPlatforms = new THREE.TextureLoader();
+const texturePlatform = textureLoaderPlatforms.load('PavingStones.jpg', (texture) => {
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(3, 2);
+});
+const sideWallGeometry = new THREE.BoxGeometry(50, 1, 20);
 const sideWallMaterial = new THREE.MeshStandardMaterial({ map: textureWall }); 
 const platformGeometry = new THREE.BoxGeometry(10, 1, 50);
 const platformMaterial = new THREE.MeshStandardMaterial({ map: texture }); 
@@ -55,6 +62,9 @@ const characterMaterial = new THREE.MeshStandardMaterial({
     transparent: true, 
     opacity: 0.0
 });
+const platformsMaterial = new THREE.MeshStandardMaterial({ map: texturePlatform });
+
+
 
 // Ground Plane
 const groundGeometry = new THREE.PlaneGeometry(20, 20);
@@ -122,11 +132,27 @@ loader.load(currentDoor.scene, function (gltf) {
 let isDoorOpen = false;
 
 // Function to open the door
+const doorPrompt = document.getElementById('doorPrompt');
+const doorOpenDistance = 2; // Distance at which the prompt appears
+
+function checkDoorProximity() {
+    const distance = character.position.distanceTo(Door.position);
+    
+    if (distance <= doorOpenDistance) {
+        doorPrompt.style.display = 'block'; // Show prompt
+    } else {
+        doorPrompt.style.display = 'none'; // Hide prompt
+    }
+}
+
 function openDoor() {
     if (!isDoorOpen && doorAnimationAction) {
         doorAnimationAction.reset();
         doorAnimationAction.play();
         isDoorOpen = true; // Set the flag to true so it won't open again
+        // Transition to success screen
+        gameOverScreen.style.display = 'block'; // Assuming this is your success screen
+        gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>"; // Update success message
     }
 }
 
@@ -195,10 +221,69 @@ const spotLightHelper4 = new THREE.SpotLightHelper(spotLight4);
 scene.add(spotLightHelper4);
 points.push(spotLight4);
 
+// five light
+const spotLight5 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
+spotLight5.userData.originalIntensity = spotLight5.intensity; // Store original intensity
+spotLight5.position.set(3, 4, 15);
+// Create a target for the spotlight
+const targetObject5 = new THREE.Object3D();
+targetObject5.position.set(3, 3, 15); // Position it below the spotlight
+scene.add(targetObject5);
+// Set the spotlight's target
+spotLight5.target = targetObject5;
+scene.add(spotLight5);
+const spotLightHelper5 = new THREE.SpotLightHelper(spotLight5);
+scene.add(spotLightHelper5);
+points.push(spotLight5);
 
-//add ambient light
-const ambientLight = new THREE.AmbientLight(0x404040);
+//add dark ambient light
+const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
 scene.add(ambientLight);
+
+// six light
+const spotLight6 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
+spotLight6.userData.originalIntensity = spotLight6.intensity; // Store original intensity
+spotLight6.position.set(-3, 6, 20);
+// Create a target for the spotlight
+const targetObject6 = new THREE.Object3D();
+targetObject6.position.set(-3, 3, 20); // Position it below the spotlight
+scene.add(targetObject6);
+// Set the spotlight's target
+spotLight6.target = targetObject6;
+scene.add(spotLight6);
+const spotLightHelper6 = new THREE.SpotLightHelper(spotLight6);
+scene.add(spotLightHelper6);
+points.push(spotLight6);
+
+// seven light
+const spotLight7 = new THREE.SpotLight(0x800080, 5, 10, Math.PI / 6, 0.5, 2);
+spotLight7.userData.originalIntensity = spotLight7.intensity; // Store original intensity
+spotLight7.position.set(3, 6, 30);
+// Create a target for the spotlight
+const targetObject7 = new THREE.Object3D();
+targetObject7.position.set(3, 3, 30); // Position it below the spotlight
+scene.add(targetObject7);
+// Set the spotlight's target
+spotLight7.target = targetObject7;
+scene.add(spotLight7);
+const spotLightHelper7 = new THREE.SpotLightHelper(spotLight7);
+scene.add(spotLightHelper7);
+points.push(spotLight7);
+
+// eight light
+const spotLight8 = new THREE.SpotLight(0x800080, 5, 4, Math.PI / 6, 0.5, 2);
+spotLight8.userData.originalIntensity = spotLight8.intensity; // Store original intensity
+spotLight8.position.set(-3, 6, 35);
+// Create a target for the spotlight
+const targetObject8 = new THREE.Object3D();
+targetObject8.position.set(-3, 3, 35); // Position it below the spotlight
+scene.add(targetObject8);
+// Set the spotlight's target
+spotLight8.target = targetObject8;
+scene.add(spotLight8);
+const spotLightHelper8 = new THREE.SpotLightHelper(spotLight8);
+scene.add(spotLightHelper8);
+points.push(spotLight8);
 
 // Walls
 const bottom = new THREE.Mesh(platformGeometry, platformMaterial);
@@ -207,9 +292,10 @@ bottom.position.z = 20;
 scene.add(bottom);
 
 const topThingy = new THREE.Mesh(platformGeometry, platformMaterial);
-topThingy.position.y = 5;
+topThingy.position.y = 10;
 topThingy.position.z = 20;
 scene.add(topThingy);
+
 
 const backWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
 backWall.position.y = 2;
@@ -233,7 +319,36 @@ right.rotation.x = Math.PI / 2;
 right.rotation.z = Math.PI / 2;
 scene.add(right);
 
+const end = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
+end.position.set(0, 2, 40);
+end.rotation.x = Math.PI / 2;
+scene.add(end);
+
+
+
 scene.background = new THREE.Color(0x333333);
+
+//Platforms 
+const platformsGeometry = new THREE.BoxGeometry(5, 0.5, 5);
+// const platformsMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 }); // Brown color for platforms
+
+
+const platforms = [
+    { position: new THREE.Vector3(3, 2, 15), size: new THREE.Vector3(5, 0.5, 5) },
+    { position: new THREE.Vector3(-3, 4, 20), size: new THREE.Vector3(5, 0.5, 5) },
+    { position: new THREE.Vector3(3, 2, 30), size: new THREE.Vector3(3, 0.3, 3) },
+    { position: new THREE.Vector3(-3, 4, 35), size: new THREE.Vector3(3, 0.3, 10) }
+  ];
+
+platforms.forEach(platform => {
+  const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(platform.size.x, platform.size.y, platform.size.z),
+      platformsMaterial
+  );
+  mesh.position.copy(platform.position);
+  scene.add(mesh);
+});
+
 
 // Create a simple character (a cube)
 const character = new THREE.Mesh(characterGeometry, characterMaterial);
@@ -254,7 +369,7 @@ const movement = { forward: 0, right: 0 };
 
 let health = 100;
 const healthNumberElement = document.getElementById('health-number');
-const damageRate = 20; // Define the damage rate
+const damageRate = 10; // Define the damage rate
 const healingRate = 10; // Define the healing rate
 
 // Event listeners for movement
@@ -439,26 +554,71 @@ function flickerLight(light, index) {
 
 function animate() {
     requestAnimationFrame(animate);
-// Update the door animation mixer if it exists
-if (doorMixer) {
-    doorMixer.update(0.01); // Update the animation mixer
-}
-  // Update character vertical position for jumping
-  // Jumping and gravity application
-if (isJumping) {
-    character.position.y += velocityY;
-    velocityY += gravity;
-  
-    if (character.position.y <= 0.5) {
-      character.position.y = 0.5;
-      isJumping = false;
-      velocityY = 0;
-      jumpCount = 0; 
+    // Update the door animation mixer if it exists
+    if (doorMixer) {
+        doorMixer.update(0.01); // Update the animation mixer
     }
-  }
+
+    // Jumping and gravity application
+    if (isJumping) {
+        character.position.y += velocityY;
+        velocityY += gravity;
+    }
+// Check proximity to the door
+checkDoorProximity();
+
+// Existing animation logic...
+
+// Handle the 'E' key press to open the door
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'e') {
+        if (doorPrompt.style.display === 'block') {
+            openDoor(); 
+        }
+    }
+});
+
+    // Check for collisions with platforms
+    let onPlatform = false;
+    platforms.forEach(platform => {
+        if (
+            character.position.x >= platform.position.x - platform.size.x / 2 &&
+            character.position.x <= platform.position.x + platform.size.x / 2 &&
+            character.position.z >= platform.position.z - platform.size.z / 2 &&
+            character.position.z <= platform.position.z + platform.size.z / 2
+        ) {
+            if (
+                character.position.y + 0.5 >= platform.position.y &&
+                character.position.y <= platform.position.y + platform.size.y
+            ) {
+                character.position.y = platform.position.y + platform.size.y;
+                velocityY = 0;
+                isJumping = false;
+                jumpCount = 0; // Reset jump count when landing on a platform
+                onPlatform = true;
+            }
+        }
+    });
+
+    // Apply gravity if not on a platform
+    if (!onPlatform && !isJumping) {
+        character.position.y += velocityY;
+        velocityY += gravity;
+    }
+
+    // Prevent falling through the ground
+    if (character.position.y < 0.5) {
+        character.position.y = 0.5;
+        isJumping = false;
+        velocityY = 0;
+    }
+
     const forward = movement.forward;
     const right = movement.right;
-
+// Reset jump count when hitting the ground
+if (onPlatform || character.position.y === 0.5) {
+    jumpCount = 0; // Reset jump count only when on a platform
+}
     // Calculate the forward and right direction based on the camera's rotation
     const cameraDirection = new THREE.Vector3();
     camera.getWorldDirection(cameraDirection);
@@ -476,13 +636,11 @@ if (isJumping) {
     }
 
     updateCameraPosition();
-    //camera.position.y = character.position.y + jumpHeight; // Keep the camera above the character
-
-    
-   controls.update(0.7); // Update controls with delta time
+    controls.update(0.7); // Update controls with delta time
     // Render the scene
     renderer.render(scene, camera);
 }
+
 startDamageTimer();
 animate();
 

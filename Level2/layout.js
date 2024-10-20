@@ -89,10 +89,14 @@ const sectorAngle = Math.PI / 4.7; // changes length of each platform / changes 
 const lampPostHeight = 2;
 const lampPostRadius = 0.1;
 
-// Create the platforms with vertical width and add lamps every second platform
+// Store platform Y positions
+const platformYPositions = [];
+
 for (let i = 0; i < numPlatforms; i++) {
     const angle = i * spiralTurnAngle;
     const platformY = i * platformSpacing;
+
+    platformYPositions.push(platformY); // Store the platformY for later use
 
     const shape = new THREE.Shape();
     shape.moveTo(Math.cos(angle) * sectorInnerRadius, Math.sin(angle) * sectorInnerRadius);
@@ -127,24 +131,18 @@ for (let i = 0; i < numPlatforms; i++) {
     
         const bulbGeometry = new THREE.SphereGeometry(0.3, 16, 16);
         const bulbMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-        if(i % 5 === 0) 
-        {
+        if (i % 5 === 0) {
             bulbMaterial.color.set(0x00ff00);
-        } 
-        else 
-        {
+        } else {
             bulbMaterial.color.set(0xffff00);
         }
         const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial);
         bulb.position.set(lampPost.position.x, platformY + platformHeight / 2 + lampPostHeight, lampPost.position.z);
     
         const light = new THREE.PointLight(0xffff00, 1, 10);
-        if(i % 5 === 0) 
-        {
+        if (i % 5 === 0) {
             light.color.set(0x00ff00);
-        } 
-        else 
-        {
+        } else {
             light.color.set(0xffff00);
         }
         light.position.set(lampPost.position.x, platformY + platformHeight / 2 + lampPostHeight, lampPost.position.z);
@@ -170,7 +168,6 @@ for (let i = 0; i < numPlatforms; i++) {
         // Add crate in front of the lamp post, closer to the inner radius
         addCrate(cratex, cratey, cratez);
     }
-    
 }
 
 // Calculate the min and max height for the circular base
@@ -198,7 +195,13 @@ function animate() {
     camera.position.y = Math.min(Math.max(camera.position.y, minHeight), maxHeight);
 
     // Update circular base's height to match the camera's Y position
-    circularBase.position.y = camera.position.y-2;
+    circularBase.position.y = camera.position.y - 2;
+
+    // Update positions of lamp posts and crates based on the platformY positions
+    for (let i = 0; i < numPlatforms; i++) {
+        const platformY = platformYPositions[i];
+        // Add any animation updates for lamp posts/crates here if needed
+    }
 
     // Render the scene with updated camera and base position
     renderer.render(scene, camera);
