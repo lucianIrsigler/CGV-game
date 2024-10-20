@@ -39,4 +39,12 @@ export default class Crosshair {
             document.body.removeChild(this.crosshairElement);
         }
     }
+
+    hideCrosshair() {
+        this.crosshairElement.style.display = 'none';
+    }
+
+    showCrosshair() {
+        this.crosshairElement.style.display = 'block';
+    }
 }
