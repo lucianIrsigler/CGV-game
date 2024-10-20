@@ -1,7 +1,7 @@
 export const door = {
     "doorOne":{
         height_diff:270,
-        scene:"../public/assets/medieval_door/scene.gltf",
+        scene:"medieval_door/scene.gltf",
         scaleX:0.003,
         scaleY:0.003,
         scaleZ:0.003,
