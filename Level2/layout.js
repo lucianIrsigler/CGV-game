@@ -62,13 +62,6 @@ function definePlatformAction(platformIndex, action) {
     platformActions[platformIndex] = action;
 }
 
-// function addCrate(x, y, z) {
-//     const crate = new THREE.Mesh(crateGeometry, crateMaterial);
-//     crate.position.set(x, y, z);
-//     crate.lookAt(0, y, 0); // Make the crate face the center
-//     platformGroup.add(crate); // Add the crate to the group
-// }
-
 // Load textures for the base and platforms
 const platformTexture = textureLoader.load('PavingStones.jpg');
 const baseTexture = textureLoader.load('PavingStones.jpg');
@@ -133,42 +126,42 @@ Object.values(gun).forEach((currentGun) => {
 // let doorAnimationAction; 
 // const currentDoor = door.doorOne;
 
-// const loader = new GLTFLoader();
-// loader.load(currentDoor.scene, function (gltf) {
-//     Door = gltf.scene;
-//     scene.add(Door);
+const doorLoader = new GLTFLoader();
+doorLoader.load(currentDoor.scene, function (gltf) {
+    Door = gltf.scene;
+    scene.add(Door);
 
-//     Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
-//     Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
-//     Door.castShadow = true;
+    Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
+    Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
+    Door.castShadow = true;
 
-//     doorMixer = new THREE.AnimationMixer(Door);
+    doorMixer = new THREE.AnimationMixer(Door);
 
-//     const animations = gltf.animations;
-//     if (animations && animations.length > 0) {
-//         doorAnimationAction = doorMixer.clipAction(animations[0]); 
-//     }
-// }, undefined, function (error) {
-//     console.error('An error happened', error);
-// });
-// let isDoorOpen = false;
+    const animations = gltf.animations;
+    if (animations && animations.length > 0) {
+        doorAnimationAction = doorMixer.clipAction(animations[0]); 
+    }
+}, undefined, function (error) {
+    console.error('An error happened', error);
+});
+let isDoorOpen = false;
 
-// function onKeyDown(event) {
-//     switch (event.code) {
-//         case "KeyE": // Use "E" key to open the door
-//         openDoor(); 
-//         break;
-//     }
-//   }
-// window.addEventListener("keydown", onKeyDown);
-// // Function to open the door
-// function openDoor() {
-//     if (!isDoorOpen && doorAnimationAction) { 
-//         doorAnimationAction.reset(); 
-//         doorAnimationAction.play(); 
-//         isDoorOpen = true; // Set the flag to true so it won't open again
-//     }
-// }
+function onKeyDown(event) {
+    switch (event.code) {
+        case "KeyE": // Use "E" key to open the door
+        openDoor(); 
+        break;
+    }
+  }
+window.addEventListener("keydown", onKeyDown);
+// Function to open the door
+function openDoor() {
+    if (!isDoorOpen && doorAnimationAction) { 
+        doorAnimationAction.reset(); 
+        doorAnimationAction.play(); 
+        isDoorOpen = true; // Set the flag to true so it won't open again
+    }
+}
 // Create the circular base (cylinder) with texture
 const radiusTop = 50;
 const radiusBottom = 50;
@@ -217,17 +210,6 @@ for (let i = 0; i < numPlatforms; i++) {
 
     // Push the combinedGroup to the platformArray
     platformArray.push(combinedGroup);
-
-    // if (i % 3 === 0) {
-    //     const lampPostGeometry = new THREE.CylinderGeometry(lampPostRadius, lampPostRadius, lampPostHeight, 16);
-    //     const lampPostMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
-    //     const lampPost = new THREE.Mesh(lampPostGeometry, lampPostMaterial);
-
-    //     lampPost.position.set(
-    //         Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2,
-    //         platformY + platformHeight / 2 + lampPostHeight / 2,
-    //         Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2
-    //     );
 
     if (i % 3 === 0 || i === numPlatforms - 1) {
         const lampX = Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2;
