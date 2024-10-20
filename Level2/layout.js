@@ -1,5 +1,7 @@
 import * as THREE from 'https://unpkg.com/three@0.153.0/build/three.module.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { lamps } from './lampPos2';
 
 // Set up the scene, camera, and renderer
 const scene = new THREE.Scene();
@@ -65,6 +67,28 @@ const platformMaterial = new THREE.MeshStandardMaterial({
 
 const baseMaterial = new THREE.MeshStandardMaterial({
     map: baseTexture
+});
+
+//Lamp Stuff
+//Lamp Stuff
+let currentLamp = lamps.lampOne; 
+Object.values(lamps).forEach((currentLamp) => {
+    const loader = new GLTFLoader();  // Use GLTFLoader directly, not THREE.GLTFLoader
+    
+    loader.load(currentLamp.scene, function (gltf) {
+      let model = gltf.scene;
+      scene.add(model);
+  
+      model.position.set(currentLamp.positionX, currentLamp.positionY, currentLamp.positionZ);
+      model.scale.set(currentLamp.scaleX, currentLamp.scaleY, currentLamp.scaleZ);
+      model.castShadow = true;
+  
+      const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
+      lampLight.position.set(currentLamp.positionX, currentLamp.positionY + 2, currentLamp.positionZ); 
+      scene.add(lampLight);
+    }, undefined, function (error) {
+      console.error('An error happened while loading the lamp model:', error);
+    });
 });
 
 // Create the circular base (cylinder) with texture
@@ -141,9 +165,9 @@ for (let i = 0; i < numPlatforms; i++) {
     
         const light = new THREE.PointLight(0xffff00, 1, 10);
         if (i % 5 === 0) {
-            light.color.set(0x00ff00);
+            light.color.set(0x9A94F0);
         } else {
-            light.color.set(0xffff00);
+            light.color.set(0x9A94F0);
         }
         light.position.set(lampPost.position.x, platformY + platformHeight / 2 + lampPostHeight, lampPost.position.z);
     
@@ -206,6 +230,8 @@ function animate() {
     // Render the scene with updated camera and base position
     renderer.render(scene, camera);
 }
+
+//animate(); 
 
 // Handle window resizing
 window.addEventListener('resize', () => {
