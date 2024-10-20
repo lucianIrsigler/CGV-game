@@ -26,6 +26,27 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+// Mini-map setup
+const miniMapCamera = new THREE.OrthographicCamera(
+    window.innerWidth / -2, window.innerWidth / 2,
+    window.innerHeight / 2, window.innerHeight / -2,
+    0.1, 1000
+);
+miniMapCamera.position.set(0, 100, 0); // Position the mini-map camera above the scene
+miniMapCamera.lookAt(0,0,15); // Look at the center of the scene
+
+// Set the zoom factor
+miniMapCamera.zoom = 12.5; // Increase this value to zoom in
+miniMapCamera.updateProjectionMatrix(); // Update the projection matrix after changing the zoom
+
+const miniMapRenderer = new THREE.WebGLRenderer({ alpha: true });
+miniMapRenderer.setSize(200, 200); // Set the size of the mini-map
+miniMapRenderer.domElement.style.position = 'absolute';
+miniMapRenderer.domElement.style.top = '10px';
+miniMapRenderer.domElement.style.right = '10px';
+document.body.appendChild(miniMapRenderer.domElement);
+
+
 // First Person Controls
 const controls = new FirstPersonControls(camera, renderer.domElement);
 //controls.movementSpeed = 2; // Lower movement speed
@@ -361,7 +382,7 @@ character.rotation.y += Math.PI;
 
 // Variables to track movement and rotation
 let moveSpeed = 0.1;
-let rotateSpeed = 0.05;
+let rotateSpeed = 0.1;
 let loaded = false;
 
 // Movement state
@@ -429,13 +450,6 @@ function restartGame() {
     health = 100;
     healthNumberElement.textContent = health; // Reset health number in the HTML
 
-    
-
-    // Reset all lights to their original intensity
-    // points.forEach(light => {
-    //     light.intensity = light.userData.originalIntensity; // Set back to original intensity
-    // });
-
     // Reload textures
     textures.forEach(texture => {
         texture.needsUpdate = true; // Mark texture for update
@@ -446,7 +460,7 @@ function restartGame() {
         scene.add(light); // Ensure light is added to the scene
     });
 
-    // Optional: Reset any other states or objects here as needed
+ 
 }
 
 
@@ -550,7 +564,8 @@ function flickerLight(light, index) {
 }
 
 
-
+let lastMiniMapRenderTime = 0; // To track the last time the mini-map was rendered
+const miniMapRenderInterval = 100; // 100ms interval for mini-map rendering
 
 function animate() {
     requestAnimationFrame(animate);
@@ -639,11 +654,15 @@ if (onPlatform || character.position.y === 0.5) {
     controls.update(0.7); // Update controls with delta time
     // Render the scene
     renderer.render(scene, camera);
+    // Only update the mini-map at the defined interval
+    const currentTime = Date.now();
+    if (currentTime - lastMiniMapRenderTime >= miniMapRenderInterval) {
+        miniMapRenderer.render(scene, miniMapCamera);
+        lastMiniMapRenderTime = currentTime; // Update the time of last render
+    }
 }
-
 startDamageTimer();
 animate();
-
 // Resize the renderer with the window size
 window.addEventListener("resize", () => {
     renderer.setSize(window.innerWidth, window.innerHeight);

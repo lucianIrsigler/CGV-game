@@ -13,9 +13,9 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // Directional light for testing
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(10, 10, 10); // Position the light
-scene.add(directionalLight);
+// const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+// directionalLight.position.set(10, 10, 10); // Position the light
+// scene.add(directionalLight);
 
 // Crates
 const textureLoader = new THREE.TextureLoader();
@@ -31,7 +31,7 @@ const roughnessMap = textureLoader.load('Planks/PlanksRoughness.jpg');
     texture.repeat.set(0.2, 0.2);
 });
 
-const crateGeometry = new THREE.BoxGeometry(7, 4, 2);
+const crateGeometry = new THREE.BoxGeometry(7, 3, 2);
 
 const crateMaterial = new THREE.MeshStandardMaterial({
     map: colorMap,
@@ -210,7 +210,7 @@ for (let i = 0; i < numPlatforms; i++) {
 
     if (i % 3 === 0 || i === numPlatforms - 1) {
         const lampX = Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2;
-        const lampY = platformY + platformHeight / 2;
+        const lampY = platformY + platformHeight / 2 - 0.5;
         const lampZ = Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2;
 
         combinedGroup.userData = {
@@ -220,7 +220,7 @@ for (let i = 0; i < numPlatforms; i++) {
 
         // Position crate on the side of the shorter arc (closer to the inner radius)
         const cratex = Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + (sectorOuterRadius - sectorInnerRadius) / 4);
-        const cratey = platformY + platformHeight / 2; 
+        const cratey = platformY + platformHeight / 2 +1; 
         const cratez = Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + (sectorOuterRadius - sectorInnerRadius) / 4);
 
         // Add crate in front of the lamp post, closer to the inner radius
@@ -273,7 +273,7 @@ Object.values(lamps).forEach((currentLamp) => {
 
                 platform.add(model);
 
-                const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
+                const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 30); // Purple light 
                 lampLight.position.set(0, 2, 0); // Position relative to the lamp model
                 model.add(lampLight);
 
