@@ -1,11 +1,12 @@
 import * as THREE from 'three';
-import {FirstPersonInputController} from "../input/FirstPersonInputController";
+import {FirstPersonInputController} from "../InputController/FirstPersonInputController";
 
 const KEYS = {
     w: 87,  // W key
     a: 65,  // A key
     s: 83,  // S key
-    d: 68   // D key
+    d: 68,   // D key
+    space:32
   };
 
 function clamp(value, min, max) {
@@ -13,9 +14,13 @@ function clamp(value, min, max) {
 }
 
 export class FirstPersonCamera {
-    constructor(camera,target) {
+    constructor(camera,target,scene) {
       this.camera_ = camera;
       this.input_ = new FirstPersonInputController();
+      this.scene = scene;
+
+
+
       this.rotation_ = new THREE.Quaternion();
       this.translation_ = new THREE.Vector3();
       this.phi_ = 0;
@@ -25,6 +30,14 @@ export class FirstPersonCamera {
       this.movementspeed_ = 5;
       this.target_ = target;
       this.sensitivity=5;
+
+      this.jumpSpeed_ = 6;
+      this.jumpAlready_=false;
+      this.isGrounded_ = true;
+      this.raycaster_ = new THREE.Raycaster();
+      this.groundCheckDistance_ = 4;
+      this.gravity_ = -0.05; // Gravity acceleration
+      this.verticalVelocity_ = 0;
     }
   
     update(timeElapsedS) {
@@ -57,11 +70,41 @@ export class FirstPersonCamera {
     //     }
     //   }
     // }
-  
+    
+
+    checkGrounded(){
+      this.raycaster_.set(this.translation_.clone().add(new THREE.Vector3(0, 1, 0)), new THREE.Vector3(0, -1, 0)); // A ray going downwards
+
+      const intersects = this.raycaster_.intersectObjects(this.scene.children, true); // Use appropriate object group
+      
+      if (intersects.length > 0 && intersects[0].distance < this.groundCheckDistance_) {
+          // If we hit something within the ground check distance
+          this.translation_.y = intersects[0].point.y + 0.5; // Adjust position slightly above the ground
+          this.verticalVelocity_ = 0; // Reset vertical velocity
+          this.isGrounded_ = true; // Set grounded state
+          this.jumpAlready_=false;
+      } else {
+          this.isGrounded_ = false; // Player is in the air
+
+      }
+
+    }
+
     updateTranslation_(timeElapsedS) {
       const forwardVelocity = (this.input_.keys_[KEYS.w] ? 1 : 0) + (this.input_.keys_[KEYS.s] ? -1 : 0);
       const strafeVelocity = (this.input_.keys_[KEYS.a] ? 1 : 0) + (this.input_.keys_[KEYS.d] ? -1 : 0);
-  
+
+
+      if (this.input_.keys_[KEYS.space] && this.isGrounded_ && !this.jumpAlready_) {
+        this.input_.keys_[KEYS.space] = false;
+        this.verticalVelocity_ = this.jumpSpeed_; // Start the jump
+        this.isGrounded_ = false; // The player is now in the air
+      }
+
+      if (!this.isGrounded_) {
+        this.verticalVelocity_ += -0.50; // Apply gravity over time
+      }
+
       const qx = new THREE.Quaternion();
       qx.setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.phi_);
   
@@ -73,14 +116,19 @@ export class FirstPersonCamera {
       left.applyQuaternion(qx);
       left.multiplyScalar(strafeVelocity * timeElapsedS * 10);
   
-  
       this.translation_.add(forward);
       this.translation_.add(left);
-  
-  
-      if (forwardVelocity !== 0 || strafeVelocity !== 0) {
-        this.headBobActive_ = true;
+
+      if (!this.jumpAlready_){
+        this.translation_.y += this.verticalVelocity_;
+        this.jumpAlready_=true;
+      }else if (!this.isGrounded_){
+        this.translation_.y += this.verticalVelocity_;
+
       }
+
+      // Perform raycasting to check if grounded
+      this.checkGrounded();
     }
   
 
@@ -151,4 +199,3 @@ export class FirstPersonCamera {
     }
   }
 }
-  

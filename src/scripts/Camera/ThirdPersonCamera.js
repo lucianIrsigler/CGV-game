@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { ThirdPersonInputController } from '../input/ThirdPersonInputController';
+import { ThirdPersonInputController } from '../InputController/ThirdPersonInputController';
 
-
+//https://www.youtube.com/watch?v=UuNPHOJ_V5o&ab_channel=SimonDev
 export class ThirdPersonCamera{
     constructor(camera,target) {
         this.camera_ = camera;

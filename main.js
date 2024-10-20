@@ -1,7 +1,9 @@
-import * as lvl1 from "./level1";
-import * as lvl2 from "./level2";
-import * as lvl3 from "./level3";
-import * as lvl4 from "./levelblahblah";
+import { CustomScene } from "./src/scenes/testScene";
+import { CustomScene1 } from "./src/scenes/testScene1";
+import { AnimationManager } from "./src/scripts/Animation/AnimationLoopHandler";
+
+const animationManager = new AnimationManager();
+
 
 let isPaused = false;
 let menuVisible = false;
@@ -11,61 +13,39 @@ function toggleMenu() {
     const menu = document.getElementById('menu');
     if (menuVisible) {
         menu.style.display = 'block';
-        isPaused = true; 
+        animationManager.pauseAnimation();
     } else {
         menu.style.display = 'none';
-        isPaused = false; 
+        animationManager.resumeAnimation();
     }
+
 }
 
 document.getElementById('lvl1').addEventListener('click', function() {
-    lvl1.disposeLevel();
-    lvl2.disposeLevel();
-    lvl3.disposeLevel();
-
-    lvl1.initLevel1();
-    lvl1.animateLevel1();
+    animationManager.switchScene(new CustomScene());
     toggleMenu();
 });
 
 document.getElementById('lvl2').addEventListener('click', function() {
-    lvl1.disposeLevel();
-    lvl2.disposeLevel();
-    lvl3.disposeLevel();
-    lvl4.disposeLevel();
-
-    lvl2.initLevel2();
-    lvl2.animateLevel2();
+    animationManager.switchScene(new CustomScene1());
     toggleMenu();
 
 });
 
-
-document.getElementById('lvl3').addEventListener('click', function() {
-    lvl1.disposeLevel();
-    lvl2.disposeLevel();
-    lvl3.disposeLevel();
-    lvl4.disposeLevel();
-
-
-    lvl3.initLevel3();
-    lvl3.animateLevel3();
-    toggleMenu();
+window.addEventListener('beforeunload', () => {
+    animationManager.stopAnimationLoop();
 });
 
 
-document.getElementById('lvl3').addEventListener('click', function() {
-    lvl1.disposeLevel();
-    lvl2.disposeLevel();
-    lvl3.disposeLevel();
-    lvl4.disposeLevel();
+// document.getElementById('lvl3').addEventListener('click', function() {
+//     lvl1.disposeLevel();
+//     lvl2.disposeLevel();
 
-    
-
-    lvl4.initLevel4();
-    lvl4.animateLevel4();
-    toggleMenu();
-});
+//     myScene.disposeLevel();
+//     myScene.initScene();
+//     myScene.animate();
+//     toggleMenu();
+// });
 
 
 

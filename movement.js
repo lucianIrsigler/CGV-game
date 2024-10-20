@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { FirstPersonCamera } from './objects/cameras/FirstPersonCamera';
-import { ThirdPersonCamera } from './objects/cameras/ThirdPersonCamera';
+import {FirstPersonCamera} from "./src/scripts/Camera/FirstPersonCamera"
+import { ThirdPersonCamera } from './src/scripts/Camera/ThirdPersonCamera';
 
 
 let targetted;
@@ -21,7 +21,7 @@ const planeGeometry = new THREE.PlaneGeometry(100, 100);
 const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x228B22 });
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 plane.rotation.x = -Math.PI / 2;
-plane.position.y = -1;
+plane.position.y = 0;
 scene.add(plane);
 
 // Add some random cubes
@@ -54,7 +54,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // Animation loop
-const fpsCamera = new FirstPersonCamera(camera,targetted)
+const fpsCamera = new FirstPersonCamera(camera,targetted,scene)
 const thirdPersonCamera = new ThirdPersonCamera(camera,targetted)
 
 
@@ -62,7 +62,6 @@ document.addEventListener("keydown", (e) => {
   switch (e.code) {
     case "KeyR":
       thirdPerson = !thirdPerson;
-      console.log("here");
       break;
   }
 
@@ -82,7 +81,6 @@ function animate() {
       thirdPersonCamera.update(timeElapsed);
     }
   }
-
   renderer.render(scene, fpsCamera.camera_);
 }
 
