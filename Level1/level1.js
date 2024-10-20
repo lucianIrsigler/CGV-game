@@ -344,7 +344,7 @@ function updateRedCubePosition() {
 const greenBlockGeometry = new THREE.BoxGeometry(3, 1, 3);
 const greenBlockMaterial = new THREE.MeshBasicMaterial({ color: 0x008000 });
 const greenBlock = new THREE.Mesh(greenBlockGeometry, greenBlockMaterial);
-greenBlock.position.set(-3, topThingy.position.y + 2, 35);
+greenBlock.position.set(-3, topThingy.position.y + 2, 39);
 scene.add(greenBlock);
 
 
