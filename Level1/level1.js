@@ -261,7 +261,7 @@ const spotLightHelper5 = new THREE.SpotLightHelper(spotLight5);
 points.push(spotLight5);
 
 //add dark ambient light
-const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
+const ambientLight = new THREE.AmbientLight(0x404040, 0.75); // Soft white light
 scene.add(ambientLight);
 
 // six light
@@ -394,7 +394,7 @@ const movement = { forward: 0, right: 0 };
 
 let health = 100;
 const healthNumberElement = document.getElementById('health-number');
-const damageRate = 40; // Define the damage rate
+const damageRate = 10; // Define the damage rate
 const healingRate = 10; // Define the healing rate
 
 // Event listeners for movement
@@ -465,6 +465,7 @@ function restartGame() {
 
  
 }
+
 function toggleLightIntensity(light) {
     light.intensity = 5;
 }
