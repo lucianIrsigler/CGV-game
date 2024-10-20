@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Bullet } from './bullet.js'; // Import the Bullet class
 
 // Scene and Camera Setup
 const scene = new THREE.Scene();
@@ -44,25 +45,6 @@ let moveRight = false;
 let rotationSpeed = 0.005; // Sensitivity of mouse movement
 let cubeRotationY = 0; // Track rotation around the Y-axis
 let verticalLook = 0; // Track vertical rotation
-
-// Array to hold bullets
-let bullets = []; // Array to hold bullets
-
-// Bullet class
-class Bullet {
-    constructor(position) {
-        this.geometry = new THREE.SphereGeometry(0.05, 10, 10); // Small sphere as a bullet parameters are (radius, widthSegments, heightSegments)
-        this.material = new THREE.MeshBasicMaterial({ color: 0xffffff }); // White color
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
-        this.mesh.position.copy(position); // Set initial position
-        this.velocity = new THREE.Vector3(0, 0, -1); // Direction of bullet movement
-    }
-
-    update() {
-        // Move the bullet in the direction of its velocity
-        this.mesh.position.add(this.velocity.clone().multiplyScalar(0.9)); // Speed of the bullet
-    }
-}
 
 // Raycaster setup
 const raycaster = new THREE.Raycaster();
@@ -114,9 +96,11 @@ document.addEventListener('mousemove', (event) => {
     verticalLook -= deltaY; // Adjust vertical look
 });
 
-// Handle mouse click to shoot bullets
+// Array to hold bullets
+let bullets = [];
+
 document.addEventListener('mousedown', (event) => {
-    if (event.button === 0) { // Left mouse button
+    if (event.button === 0 && !isSettingsMenuOpen) { // Only shoot if menu is not open
         const bullet = new Bullet(cube.position.clone()); // Create bullet at the cube's position
 
         // Calculate the bullet direction based on the camera's forward direction
@@ -127,9 +111,10 @@ document.addEventListener('mousedown', (event) => {
         bullet.velocity.copy(direction); // Set bullet velocity to point in the camera's direction
         bullets.push(bullet); // Add bullet to the array
         scene.add(bullet.mesh); // Add bullet mesh to the scene
+        
+        scene.add(bullet.light); // Add bullet light to the scene
     }
 });
-
 
 // Update camera position to always follow the cube
 function updateCamera() {
@@ -151,6 +136,8 @@ function updateCamera() {
 
 // Move the cube (player) based on WASD input
 function movePlayer() {
+    if (isSettingsMenuOpen) return; // Prevent movement if menu is open
+
     const moveSpeed = 0.1;
     let direction = new THREE.Vector3();
 
@@ -186,11 +173,9 @@ function animate() {
 
     // Update bullets
     for (let i = bullets.length - 1; i >= 0; i--) {
-        bullets[i].update(); // Update bullet position
-        // Remove bullet if it goes out of bounds
-        if (bullets[i].mesh.position.z > 50) { // Adjust this value as needed
-            scene.remove(bullets[i].mesh); // Remove bullet from the scene
-            bullets.splice(i, 1); // Remove bullet from the array
+        const isActive = bullets[i].update(scene); // Pass scene to update the bullet
+        if (!isActive) {
+            bullets.splice(i, 1); // Remove bullet from the array if inactive (traveled max distance)
         }
     }
 
@@ -205,11 +190,45 @@ window.addEventListener("resize", () => {
 });
 
 // Pointer Lock Functionality
+let isSettingsMenuOpen = false; // Flag to track if settings menu is open
+
 function lockPointer() {
-    renderer.domElement.requestPointerLock();
+    if (!isSettingsMenuOpen) { // Only lock pointer if settings menu is not open
+        renderer.domElement.requestPointerLock();
+    }
 }
 
-document.addEventListener('click', lockPointer);
+document.addEventListener('click', () => {
+    lockPointer(); // Attempt to lock pointer on click
+});
+
+// Update settingsMenu.js to toggle the isSettingsMenuOpen flag
+// settingsMenu.js
+
+// Function to open settings modal
+function openSettings() {
+    settingsModal.style.display = 'block';
+    document.exitPointerLock(); // Exit pointer lock when opening settings
+    isSettingsMenuOpen = true; // Set flag to indicate settings menu is open
+}
+
+// Function to close settings modal
+function closeSettings() {
+    settingsModal.style.display = 'none';
+    lockPointer(); // Re-enable pointer lock when closing settings
+    isSettingsMenuOpen = false; // Reset flag when settings menu is closed
+}
+
+// Function to toggle settings modal when ESC is pressed
+window.addEventListener('keydown', (event) => {
+    if (event.key === "Escape") {
+        if (settingsModal.style.display === 'none' || settingsModal.style.display === '') {
+            openSettings();
+        } else {
+            closeSettings();
+        }
+    }
+});
 
 // Create Crosshair
 const crosshair = document.createElement('div');

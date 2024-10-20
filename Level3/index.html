@@ -1,13 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>My first three.js app</title>
-		<style>
-			body { margin: 0; }
-		</style>
-	</head>
-	<body>
-		<script type="module" src="/level3.js"></script>
-	</body>
+<head>
+	<meta charset="utf-8">
+	<title>My first three.js app</title>
+	<style>
+		body { margin: 0; }
+
+		/* Modal background */
+		.modal {
+			display: none; /* Hidden by default */
+			position: fixed;
+			z-index: 1000; /* Ensure it sits on top */
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+		}
+
+		/* Modal content */
+		.modal-content {
+			background-color: white;
+			margin: 15% auto;
+			padding: 20px;
+			border-radius: 10px;
+			width: 300px;
+			text-align: center;
+		}
+
+		/* Close button */
+		.close {
+			position: absolute;
+			top: 10px;
+			right: 20px;
+			font-size: 24px;
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+
+	<!-- Settings Modal (Popup) -->
+	<div id="settingsModal" class="modal">
+		<div class="modal-content">
+			<span id="closeModal" class="close">&times;</span>
+			<h2>Settings</h2>
+			<label>
+				<input type="radio" id="firstPerson" name="viewMode" value="firstPerson" checked>
+				First Person
+			</label>
+			<label>
+				<input type="radio" id="thirdPerson" name="viewMode" value="thirdPerson">
+				Third Person
+			</label>
+		</div>
+	</div>
+
+	<script type="module" src="/level3.js"></script>
+	<script src="/settingsMenu.js"></script>
+</body>
 </html>
