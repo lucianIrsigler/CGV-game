@@ -19,11 +19,11 @@ scene.add(directionalLight);
 // Crates
 const textureLoader = new THREE.TextureLoader();
 const colorMap = textureLoader.load('Planks/PlanksColor.jpg');
-const aoMap = textureLoader.load('PlanksAmbientOcclusion.jpg');
-const displacementMap = textureLoader.load('PlanksDisplacement.jpg');
-const metalnessMap = textureLoader.load('PlanksMetalness.jpg');
-const normalMapDX = textureLoader.load('PlanksNormalDX.jpg');
-const roughnessMap = textureLoader.load('PlanksRoughness.jpg');
+const aoMap = textureLoader.load('Planks/PlanksAmbientOcclusion.jpg');
+const displacementMap = textureLoader.load('Planks/PlanksDisplacement.jpg');
+const metalnessMap = textureLoader.load('Planks/PlanksMetalness.jpg');
+const normalMapDX = textureLoader.load('Planks/PlanksNormalDX.jpg');
+const roughnessMap = textureLoader.load('Planks/PlanksRoughness.jpg');
 
 [colorMap, aoMap, displacementMap, metalnessMap, normalMapDX, roughnessMap].forEach(texture => {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -84,7 +84,7 @@ const baseMaterial = new THREE.MeshStandardMaterial({
     map: baseTexture
 });
 
-//Lamp Stuff
+
 //Lamp Stuff
 let currentLamp = lamps.lampOne; 
 Object.values(lamps).forEach((currentLamp) => {
