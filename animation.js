@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';  /
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as cameraWrapper from "./camera";
 import * as misc from "./src/scripts/util/generatePlatform";
-import * as character from "./character";
+import * as character from "./src/data/characters";
 
 const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");

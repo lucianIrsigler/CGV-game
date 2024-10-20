@@ -2,9 +2,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';  // Correct ES6 import
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as dat from "dat.gui";
-import * as cameraWrapper from "./camera";
-import * as character from "./character";
-import {monsters} from "./objects/monsters";
+import * as cameraWrapper from "./src/scripts/Camera/camera";
+import {monsters} from "./src/data/monsters";
 
 let highestVelocity = 0.15;
 
@@ -15,7 +14,6 @@ scene.background = new THREE.Color(0xcccccc);
 // Camera setup
 // const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const camera = new cameraWrapper.CameraClass( new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000))
-
 camera.setPosition({x:150,y:300,z:150}); 
 
 // Renderer setup
@@ -69,6 +67,13 @@ box1.castShadow = true;
 box1.position.set(0,0,-30); 
 box1.name="player";
 scene.add(box1);
+// box1.visible=false;
+
+
+const cameraHelper = new THREE.Object3D();
+cameraHelper.position.copy(box1.position);
+scene.add(cameraHelper);
+
 
 
 
@@ -88,63 +93,16 @@ SpotLight.shadow.camera.near = 0.5;
 SpotLight.shadow.camera.far = 2000;
 SpotLight.shadow.camera.fov = 20
 scene.add(SpotLight);
-SpotLight.target = box1;
+SpotLight.target = cameraHelper;
 scene.add(SpotLight.target);
 
 
-const dSpotHelper = new THREE.SpotLightHelper(SpotLight);
-scene.add(dSpotHelper);
+// const dSpotHelper = new THREE.SpotLightHelper(SpotLight);
+// scene.add(dSpotHelper);
 
-scene.add(new THREE.CameraHelper(SpotLight.shadow.camera));
+// scene.add(new THREE.CameraHelper(SpotLight.shadow.camera));
 
 
-
-// function onKeyDown(event) {
-//     switch (event.code) {
-//       case "ArrowUp":
-//         player.moveForward = true;
-//         break;
-//       case "ArrowDown":
-//         player.moveBackward = true;
-//         break;
-//       case "ArrowLeft":
-//         player.rotateLeft = true;
-//         break;
-//       case "ArrowRight":
-//         player.rotateRight = true;
-//         break;
-//       case "Space":
-//         if (!player.isJumping()) {
-//             player.setJumping(true);
-//           console.log("HERE");
-//           player.velocityY = highestVelocity; // Set initial jump velocity
-//         }
-//         break;
-//       case "KeyQ":
-//         createFallingSphere();
-//         break;
-//     }
-//   }
-
-// function onKeyUp(event) {
-// switch (event.code) {
-//     case "ArrowUp":
-//         player.moveForward = false;
-//     break;
-//     case "ArrowDown":
-//         player.moveBackward = false;
-//     break;
-//     case "ArrowLeft":
-//         player.rotateLeft = false;
-//     break;
-//     case "ArrowRight":
-//         player.rotateRight = false;
-//     break;
-// }
-// }
-
-// window.addEventListener("keydown", onKeyDown);
-// window.addEventListener("keyup", onKeyUp);
 
 
 /*
@@ -154,9 +112,10 @@ scene.add(new THREE.CameraHelper(SpotLight.shadow.camera));
     longest distance. 
     
     If the box comes before the player, then hidden
-    If the box is -1, and player isnt, then found
     If the player is -1, then hidden
+    If the box is -1, and player isnt, then found
     If box comes after the player, then found
+
 
 */
 function isObjectInSpotlight(spotLight) {
@@ -181,7 +140,7 @@ function isObjectInSpotlight(spotLight) {
     const boxIndex = intersects.findIndex(intersect => intersect.object.name === "box");
     const playerIndex = intersects.findIndex(intersect => intersect.object.name === "player");
 
-    if ((boxIndex==-1 && playerIndex>0) || (playerIndex<boxIndex)){
+    if ((boxIndex==-1 && playerIndex!=-1) || (playerIndex<boxIndex)){
         return true;
     }else{
         return false;
@@ -256,16 +215,18 @@ function animate() {
         model.position.z
     )
 
-    model.lookAt(box1.position)
+    model.lookAt(cameraHelper.position)
     }
 
     if (isObjectInSpotlight(SpotLight)) {
         box1.material.color.set(0x00FF00);  // Green if in spotlight
+        box1.visible=true;
     } else {
         box1.material.color.set(0xFF0000);  // Red if not
+        box1.visible=false;
     }
 
-    dSpotHelper.update();
+    // dSpotHelper.update();
 
     //  player.updatePlayerPosition();
 
