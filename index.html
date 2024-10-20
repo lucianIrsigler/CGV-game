@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>HELLO</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Three.js Game with Keypress Menu</title>
     <style>
-        body { margin: 0; overflow: hidden; }
+        body { margin: 0; overflow: hidden;cursor: none; }
         canvas { display: block; }
+        
         #menu {
             position: absolute;
             top: 50%;
@@ -14,6 +16,7 @@
             transform: translate(-50%, -50%);
             text-align: center;
             display: none; /* Initially hidden */
+            
         }
         .menu-button {
             display: block;
@@ -28,9 +31,77 @@
         .menu-button:hover {
             background-color: #555;
         }
+
+        #aimingDot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background-color: whitesmoke;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+
+        #health-bar-container {
+        width: 200px;
+        height: 20px;
+        background-color: #555;
+        border: 1px solid #000;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        display: flex;
+        align-items: center;
+        }
+
+
+        #health-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .progress-bar-container{
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            width: 100%;
+            height:  100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #progress-bar{
+            width: 30%;
+            margin-top: 0.5%;
+            height: 2%;
+        }
+
+        label{
+            color: white;
+            font-size: 2rem;
+        }
     </style>
 </head>
 <body>
+
+    <div class="progress-bar-container">
+        <label for="progress-bar">Loading...</label>
+        <progress id="progress-bar" value="0" max="100"></progress>
+    </div>
+    <div id="health-container">
+        Health: <span id="health-number">100</span>
+    </div>
+
     <div id="gameOverScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); color: white; text-align: center; padding-top: 20%;">
         <h1>Stay in the light</h1>
         <button id="restartButton" style="padding: 10px 20px; font-size: 20px;">Restart</button>
@@ -39,7 +110,8 @@
         <button class="menu-button" id="lvl1">Level 1</button>
         <button class="menu-button" id="lvl2">Level 2</button>
         <button class="menu-button" id="lvl3">Level 3</button>
+        <button class="menu-button" id="lvl4">blah blah</button>
     </div>
-    <script type="module" src="main.js"></script>
+    <script type="module" src="movement.js"></script>
 </body>
 </html>
