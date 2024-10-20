@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
 import { door } from './doorPos1.js';
 import { lamps } from './lampPos1.js'; // Import the lamps object from lampPos.js
+import { lights } from 'three/webgpu';
 const loader = new GLTFLoader();
 let model;
 
@@ -393,7 +394,7 @@ const movement = { forward: 0, right: 0 };
 
 let health = 100;
 const healthNumberElement = document.getElementById('health-number');
-const damageRate = 10; // Define the damage rate
+const damageRate = 40; // Define the damage rate
 const healingRate = 10; // Define the healing rate
 
 // Event listeners for movement
@@ -458,14 +459,15 @@ function restartGame() {
         texture.needsUpdate = true; // Mark texture for update
     });
 
-    // Reinitialize lights if necessary
-    lights.forEach(light => {
-        scene.add(light); // Ensure light is added to the scene
-    });
+     // Use the toggleLightIntensity function to turn on all lights at intensity 5
+     points.forEach(light => toggleLightIntensity(light));
+    
 
  
 }
-
+function toggleLightIntensity(light) {
+    light.intensity = 5;
+}
 
 restartButton.addEventListener("click", restartGame);
 
