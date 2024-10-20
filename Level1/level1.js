@@ -4,6 +4,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.js';
 import { door } from './doorPos1.js';
 import { lamps } from './lampPos1.js'; // Import the lamps object from lampPos.js
+import { lights } from 'three/webgpu';
 const loader = new GLTFLoader();
 let model;
 
@@ -260,7 +261,7 @@ const spotLightHelper5 = new THREE.SpotLightHelper(spotLight5);
 points.push(spotLight5);
 
 //add dark ambient light
-const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
+const ambientLight = new THREE.AmbientLight(0x404040, 0.75); // Soft white light
 scene.add(ambientLight);
 
 // six light
@@ -319,6 +320,32 @@ const topThingy = new THREE.Mesh(platformGeometry, platformMaterial);
 topThingy.position.y = 10;
 topThingy.position.z = 20;
 scene.add(topThingy);
+
+// Create a red cube
+const redCubeGeometry = new THREE.BoxGeometry(3, 1, 3);
+const redCubeMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+const redCube = new THREE.Mesh(redCubeGeometry, redCubeMaterial);
+
+// Set the red cube's initial position to match topThingy
+redCube.position.set(topThingy.position.x, topThingy.position.y+2, topThingy.position.z);
+
+// Add the red cube to the scene
+scene.add(redCube);
+
+
+function updateRedCubePosition() {
+    redCube.position.x = character.position.x;
+    redCube.position.z = character.position.z;
+  }
+  
+
+
+  // Green block above topThingy at x = -3 and z = 35
+const greenBlockGeometry = new THREE.BoxGeometry(3, 1, 3);
+const greenBlockMaterial = new THREE.MeshBasicMaterial({ color: 0x008000 });
+const greenBlock = new THREE.Mesh(greenBlockGeometry, greenBlockMaterial);
+greenBlock.position.set(-3, topThingy.position.y + 2, 39);
+scene.add(greenBlock);
 
 
 const backWall = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
@@ -456,14 +483,9 @@ function restartGame() {
     // Reload textures
     textures.forEach(texture => {
         texture.needsUpdate = true; // Mark texture for update
-    });
+    });  
 
-    // Reinitialize lights if necessary
-    lights.forEach(light => {
-        scene.add(light); // Ensure light is added to the scene
-    });
-
- 
+    
 }
 
 
@@ -585,7 +607,8 @@ function animate() {
 // Check proximity to the door
 checkDoorProximity();
 
-// Existing animation logic...
+ // Update the red cube's position
+ updateRedCubePosition();
 
 // Handle the 'E' key press to open the door
 document.addEventListener('keydown', (e) => {
