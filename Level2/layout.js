@@ -62,13 +62,6 @@ function definePlatformAction(platformIndex, action) {
     platformActions[platformIndex] = action;
 }
 
-// function addCrate(x, y, z) {
-//     const crate = new THREE.Mesh(crateGeometry, crateMaterial);
-//     crate.position.set(x, y, z);
-//     crate.lookAt(0, y, 0); // Make the crate face the center
-//     platformGroup.add(crate); // Add the crate to the group
-// }
-
 // Load textures for the base and platforms
 const platformTexture = textureLoader.load('PavingStones.jpg');
 const baseTexture = textureLoader.load('PavingStones.jpg');
@@ -195,17 +188,6 @@ for (let i = 0; i < numPlatforms; i++) {
 
     // Push the combinedGroup to the platformArray
     platformArray.push(combinedGroup);
-
-    // if (i % 3 === 0) {
-    //     const lampPostGeometry = new THREE.CylinderGeometry(lampPostRadius, lampPostRadius, lampPostHeight, 16);
-    //     const lampPostMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
-    //     const lampPost = new THREE.Mesh(lampPostGeometry, lampPostMaterial);
-
-    //     lampPost.position.set(
-    //         Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2,
-    //         platformY + platformHeight / 2 + lampPostHeight / 2,
-    //         Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2
-    //     );
 
     if (i % 3 === 0 || i === numPlatforms - 1) {
         const lampX = Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2;
