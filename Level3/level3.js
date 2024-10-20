@@ -23,7 +23,19 @@ function restartGame() {
 
     // Reset health
     enemyCurrentHealth = enemyMaxHealth; // Reset current health to max
+    enemyHits = 0; // Reset hit counter
+    document.getElementById('health-bar').style.display = 'block';
     updateHealthBar(); // Update health bar to full width
+    // make bar full
+    
+
+
+    // make enemy visible again
+    cubeEnemy.visible = true;
+    enemyLight.visible = true;
+
+    // crosshair
+    crosshair.showCrosshair();
 }
 
 // Renderer Setup
@@ -48,6 +60,11 @@ const cubeEnemy = new THREE.Mesh(geometryEnemy, materialEnemy);
 cubeEnemy.position.set(10, 2, 5); // Set initial position of the cube
 scene.add(cubeEnemy);
 
+// Create a point light to simulate the enemy emitting light
+const enemyLight = new THREE.PointLight(0xff0400, 1, 100); // Color, intensity, distance
+enemyLight.position.copy(cubeEnemy.position); // Set the light position to the cube's position
+scene.add(enemyLight);
+
 // Enemy movement variables
 const enemyMovementSpeed = 0.1; // Adjusted speed for slower movement
 const moveDistance = 20; // Distance to move in one direction before changing
@@ -71,6 +88,9 @@ function updateEnemyMovement() {
         // Move the enemy in the current direction
         cubeEnemy.position.add(enemyDirection.clone().multiplyScalar(enemyMovementSpeed));
         distanceMoved += enemyMovementSpeed;
+
+        // Update the position of the light to follow the cube
+        enemyLight.position.copy(cubeEnemy.position);
 
         // Check if the enemy has moved the specified distance
         if (distanceMoved >= moveDistance) {
@@ -125,7 +145,7 @@ wall4.position.set(-50, 50, 0);
 scene.add(wall4);
 
 // Create Ambient Light
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.03); // Soft white light, 0.5 is the intensity
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.01); // Soft white light, 0.5 is the intensity
 scene.add(ambientLight);
 
 // Convert lamps object to an array
@@ -396,10 +416,7 @@ function handleEnemyHit() {
         updateHealthBar(); // Update the health bar after taking damage
 
         if (enemyCurrentHealth <= 0) {
-            console.log("You win!"); // Display win message if health reaches zero
-            enemyCurrentHealth = 0; // Prevent negative health
-            gameOverScreen.style.display = "block"; // Show game over screen
-            document.exitPointerLock(); // Exit mouse lock
+            youWin(); // Call the win condition function
         } 
         else {
             // Change the enemy color to a lighter red temporarily
@@ -421,4 +438,17 @@ function detectCollision(bullet, enemy) {
     const enemyBoundingBox = new THREE.Box3().setFromObject(enemy);
 
     return bulletBoundingBox.intersectsBox(enemyBoundingBox);
+}
+
+// Function to handle win condition
+function youWin() {
+    console.log("You win!"); // Display win message if health reaches zero
+    enemyCurrentHealth = 0; // Prevent negative health
+    gameOverScreen.style.display = "block"; // Show game over screen
+    document.exitPointerLock(); // Exit mouse lock
+    document.getElementById('health-bar').style.display = 'none';
+    crosshair.hideCrosshair();
+    cubeEnemy.visible = false;
+    enemyLight.visible = false;
+
 }
