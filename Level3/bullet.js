@@ -1,8 +1,11 @@
 import * as THREE from 'three'; // Import necessary modules
+// const bulletSound = new Audio('bullet_sound.mp3'); // Load gunshot sound
+// bulletSound.volume = 0.5; // Adjust the volume
 
 // Bullet class
 export class Bullet {
     constructor(position, color) {
+        // bulletSound.play(); // Play gunshot sound when bullet is created
         this.geometry = new THREE.SphereGeometry(0.05, 10, 10); // Small sphere as bullet
         this.material = new THREE.MeshBasicMaterial({ color: color }); // Use the provided color
         this.mesh = new THREE.Mesh(this.geometry, this.material);

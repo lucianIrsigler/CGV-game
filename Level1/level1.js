@@ -5,9 +5,41 @@ import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.j
 import { door } from './doorPos1.js';
 import { lamps } from './lampPos1.js'; // Import the lamps object from lampPos.js
 import { lights } from 'three/webgpu';
+import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
+
 const loader = new GLTFLoader();
 let model;
 let characterLight; 
+//Door audio things
+let audioContext;
+let doorCreakBuffer; 
+
+function initAudio() {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    loadDoorCreakSound();
+}
+
+// Load door creak sound
+function loadDoorCreakSound() {
+    fetch('wooden-door-creaking.mp3')
+        .then(response => response.arrayBuffer())
+        .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+        .then(audioBuffer => {
+            doorCreakBuffer = audioBuffer;
+        })
+        .catch(error => console.error('Error loading door creak sound:', error));
+}
+
+// Play door creak sound
+function playDoorCreakSound() {
+    if (doorCreakBuffer) {
+        const source = audioContext.createBufferSource();
+        source.buffer = doorCreakBuffer;
+        source.connect(audioContext.destination);
+        source.start();
+    }
+}
+
 
 // Scene setup
 const gameOverScreen = document.getElementById("gameOverScreen");
@@ -54,40 +86,64 @@ const controls = new FirstPersonControls(camera, renderer.domElement);
 //controls.movementSpeed = 2; // Lower movement speed
 controls.lookSpeed = 0.01; // Lower look speed
 
-//TExtures
+
 //Texture for ground 
-const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load('PavingStones.jpg', (texture) => {
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(1, 5);
-});
+const groundTextures = loadTextures('PavingStones');
+applyTextureSettings(groundTextures, 1, 5);
+
 //Texture for walls
-const textureLoaderWall = new THREE.TextureLoader();
-const textureWall = textureLoaderWall.load('PavingStones.jpg', (texture) => {
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(4, 1);
-});
-// Texture for platforms 
-const textureLoaderPlatforms = new THREE.TextureLoader();
-const texturePlatform = textureLoaderPlatforms.load('PavingStones.jpg', (texture) => {
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(3, 2);
-});
+const wallTextures = loadTextures('PavingStones');
+applyTextureSettings(wallTextures, 4, 1); 
+
+//Texture for platforms 
+const platformTextures = loadTextures('PavingStones');
+applyTextureSettings(platformTextures, 3, 2); 
+
 const sideWallGeometry = new THREE.BoxGeometry(50, 1, 20);
-const sideWallMaterial = new THREE.MeshStandardMaterial({ map: textureWall }); 
+// const sideWallMaterial = new THREE.MeshStandardMaterial({ map: textureWall }); 
+const sideWallMaterial = new THREE.MeshStandardMaterial({
+    map: wallTextures.colorMap,
+    aoMap: wallTextures.aoMap,
+    displacementMap: wallTextures.displacementMap,
+    metalnessMap: wallTextures.metalnessMap,
+    normalMap: wallTextures.normalMapDX, 
+    roughnessMap: wallTextures.roughnessMap,
+    displacementScale: 0,
+    metalness: 0.1,
+    roughness: 0.5
+});
+
+
 const platformGeometry = new THREE.BoxGeometry(10, 1, 50);
-const platformMaterial = new THREE.MeshStandardMaterial({ map: texture }); 
+const platformMaterial = new THREE.MeshStandardMaterial({
+    map: groundTextures.colorMap,
+    aoMap: groundTextures.aoMap,
+    displacementMap: groundTextures.displacementMap,
+    metalnessMap: groundTextures.metalnessMap,
+    normalMap: groundTextures.normalMapDX, 
+    roughnessMap: groundTextures.roughnessMap,
+    displacementScale: 0,
+    metalness: 0.1,
+    roughness: 0.5
+});
+
 const characterGeometry = new THREE.BoxGeometry(1, 1, 1);
 const characterMaterial = new THREE.MeshStandardMaterial({ 
     color: 0xff0000, 
     transparent: true, 
     opacity: 0.0
 });
-const platformsMaterial = new THREE.MeshStandardMaterial({ map: texturePlatform });
-
+const platformsMaterial = new THREE.MeshStandardMaterial({
+    map: platformTextures.colorMap,
+    aoMap: platformTextures.aoMap,
+    displacementMap: platformTextures.displacementMap,
+    metalnessMap: platformTextures.metalnessMap,
+    normalMap: platformTextures.normalMapDX, 
+    roughnessMap: platformTextures.roughnessMap,
+    displacementScale: 0,
+    metalness: 0.1,
+    roughness: 0.5
+});
 
 // Convert lamps object to an array
 const lampsArray = Object.values(lamps);
@@ -164,10 +220,10 @@ function openDoor() {
     if (!isDoorOpen && doorAnimationAction) {
         doorAnimationAction.reset();
         doorAnimationAction.play();
-        isDoorOpen = true; // Set the flag to true so it won't open again
-        // Transition to success screen
-        gameOverScreen.style.display = 'block'; // Assuming this is your success screen
-        gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>"; // Update success message
+        isDoorOpen = true;
+        playDoorCreakSound(); // Play the door creak sound
+        gameOverScreen.style.display = 'block';
+        gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>";
     }
 }
 
@@ -395,6 +451,11 @@ let health = 100;
 const healthNumberElement = document.getElementById('health-number');
 const damageRate = 20; // Define the damage rate
 const healingRate = 10; // Define the healing rate
+
+
+//Event listener for door sound 
+window.addEventListener('load', initAudio);
+
 
 //inputs
 // Event listeners for movement
