@@ -11,6 +11,8 @@ import { FirstPersonControls } from 'three/examples/jsm/controls/FirstPersonCont
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
+
+
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
@@ -18,7 +20,80 @@ document.body.appendChild(renderer.domElement);
 const controls = new FirstPersonControls(camera, renderer.domElement);
 controls.movementSpeed = 10;
 controls.lookSpeed = 0.1;
-camera.position.set(55, 2,2);
+
+const characterGeometry = new THREE.BoxGeometry(1, 1, 1);
+const characterMaterial = new THREE.MeshStandardMaterial({ 
+    color: 0xff0000, 
+    transparent: true, 
+    opacity: 0.0
+});
+// Create a simple character (a cube)
+const character = new THREE.Mesh(characterGeometry, characterMaterial);
+character.position.set(55,0.5, 2.5);
+scene.add(character);
+let moveSpeed = 0.1;
+let rotateSpeed = 0.1;
+let loaded = false;
+//jump variables
+let jumpCount = 0; 
+const gravity = -0.01; // Adjusted gravity value
+let isJumping = false; // Track if the character is jumping
+let velocityY = 0; // Vertical velocity for jumping
+// Position camera initially at the same place as the character
+camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
+character.rotation.y += Math.PI;
+//inputs
+// Event listeners for movement
+document.addEventListener('keydown', (e) => {
+    switch (e.key) {
+        case 'w':
+            movement.forward = 1;
+            break; // Move forward
+        case 's':
+            movement.forward = -1; break; // Move backward
+        case 'a':
+            movement.right = -1; break; // Move left
+        case 'd':
+            movement.right = 1; break; // Move right
+        case 'KeyQ': 
+            break;
+        case 'KeyE': // Use "E" key to open the door
+           
+            break;
+        case ' ':
+            if (jumpCount < 2) { //Jumping twice
+                isJumping = true;
+                velocityY = 0.15;
+                jumpCount++; 
+            }
+            break;
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    switch (e.key) {
+        case 'w':
+        case 's':
+            movement.forward = 0; break;
+        case 'a':
+        case 'd':
+            movement.right = 0; break;
+    }
+});
+
+// Movement state
+const movement = { forward: 0, right: 0 };
+
+
+function updateCameraPosition() {
+    camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
+    camera.rotation.y = character.rotation.y;
+    loaded = true;
+    
+}
+//add ambient light
+const ambientLight3 = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight3);
 
 // Crates
 const textureLoader = new THREE.TextureLoader();
@@ -393,9 +468,32 @@ function animate(time) {
     // Check if 100ms has passed since the last update
     if (time - lastUpdate >= updateInterval) {
         lastUpdate = time; // Update the last update time
+        if (isJumping) {
+            character.position.y += velocityY;
+            velocityY += gravity;
+        }
+        velocityY += gravity;
+        // Calculate camera direction
+        const cameraDirection = new THREE.Vector3();
+        camera.getWorldDirection(cameraDirection);
+        cameraDirection.y = 0; // Ignore vertical direction
+        cameraDirection.normalize();
+        
+        // Calculate right direction
+        const rightDirection = new THREE.Vector3();
+        rightDirection.crossVectors(cameraDirection, new THREE.Vector3(0, 1, 0)); // Get the right direction
+        
+        // Update character position based on movement
+        if (movement.forward) {
+            character.position.add(cameraDirection.multiplyScalar(moveSpeed * movement.forward));
+        }
+        if (movement.right) {
+            character.position.add(rightDirection.multiplyScalar(moveSpeed * movement.right));
+        }
 
+    updateCameraPosition();
         // Update the camera controls
-        controls.update(0.1);
+        controls.update(0.1)
 
         // Constrain camera's Y position between minHeight and maxHeight
         // camera.position.y = Math.min(Math.max(camera.position.y, minHeight), maxHeight);
