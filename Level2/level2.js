@@ -14,10 +14,19 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-//Directional light for testing
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(10, 10, 10); // Position the light
-scene.add(directionalLight);
+// Directional light for testing
+const directionalLight1 = new THREE.DirectionalLight(0x0000ff, 0.2);
+directionalLight1.position.set(0, 50, 0); // Position the light
+directionalLight1.target.position.set(0, 100, 0); // Make the light face upwards
+scene.add(directionalLight1);
+scene.add(directionalLight1.target); // Add the target to the scene
+
+// Add a second directional light opposite to the first
+const directionalLight2 = new THREE.DirectionalLight(0x0000ff, 0.2);
+directionalLight2.position.set(0, -50, 0); // Position the light
+directionalLight2.target.position.set(0, -100, 0); // Make the light face downwards
+scene.add(directionalLight2);
+scene.add(directionalLight2.target); // Add the target to the scene
 
 // Crates
 const textureLoader = new THREE.TextureLoader();
@@ -72,8 +81,9 @@ const baseTexture = textureLoader.load('PavingStones.jpg');
 
 // Set texture wrapping and repeat if needed
 platformTexture.wrapS = platformTexture.wrapT = THREE.RepeatWrapping;
+platformTexture.repeat.set(0.1, 0.1); // Increase the wrapping scale
 baseTexture.wrapS = baseTexture.wrapT = THREE.RepeatWrapping;
-
+baseTexture.repeat.set(5, 5);
 // Apply textures to the materials
 const platformMaterial = new THREE.MeshStandardMaterial({
     map: platformTexture.colorMap,
@@ -105,11 +115,18 @@ Object.values(gun).forEach((currentGun) => {
       model.scale.set(currentGun.scaleX, currentGun.scaleY, currentGun.scaleZ);
       model.castShadow = true;
   
-      const gunLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
-      gunLight.position.set(currentGun.positionX, currentGun.positionY + 2, currentGun.positionZ); 
+      const gunLight = new THREE.PointLight(0xffffff, 5, 15); // Purple light 
+      gunLight.position.set(-53, 62, -15); 
       model.rotation.y = THREE.MathUtils.degToRad(-110);
 
       scene.add(gunLight);
+
+      // Add the gun model to the animation loop for rotation
+      function rotateGun() {
+          model.rotation.y += 0.01; // Adjust the speed of rotation as needed
+          requestAnimationFrame(rotateGun);
+      }
+      rotateGun();
     }, undefined, function (error) {
       console.error('An error happened while loading the gun model:', error);
     });
@@ -232,16 +249,16 @@ for (let i = 0; i < numPlatforms; i++) {
 
     // Define specific actions for platforms
     switch (true) {
-        case (i === 4 || i === 8 || i === 20):
+        case (i === 4 || i === 8 ):
             definePlatformAction(i, { type: 'leftright', speed: 0.002, range: 2 });
             break;
-        case (i === 5 || i === 7 || i === 16):
+        case (i === 5 || i === 7 || i === 19):
             definePlatformAction(i, { type: 'rightleft', speed: 0.002, range: 2 });
             break;
-        case (i === 10 || i === 14 || i === 17):
+        case (i === 10 || i === 14 || i === 16 || i === 17 ):
             definePlatformAction(i, { type: 'updown', speed: 0.002, range: 2 });
             break;
-        case (i === 11 || i === 13 || i === 19):
+        case (i === 11 || i === 13 || i === 20):
             definePlatformAction(i, { type: 'downup', speed: 0.002, range: 2 });
             break;
         case (i === 22 || i === 25):
@@ -259,6 +276,7 @@ for (let i = 0; i < numPlatforms; i++) {
 const loader = new GLTFLoader();
 let lampIndex = 0;
 
+// Inside the lamps loading section
 Object.values(lamps).forEach((currentLamp) => {
     loader.load(currentLamp.scene, function (gltf) {
         let model = gltf.scene;
@@ -278,9 +296,20 @@ Object.values(lamps).forEach((currentLamp) => {
 
                 platform.add(model);
 
-                const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 30); // Purple light 
-                lampLight.position.set(0, 2, 0); // Position relative to the lamp model
-                model.add(lampLight);
+                // Adjust the light position to point downwards
+                // const lampLight = new THREE.PointLight(0xA96CC3, 15, 15); // Purple light 
+                // lampLight.position.set(0, 2, 0); // Position it below the lamp model
+                // model.add(lampLight);
+                
+                // Create a cone light to point at the platform
+                const coneLight = new THREE.SpotLight(0xA96CC3, 15, 10, Math.PI / 4, 0.5, 2); // Adjust parameters as needed
+                coneLight.position.copy(lampPos).add(new THREE.Vector3(0, 5, 0)); // Adjust height if necessary
+                coneLight.target.position.copy(lampPos); // Point towards the lamp position
+                coneLight.target.updateMatrixWorld(); // Ensure target is updated
+                scene.add(coneLight.target); // Add target to scene
+                scene.add(coneLight); // Add the light to the scene
+                
+                // coneLight.rotation.x = Math.PI / 2; // Rotate the light to point downwards
 
                 break; // Move to the next lamp
             }
@@ -291,6 +320,7 @@ Object.values(lamps).forEach((currentLamp) => {
         console.error('An error happened while loading the lamp model:', error);
     });
 });
+
 
 // Calculate the min and max height for the circular base
 const minHeight = 0;
@@ -339,9 +369,14 @@ bottomCap.rotation.x = -Math.PI / 2;
 bottomCap.position.y = -roomHeight / 2 + 30;
 scene.add(bottomCap);
 
-const centerLight = new THREE.PointLight(0xffffff, 1, 100);
-centerLight.position.set(0, roomHeight / 2, 0); // Position the light in the center of the room
-scene.add(centerLight);
+// const centerLight = new THREE.PointLight(0xffffff, 1, 100);
+// centerLight.position.set(0, roomHeight / 2, 0); // Position the light in the center of the room
+// scene.add(centerLight);
+
+// Add a point light that radiates to the entirety of the cylinder
+// const pointLight = new THREE.PointLight(0x0000ff, 0.5, roomRadius * 2);
+// pointLight.position.set(0, roomHeight / 2, 0); // Position the light in the center of the room
+// scene.add(pointLight);
 
 // Animation loop
 let lastUpdate = 0; // Track the last update time
