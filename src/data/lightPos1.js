@@ -9,9 +9,8 @@ export const lightsConfigLevel1 = [
         penumbra: 0.5,
         decay: 2,
         position: { x: 0, y: 4, z: 0 },
-        target: {
-            position: { x: 0, y: 0, z: 0 }
-        }
+        target: { position: { x: 0, y: 0, z: 0 } },
+        helper: true
     },
     {
         name: "spotlight1",
@@ -23,9 +22,8 @@ export const lightsConfigLevel1 = [
         penumbra: 0.5,
         decay: 2,
         position: { x: -4, y: 3, z: 5 },
-        target: {
-            position: { x: -4, y: 0, z: 5 }
-        }
+        target: { position: { x: -4, y: 0, z: 5 } },
+        helper: true
     },
     {
         name: "spotlight2",
@@ -37,9 +35,8 @@ export const lightsConfigLevel1 = [
         penumbra: 0.5,
         decay: 2,
         position: { x: 4, y: 3, z: 10 },
-        target: {
-            position: { x: 4, y: 0, z: 10 }
-        }
+        target: { position: { x: 4, y: 0, z: 10 } },
+        helper: true
     },
     {
         name: "pointlight3",
@@ -48,7 +45,8 @@ export const lightsConfigLevel1 = [
         intensity: 1,
         distance: 4,
         position: { x: 0, y: 6, z: -9 },
-        target: null // PointLight doesn't need a target
+        target: null, // PointLight doesn't need a target
+        helper: true
     },
     {
         name: "spotlight4",
@@ -60,8 +58,66 @@ export const lightsConfigLevel1 = [
         penumbra: 0.5,
         decay: 2,
         position: { x: 4, y: 3, z: 25 },
-        target: {
-            position: { x: 4, y: 0, z: 25 }
-        }
+        target: { position: { x: 4, y: 0, z: 25 } },
+        helper: true
     },
+    {
+        name: "spotlight5",
+        type: "SpotLight",
+        color: 0x800080,
+        intensity: 5,
+        distance: 4,
+        angle: Math.PI / 6,
+        penumbra: 0.5,
+        decay: 2,
+        position: { x: 3, y: 5, z: 15 },
+        target: { position: { x: 3, y: 2, z: 15 } },
+        helper: true
+    },
+    {
+        name: "spotlight6",
+        type: "SpotLight",
+        color: 0x800080,
+        intensity: 5,
+        distance: 4,
+        angle: Math.PI / 6,
+        penumbra: 0.5,
+        decay: 2,
+        position: { x: -3, y: 7, z: 20 },
+        target: { position: { x: -3, y: 3, z: 20 } },
+        helper: true
+    },
+    {
+        name: "spotlight7",
+        type: "SpotLight",
+        color: 0x800080,
+        intensity: 5,
+        distance: 4,
+        angle: Math.PI / 6,
+        penumbra: 0.5,
+        decay: 2,
+        position: { x: 3, y: 5, z: 30 },
+        target: { position: { x: 3, y: 2, z: 30 } },
+        helper: true
+    },
+    {
+        name: "spotlight8",
+        type: "SpotLight",
+        color: 0x008000, // Green light
+        intensity: 5,
+        distance: 4,
+        angle: Math.PI / 6,
+        penumbra: 0.5,
+        decay: 2,
+        position: { x: -3, y: 7, z: 35 },
+        target: { position: { x: -3, y: 4, z: 35 } },
+        helper: true
+    },
+    {
+        name: "ambientLight",
+        type: "AmbientLight",
+        color: 0x101010,
+        intensity: 0.75,
+        helper: false
+    }
 ];
