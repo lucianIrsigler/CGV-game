@@ -518,12 +518,13 @@ function restartGame() {
         texture.needsUpdate = true; // Mark texture for update
     });  
 
-         // Use the toggleLightIntensity function to turn on all lights at intensity 5
-         points.forEach(light => toggleLightIntensity(light));
-         lampLights.forEach(lampLight => {
-            lampLight.intensity = 0.5; // Reset to original intensity
-        });
-         updateCharacterLight();
+        // Use the toggleLightIntensity function to turn on all lights at intensity 5
+    points.forEach(light => toggleLightIntensity(light));
+        lampLights.forEach(lampLight => {
+        lampLight.intensity = 0.5; // Reset to original intensity
+    });
+    
+    updateCharacterLight();
 }
 
 function toggleLightIntensity(light) {
