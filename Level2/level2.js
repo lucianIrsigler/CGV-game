@@ -93,7 +93,7 @@ function updateCameraPosition() {
 }
 //add ambient light
 const ambientLight3 = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight3);
+//scene.add(ambientLight3);
 
 // Crates
 const textureLoader = new THREE.TextureLoader();
