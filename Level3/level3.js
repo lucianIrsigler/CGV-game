@@ -716,7 +716,6 @@ function startDamageTimer() {
                 if (calcEuclid(cube.position.x, cube.position.z, light.x, light.z)) {
                     valid = true;
                     heal(healingRate);
-                    
                 }
             });
 

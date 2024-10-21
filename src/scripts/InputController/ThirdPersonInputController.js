@@ -17,8 +17,7 @@ export class ThirdPersonInputController {
         this.scene=scene;
         this.target_ = target;
 
-
-        this.speed_ = 0.1;
+        this.speed_ = 0.2;
         this.phi_ = 0;
         this.theta_ = 0;
 
@@ -37,7 +36,7 @@ export class ThirdPersonInputController {
     }
 
     reset(){
-      this.speed_ = 0.1;
+      this.speed_ = 0.2;
       this.phi_ = 0;
       this.theta_ = 0;
 
@@ -149,6 +148,9 @@ export class ThirdPersonInputController {
       }
 
 
+      
+
+
 
     updatePositon_(timeElapsedS){
         const moveDirection = new THREE.Vector3();
@@ -164,9 +166,8 @@ export class ThirdPersonInputController {
             this.verticalVelocity_ = this.jumpSpeed; // Set vertical velocity for jumping
             this.jumping = true;                      // Set jumping state
             this.grounded = false;                    // Player is now in the air
-          }
-          
-
+        }
+        
 
         if (this.keys_[KEYS.w]) {
             moveDirection.z += this.speed_;
@@ -241,7 +242,6 @@ export class ThirdPersonInputController {
         }
         else{
             this.phi_ += (-1*xh * 2);
-
             this.theta_ = clamp(this.theta_ + -yh * 5, -Math.PI / 3, Math.PI / 3);
         }
     

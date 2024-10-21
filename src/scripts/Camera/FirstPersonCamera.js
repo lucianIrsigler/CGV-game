@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {FirstPersonInputController} from "../InputController/FirstPersonInputController";
+import { Vector3 } from 'three.js';
 
 const KEYS = {
     w: 87,  // W key
@@ -27,10 +28,10 @@ export class FirstPersonCamera {
       this.translation_ = new THREE.Vector3();
       this.phi_ = 0;
       this.theta_ = 0;
-      this.movementspeed_ = 5;
+      this.movementspeed_ = 2;
       this.target_ = target;
 
-      this.sensitivity=5;
+      this.sensitivity=2;
 
       this.gravity = this.character.calcGravity();
       this.jumpSpeed = this.character.calcJumpSpeed();
@@ -92,13 +93,15 @@ export class FirstPersonCamera {
     
       // Create a ray starting from the player position, pointing downwards
       let start = this.translation_.clone();
+      // start.addVectors(start,new THREE.Vector3(0,0.6,0));
+
       let direction = new THREE.Vector3(0, -1, 0);  // Cast directly down
       this.rayCaster.set(start, direction);
       
       // Limit raycast to specific objects in the scene (e.g., ground only)
       const groundObjects = this.scene.children.filter(child => child.isGround);  // Tag or mark ground objects
       const intersects = this.rayCaster.intersectObjects(groundObjects, true);
-    
+      
       if (intersects.length > 0) {
         // If the intersection is within a certain distance, mark as grounded
         if (intersects[0].distance < this.groundCheckDistance_ && this.hasJumped) {
@@ -111,12 +114,11 @@ export class FirstPersonCamera {
         } else {
           this.grounded = false;
         }
-
         if (intersects[0].distance>this.groundCheckDistance_ && !this.hasJumped){
           this.hasJumped=true;
         }
       } else {
-        this.grounded = false;  // If no intersections found, we are in the air
+          this.grounded = false;  // If no intersections found, we are in the air
       }
     }
     
