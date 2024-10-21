@@ -5,6 +5,8 @@ import { FirstPersonControls } from 'three/addons/controls/FirstPersonControls.j
 import { door } from './doorPos1.js';
 import { lamps } from './lampPos1.js'; // Import the lamps object from lampPos.js
 import { lights } from 'three/webgpu';
+import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
+
 const loader = new GLTFLoader();
 let model;
 let characterLight; 
@@ -84,59 +86,45 @@ const controls = new FirstPersonControls(camera, renderer.domElement);
 //controls.movementSpeed = 2; // Lower movement speed
 controls.lookSpeed = 0.01; // Lower look speed
 
-//TExtures
-// const textureLoader = new THREE.TextureLoader();
-// const texture = textureLoader.load('PavingStones.jpg', (texture) => {
-//   texture.wrapS = THREE.RepeatWrapping;
-//   texture.wrapT = THREE.RepeatWrapping;
-//   texture.repeat.set(1, 5);
-// });
 
 //Texture for ground 
-const textureLoader = new THREE.TextureLoader();
-const colorMap = textureLoader.load('PavingStones/Color.jpg');
-const aoMap = textureLoader.load('PavingStones/AmbientOcclusion.jpg');
-const displacementMap = textureLoader.load('PavingStones/Displacement.jpg');
-const metalnessMap = textureLoader.load('PavingStones/Metalness.jpg');
-const normalMapGL = textureLoader.load('PavingStones/NormalGL.jpg');
-const normalMapDX = textureLoader.load('PavingStones/NormalDX.jpg')
-const roughnessMap = textureLoader.load('PavingStones/Roughness.jpg');
-
-[colorMap, aoMap, displacementMap, metalnessMap, normalMapGL, normalMapDX, roughnessMap].forEach(texture => {
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(1, 5);
-});
-
+const groundTextures = loadTextures('PavingStones');
+applyTextureSettings(groundTextures, 1, 5);
 
 //Texture for walls
-const textureLoaderWall = new THREE.TextureLoader();
-const textureWall = textureLoaderWall.load('PavingStones.jpg', (texture) => {
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(4, 1);
-});
-// Texture for platforms 
-const textureLoaderPlatforms = new THREE.TextureLoader();
-const texturePlatform = textureLoaderPlatforms.load('PavingStones.jpg', (texture) => {
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(3, 2);
-});
+const wallTextures = loadTextures('PavingStones');
+applyTextureSettings(wallTextures, 4, 1); 
+
+//Texture for platforms 
+const platformTextures = loadTextures('PavingStones');
+applyTextureSettings(platformTextures, 3, 2); 
+
 const sideWallGeometry = new THREE.BoxGeometry(50, 1, 20);
-const sideWallMaterial = new THREE.MeshStandardMaterial({ map: textureWall }); 
-const platformGeometry = new THREE.BoxGeometry(10, 1, 50);
-//const platformMaterial = new THREE.MeshStandardMaterial({ map: texture }); 
-const platformMaterial = new THREE.MeshStandardMaterial({
-    map: colorMap,
-    aoMap: aoMap,
-    displacementMap: displacementMap,
-    metalnessMap: metalnessMap,
-    //normalMap: normalMapGL,
-    normalMap: normalMapDX, 
-    roughnessMap: roughnessMap,
+// const sideWallMaterial = new THREE.MeshStandardMaterial({ map: textureWall }); 
+const sideWallMaterial = new THREE.MeshStandardMaterial({
+    map: wallTextures.colorMap,
+    aoMap: wallTextures.aoMap,
+    displacementMap: wallTextures.displacementMap,
+    metalnessMap: wallTextures.metalnessMap,
+    normalMap: wallTextures.normalMapDX, 
+    roughnessMap: wallTextures.roughnessMap,
     displacementScale: 0,
-    metalness: 0.3,
-    roughness: roughnessMap
+    metalness: 0.1,
+    roughness: 0.5
+});
+
+
+const platformGeometry = new THREE.BoxGeometry(10, 1, 50);
+const platformMaterial = new THREE.MeshStandardMaterial({
+    map: groundTextures.colorMap,
+    aoMap: groundTextures.aoMap,
+    displacementMap: groundTextures.displacementMap,
+    metalnessMap: groundTextures.metalnessMap,
+    normalMap: groundTextures.normalMapDX, 
+    roughnessMap: groundTextures.roughnessMap,
+    displacementScale: 0,
+    metalness: 0.1,
+    roughness: 0.5
 });
 
 const characterGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -145,8 +133,17 @@ const characterMaterial = new THREE.MeshStandardMaterial({
     transparent: true, 
     opacity: 0.0
 });
-const platformsMaterial = new THREE.MeshStandardMaterial({ map: texturePlatform });
-
+const platformsMaterial = new THREE.MeshStandardMaterial({
+    map: platformTextures.colorMap,
+    aoMap: platformTextures.aoMap,
+    displacementMap: platformTextures.displacementMap,
+    metalnessMap: platformTextures.metalnessMap,
+    normalMap: platformTextures.normalMapDX, 
+    roughnessMap: platformTextures.roughnessMap,
+    displacementScale: 0,
+    metalness: 0.1,
+    roughness: 0.5
+});
 
 // Convert lamps object to an array
 const lampsArray = Object.values(lamps);
