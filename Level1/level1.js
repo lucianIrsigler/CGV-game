@@ -429,7 +429,7 @@ scene.add(character);
 
 //charcter light 
 function setupCharacterLight() {
-    characterLight = new THREE.PointLight(0xffffff, 1, 5);
+    characterLight = new THREE.PointLight(0xffffff, 1, 10);
     characterLight.position.set(0, 1, 0); // Slightly above the character
     character.add(characterLight); // Attach the light to the character
 }

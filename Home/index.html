@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Lights Out</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="title">Lights Out</div>
+    <div class="buttons">
+      <button class="btn">Start Game</button>
+      <button class="btn">Settings</button>
+      <button class="btn">Exit</button>
+    </div>
+
+      <!-- Background Sound -->
+  <audio id="background-audio" autoplay loop>
+    <source src="horror-sound-effect.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+  </div>
+
+  <script>
+    // Adjust the background audio volume (optional)
+    document.getElementById('background-audio').volume = 0.5;  // Volume range from 0.0 to 1.0
+  </script>
+
+  
+</body>
+</html>
