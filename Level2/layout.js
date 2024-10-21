@@ -292,6 +292,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; 
 controls.dampingFactor = 0.25;
 controls.screenSpacePanning = false;
+
 // Create a big cylindrical structure around the existing elements
 const roomRadius = 100;
 const roomHeight = 100;
