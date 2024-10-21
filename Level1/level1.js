@@ -8,6 +8,36 @@ import { lights } from 'three/webgpu';
 const loader = new GLTFLoader();
 let model;
 let characterLight; 
+//Door audio things
+let audioContext;
+let doorCreakBuffer; 
+
+function initAudio() {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    loadDoorCreakSound();
+}
+
+// Load door creak sound
+function loadDoorCreakSound() {
+    fetch('wooden-door-creaking.mp3')
+        .then(response => response.arrayBuffer())
+        .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+        .then(audioBuffer => {
+            doorCreakBuffer = audioBuffer;
+        })
+        .catch(error => console.error('Error loading door creak sound:', error));
+}
+
+// Play door creak sound
+function playDoorCreakSound() {
+    if (doorCreakBuffer) {
+        const source = audioContext.createBufferSource();
+        source.buffer = doorCreakBuffer;
+        source.connect(audioContext.destination);
+        source.start();
+    }
+}
+
 
 // Scene setup
 const gameOverScreen = document.getElementById("gameOverScreen");
@@ -164,10 +194,10 @@ function openDoor() {
     if (!isDoorOpen && doorAnimationAction) {
         doorAnimationAction.reset();
         doorAnimationAction.play();
-        isDoorOpen = true; // Set the flag to true so it won't open again
-        // Transition to success screen
-        gameOverScreen.style.display = 'block'; // Assuming this is your success screen
-        gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>"; // Update success message
+        isDoorOpen = true;
+        playDoorCreakSound(); // Play the door creak sound
+        gameOverScreen.style.display = 'block';
+        gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>";
     }
 }
 
@@ -395,6 +425,11 @@ let health = 100;
 const healthNumberElement = document.getElementById('health-number');
 const damageRate = 20; // Define the damage rate
 const healingRate = 10; // Define the healing rate
+
+
+//Event listener for door sound 
+window.addEventListener('load', initAudio);
+
 
 //inputs
 // Event listeners for movement
