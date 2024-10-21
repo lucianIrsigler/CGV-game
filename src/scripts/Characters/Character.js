@@ -1,6 +1,6 @@
 
 //https://medium.com/@brazmogu/physics-for-game-dev-a-platformer-physics-cheatsheet-f34b09064558
-export class Characater{
+export class Character{
     constructor(H,t){
         this.H = H;
         this.t = t;

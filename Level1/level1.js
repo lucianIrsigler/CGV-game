@@ -690,20 +690,20 @@ function animate() {
         character.position.y += velocityY;
         velocityY += gravity;
     }
-// Check proximity to the door
-checkDoorProximity();
+    // Check proximity to the door
+    checkDoorProximity();
 
- // Update the red cube's position
- updateRedCubePosition();
+    // Update the red cube's position
+    updateRedCubePosition();
 
-// Handle the 'E' key press to open the door
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'e') {
-        if (doorPrompt.style.display === 'block') {
-            openDoor(); 
+    // Handle the 'E' key press to open the door
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'e') {
+            if (doorPrompt.style.display === 'block') {
+                openDoor(); 
+            }
         }
-    }
-});
+    });
 
     // Check for collisions with platforms
     let onPlatform = false;

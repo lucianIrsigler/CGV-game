@@ -46,10 +46,9 @@ export class FirstPersonCamera {
       this.updateRotation_(timeElapsedS);
       this.updateCamera_(timeElapsedS);
       this.updateTranslation_(timeElapsedS);
-      
       this.input_.update();
     }
-  
+
     updateCamera_(_) {
       let desync = this.translation_.distanceTo(this.target_.position)>1.2;
 
@@ -62,6 +61,8 @@ export class FirstPersonCamera {
 
       this.camera_.quaternion.copy(this.rotation_);
       this.camera_.position.copy(this.translation_);
+
+
       this.target_.position.copy(this.translation_);
 
       this.camera_.position.y +=1.2;
@@ -105,7 +106,6 @@ export class FirstPersonCamera {
       }
     }
     
-    
 
     updateTranslation_(timeElapsedS) {
       const forwardVelocity = (this.input_.keys_[KEYS.w] ? 1 : 0) + (this.input_.keys_[KEYS.s] ? -1 : 0);
@@ -125,7 +125,6 @@ export class FirstPersonCamera {
         this.grounded = false;                    // Player is now in the air
       }
       
-
       const qx = new THREE.Quaternion();
       qx.setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.phi_);
   
@@ -136,13 +135,15 @@ export class FirstPersonCamera {
       const left = new THREE.Vector3(-1*this.movementspeed_, 0, 0);
       left.applyQuaternion(qx);
       left.multiplyScalar(strafeVelocity * timeElapsedS * 3);
+
       
+
       this.translation_.add(forward);
       this.translation_.add(left);
       this.translation_.y += this.verticalVelocity_ * timeElapsedS;
 
+      this.checkIfGround();
 
-      this.checkIfGround()
     }
   
 
@@ -211,5 +212,6 @@ export class FirstPersonCamera {
     
         this.rotation_.copy(q);
     }
+
   }
 }
