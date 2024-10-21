@@ -62,13 +62,6 @@ function definePlatformAction(platformIndex, action) {
     platformActions[platformIndex] = action;
 }
 
-// function addCrate(x, y, z) {
-//     const crate = new THREE.Mesh(crateGeometry, crateMaterial);
-//     crate.position.set(x, y, z);
-//     crate.lookAt(0, y, 0); // Make the crate face the center
-//     platformGroup.add(crate); // Add the crate to the group
-// }
-
 // Load textures for the base and platforms
 const platformTexture = textureLoader.load('PavingStones.jpg');
 const baseTexture = textureLoader.load('PavingStones.jpg');
@@ -95,12 +88,14 @@ Object.values(gun).forEach((currentGun) => {
       let model = gltf.scene;
       scene.add(model);
   
-      model.position.set(currentGun.positionX, currentGun.positionY, currentGun.positionZ);
+      model.position.set(-53, 59, -15);
       model.scale.set(currentGun.scaleX, currentGun.scaleY, currentGun.scaleZ);
       model.castShadow = true;
   
       const gunLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
       gunLight.position.set(currentGun.positionX, currentGun.positionY + 2, currentGun.positionZ); 
+      model.rotation.y = THREE.MathUtils.degToRad(-110);
+
       scene.add(gunLight);
     }, undefined, function (error) {
       console.error('An error happened while loading the gun model:', error);
@@ -108,44 +103,45 @@ Object.values(gun).forEach((currentGun) => {
 });
 
 //Door Things 
-let currentDoor = door.doorOne; 
-Object.values(door).forEach((currentDoor) => {
+let currentDoor1 = door.doorOne;
+Object.values(door).forEach((currentDoor1) => {
     const loader = new GLTFLoader();  // Use GLTFLoader directly, not THREE.GLTFLoader
     
-    loader.load(currentDoor.scene, function (gltf) {
+    loader.load(currentDoor1.scene, function (gltf) {
       let model = gltf.scene;
       scene.add(model);
-  
-      model.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
-      model.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
+      
+      model.position.set(-51.5, 58, -18);
+      model.scale.set(currentDoor1.scaleX, currentDoor1.scaleY, currentDoor1.scaleZ);
       model.castShadow = true;
+
+      // Rotate the door by 20 degrees (in radians)
+      model.rotation.y = THREE.MathUtils.degToRad(-20);
 
     }, undefined, function (error) {
       console.error('An error happened while loading the door model:', error);
     });
 });
 
-
-//Lamp Stuff
-// let currentLamp = lamps.lampOne; 
-// Object.values(lamps).forEach((currentLamp) => {
-//     const loader = new GLTFLoader();  // Use GLTFLoader directly, not THREE.GLTFLoader
+let currentDoor2 = door.doorOne;
+Object.values(door).forEach((currentDoor2) => {
+    const loader = new GLTFLoader();  // Use GLTFLoader directly, not THREE.GLTFLoader
     
-//     loader.load(currentLamp.scene, function (gltf) {
-//       let model = gltf.scene;
-//       scene.add(model);
-  
-//       model.position.set(currentLamp.positionX, currentLamp.positionY, currentLamp.positionZ);
-//       model.scale.set(currentLamp.scaleX, currentLamp.scaleY, currentLamp.scaleZ);
-//       model.castShadow = true;
-  
-//       const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
-//       lampLight.position.set(currentLamp.positionX, currentLamp.positionY + 2, currentLamp.positionZ); 
-//       scene.add(lampLight);
-//     }, undefined, function (error) {
-//       console.error('An error happened while loading the lamp model:', error);
-//     });
-// });
+    loader.load(currentDoor2.scene, function (gltf) {
+      let model = gltf.scene;
+      scene.add(model);
+      
+      model.position.set(54.5, 0,2);
+      model.scale.set(currentDoor2.scaleX, currentDoor2.scaleY, currentDoor2.scaleZ);
+      model.castShadow = true;
+
+      // Rotate the door by 20 degrees (in radians)
+      model.rotation.y = THREE.MathUtils.degToRad(0);
+
+    }, undefined, function (error) {
+      console.error('An error happened while loading the door model:', error);
+    });
+});
 
 // Create the circular base (cylinder) with texture
 const radiusTop = 50;
@@ -161,7 +157,7 @@ const numPlatforms = 30;
 const sectorInnerRadius = radiusTop + 2; // Inner radius of the sector which determines how far platforms are from the base
 const sectorOuterRadius = sectorInnerRadius + 5; // widens the back of each platform
 const platformHeight = 1;
-const platformSpacing = 1;
+const platformSpacing = 2;
 const spiralTurnAngle = Math.PI / 4.2; // changes distance between platforms
 const sectorAngle = Math.PI / 4.7; // changes length of each platform
 
@@ -196,17 +192,6 @@ for (let i = 0; i < numPlatforms; i++) {
     // Push the combinedGroup to the platformArray
     platformArray.push(combinedGroup);
 
-    // if (i % 3 === 0) {
-    //     const lampPostGeometry = new THREE.CylinderGeometry(lampPostRadius, lampPostRadius, lampPostHeight, 16);
-    //     const lampPostMaterial = new THREE.MeshBasicMaterial({ color: 0x808080 });
-    //     const lampPost = new THREE.Mesh(lampPostGeometry, lampPostMaterial);
-
-    //     lampPost.position.set(
-    //         Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2,
-    //         platformY + platformHeight / 2 + lampPostHeight / 2,
-    //         Math.sin(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2
-    //     );
-
     if (i % 3 === 0 || i === numPlatforms - 1) {
         const lampX = Math.cos(angle + sectorAngle / 2) * (sectorInnerRadius + sectorOuterRadius) / 2;
         const lampY = platformY + platformHeight / 2 - 0.5;
@@ -233,20 +218,28 @@ for (let i = 0; i < numPlatforms; i++) {
     platformGroup.add(combinedGroup);
 
     // Define specific actions for platforms
-    if(i === 0) {
-        continue; // Skip the first platform
-    }
-    else if(i % 5 === 0) {
-        definePlatformAction(i, { type: 'updown', speed: 0.002, range: 2 });
-    }
-    else if(i % 6 === 0) {
-        definePlatformAction(i, { type: 'downup', speed: 0.002, range: 2 });
-    }
-    else if(i % 4 === 0) {
-        definePlatformAction(i, { type: 'leftright', speed: 0.002, range: 2 });
-    }
-    else if(i % 7 === 0) {
-        definePlatformAction(i, { type: 'rightleft', speed: 0.002, range: 2 });
+    switch (true) {
+        case (i === 4 || i === 8 || i === 20):
+            definePlatformAction(i, { type: 'leftright', speed: 0.002, range: 2 });
+            break;
+        case (i === 5 || i === 7 || i === 16):
+            definePlatformAction(i, { type: 'rightleft', speed: 0.002, range: 2 });
+            break;
+        case (i === 10 || i === 14 || i === 17):
+            definePlatformAction(i, { type: 'updown', speed: 0.002, range: 2 });
+            break;
+        case (i === 11 || i === 13 || i === 19):
+            definePlatformAction(i, { type: 'downup', speed: 0.002, range: 2 });
+            break;
+        case (i === 22 || i === 25):
+            definePlatformAction(i, { type: 'leftrightupdown', speed: 0.002, range: 2 });
+            break;
+        case (i === 23 || i === 26):
+            definePlatformAction(i, { type: 'rightleftdownup', speed: 0.002, range: 2 });
+            break;
+        case (i === 28):
+            definePlatformAction(i, { type: 'updown', speed: 0.002, range: 6 });
+            break;
     }
 }
 
@@ -300,15 +293,49 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.25;
 controls.screenSpacePanning = false;
 
+// Create a big cylindrical structure around the existing elements
+const roomRadius = 100;
+const roomHeight = 100;
+
+// Create the cylindrical room
+const roomGeometry = new THREE.CylinderGeometry(roomRadius, roomRadius, roomHeight, 64, 1, true);
+const roomMaterial = new THREE.MeshStandardMaterial({
+    map: baseTexture,
+    side: THREE.DoubleSide // Render both sides of the cylinder
+});
+const room = new THREE.Mesh(roomGeometry, roomMaterial);
+room.position.y = roomHeight / 2 - 20; // Adjust position to match the base height
+scene.add(room);
+
+// Create the top and bottom caps for the room
+const capGeometry = new THREE.CircleGeometry(roomRadius, 64);
+const capMaterial = new THREE.MeshStandardMaterial({
+    map: baseTexture,
+    side: THREE.DoubleSide // Render both sides of the caps
+});
+
+// Top cap
+const topCap = new THREE.Mesh(capGeometry, capMaterial);
+topCap.rotation.x = Math.PI / 2;
+topCap.position.y = roomHeight / 2 + 30;
+scene.add(topCap);
+
+// Bottom cap
+const bottomCap = new THREE.Mesh(capGeometry, capMaterial);
+bottomCap.rotation.x = -Math.PI / 2;
+bottomCap.position.y = -roomHeight / 2 + 30;
+scene.add(bottomCap);
+
+const centerLight = new THREE.PointLight(0xffffff, 1, 100);
+centerLight.position.set(0, roomHeight / 2, 0); // Position the light in the center of the room
+scene.add(centerLight);
+
 // Animation loop
 let lastUpdate = 0; // Track the last update time
 const updateInterval = 1; // Time in milliseconds for each update
 
 function animate(time) {
     requestAnimationFrame(animate);
-    // if (doorMixer) {
-    //     doorMixer.update(0.01); // Update the animation mixer
-    // }
     // Check if 100ms has passed since the last update
     if (time - lastUpdate >= updateInterval) {
         lastUpdate = time; // Update the last update time
@@ -358,6 +385,22 @@ function animate(time) {
                             group.position.x = originalPosition.x; // Set to original position
                         }
                         group.position.x = -Math.sin(Date.now() * speed) * range;
+                        break;
+                    case 'leftrightupdown':
+                        // Reset the group position to the original position
+                        if (group.position.x !== originalPosition.x || group.position.y !== originalPosition.y) {
+                            group.position.set(originalPosition.x, originalPosition.y, originalPosition.z); // Set to original position
+                        }
+                        group.position.x = Math.sin(Date.now() * speed) * range;
+                        group.position.y = Math.cos(Date.now() * speed) * range;
+                        break;
+                    case 'rightleftdownup':
+                        // Reset the group position to the original position
+                        if (group.position.x !== originalPosition.x || group.position.y !== originalPosition.y) {
+                            group.position.set(originalPosition.x, originalPosition.y, originalPosition.z); // Set to original position
+                        }
+                        group.position.x = Math.sin(Date.now() * speed) * range;
+                        group.position.y = -Math.cos(Date.now() * speed) * range;
                         break;
                 }
             }
