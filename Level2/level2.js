@@ -401,7 +401,7 @@ function animate(time) {
         // camera.position.y = Math.min(Math.max(camera.position.y, minHeight), maxHeight);
 
         // Update circular base's height to match the camera's Y position
-        circularBase.position.y = camera.position.y - 4;
+        circularBase.position.y = Math.min(Math.max(camera.position.y - 4, minHeight), maxHeight);
 
         // Update positions of platforms based on defined actions
         platformArray.forEach((group, index) => {
