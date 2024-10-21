@@ -552,7 +552,7 @@ function youWin() {
 
 // Function to handle loss condition
 function youLose() {
-    document.getElementById('header-end').innerText = "You Lose!";
+    document.getElementById('header-end').innerText = "You Died!\nYou ran out of light and the darkness consumed you!";
     isEnemyAsleep = true;
     isGamePaused = true; // Pause the game
     console.log("You lose!"); // Display lose message if health reaches zero
