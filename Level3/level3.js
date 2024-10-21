@@ -25,6 +25,7 @@ restartButton.addEventListener("click", restartGame);
 function restartGame() {
     isEnemyAsleep = true;
     isGamePaused = false; // Unpause the game
+    enemyAlive = true; // Reset enemy alive flag
     gameOverScreen.style.display = "none";
 
     // Reset character and enemy positions
@@ -349,7 +350,7 @@ function animate() {
     if (isGamePaused) return; // Skip updates if the game is paused
     movePlayer();  // Update player movement
     updateCamera();  // Update camera to follow the player
-    if(!isEnemyAsleep){
+    if(!isEnemyAsleep && enemyCurrentHealth > 0){
         updateEnemyMovement(); // Update enemy's random movement
         enemyShoot(); // Enemy shooting logic
         document.getElementById('health-bar-container').style.display = 'block';
@@ -454,14 +455,14 @@ function updateHealthBar() {
     healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
 }
 
+let enemyAlive = true; // Flag to track if the enemy is alive
 // Function to handle when enemy gets hit
 function handleEnemyHit() {
     // const enemyHit = detectCollision(bullet, cubeEnemy); // Check for collision with the enemy
-    if(isEnemyAsleep){
+    if(isEnemyAsleep && enemyCurrentHealth > 0){
         const monsterNoise = new Audio('monster_moan.mp3');
         monsterNoise.volume = 0.4;
         monsterNoise.play();
-        console.log("Enemy has been hit! WAKE UP");
     }
     isEnemyAsleep = false;
     if (!enemyHitCooldown) {
@@ -473,16 +474,30 @@ function handleEnemyHit() {
         updateHealthBar(); // Update the health bar after taking damage
 
         if (enemyCurrentHealth <= 0) {
-            youWin(); // Call the win condition function
+            if(enemyAlive){
+                const monsterNoise = new Audio('monster_moan.mp3');
+                monsterNoise.volume = 0.4;
+                monsterNoise.play();
+            }
+            enemyAlive = false; // Set enemy alive flag to false
+            cubeEnemy.material.color.set(0xffffff); // white 0xffffff
+            enemyLight.intensity = 0; // Turn off the light
+            isEnemyAsleep = true;
+
+            //wait for 3 second
+            setTimeout(() => {
+                youWin(); // Call the win condition function
+            }, 3000); // milliseconds delay
+            
         } 
         else {
             // Change the enemy color to a lighter red temporarily
             cubeEnemy.material.color.set(0xff6666); // Lighter red color
             enemyHitCooldown = true; // Set cooldown flag
 
-            // Reset color after 200ms
+            // Reset color after 50ms
             setTimeout(() => {
-                cubeEnemy.material.color.set(0x040405); // Reset to original red color
+                cubeEnemy.material.color.set(0x040405);
                 enemyHitCooldown = false; // Reset cooldown flag
             }, 50); // milliseconds delay
         }
@@ -499,7 +514,7 @@ function detectCollision(bullet, character) {
 
 // Function to handle win condition
 function youWin() {
-    document.getElementById('header-end').innerText = "You Win!";
+    document.getElementById('header-end').innerText = "You Win!\nYou have slain the beast aka your MOM!!! *GASP*\nShe turned into a monster because you didn't do the dishes!";
     isEnemyAsleep = true;
     isGamePaused = true; // Pause the game
     console.log("You win!"); // Display win message if health reaches zero
