@@ -12,20 +12,19 @@ export class LoadingManager{
         this.onLoadCallback = null; // Optional callback when loading is complete
         this.progressBar = document.getElementById("progress-bar");
         this.progressBarContainer = document.querySelector(".progress-bar-container");
-
         this.init_();
     }
 
     init_(){
         this.loadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
-            console.log(`Started loading: ${url}.`);
+            // console.log(`Started loading: ${url}.`);
             this.progressBarContainer.style.display = 'flex';
 
         };
 
 
         this.loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
-            console.log(`Loading: ${url}. Loaded ${itemsLoaded} of ${itemsTotal} items.`);
+            // console.log(`Loading: ${url}. Loaded ${itemsLoaded} of ${itemsTotal} items.`);
             this.progressBar.value=(itemsLoaded/itemsTotal)*100;
 
             if (this.onProgressCallback) {
@@ -34,7 +33,7 @@ export class LoadingManager{
         };
 
         this.loadingManager.onLoad = () => {
-            console.log('All items loaded.');
+            // console.log('All items loaded.');
             this.progressBarContainer.style.display = 'none';
 
             if (this.onLoadCallback) {
