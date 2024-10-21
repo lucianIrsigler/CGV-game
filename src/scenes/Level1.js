@@ -8,6 +8,9 @@ import { lightsConfigLevel1 } from "../data/lightPos1";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { FirstPersonControls } from "three/examples/jsm/Addons.js";
 import { LoadingManager } from "../scripts/Loaders/Loader";
+import { CameraManager } from "../scripts/Camera/CameraManager";
+import { Character } from "../scripts/Characters/Character";
+
 
 export class Level1 extends SceneBaseClass {
     constructor() {
@@ -18,6 +21,8 @@ export class Level1 extends SceneBaseClass {
         this.objManager = new ObjectManager(this.scene);
         this.lightManager = new LightManager(this.scene);
         this.loader = new LoadingManager();
+        this.cameraManager;
+        this.target;
 
         this.platforms = [
             { position: new THREE.Vector3(3, 2, 15), size: new THREE.Vector3(5, 0.5, 5) },
@@ -31,15 +36,51 @@ export class Level1 extends SceneBaseClass {
         this.points = [];
         this.character;
         this.characterLight;
+
+        //door stuff
+        this.Door;
+        this.isDoorOpen = false;
+        this.doorPrompt = document.getElementById('doorPrompt');
+        this.doorOpenDistance = 2; // Distance at which the prompt appears
+
+
+        //minimap
+        this.lightTimers = {}; // Track time spent near lights
+        this.lastMiniMapRenderTime = 0; // To track the last time the mini-map was rendered
+        this.miniMapRenderInterval = 100; // 100ms interval for mini-map rendering
+
+
+        //for animation
+        this.lastTime = 0;
+        
+
     }
 
     initScene(){
+        this.init_eventHandlers_();
         this.init_lighting_();
         this.init_camera_();
         this.init_objects_();
         this.init_miniMap_();
         this.init_door_();
+    }
 
+
+    init_eventHandlers_(){
+        document.addEventListener("keydown", (e) => {
+            switch (e.code) {
+              case "KeyR":
+                if (this.cameraManager==undefined){
+                  return;
+                }
+                if (this.cameraManager.getFirstPerson()){
+                  this.cameraManager.toggleThirdPerson()
+                }else{
+                    this.cameraManager.toggleFirstPerson()
+                }
+                break;
+            }
+          })
     }
 
     //TODO make into class
@@ -64,12 +105,9 @@ export class Level1 extends SceneBaseClass {
         document.body.appendChild(this.miniMapRenderer.domElement);
     }
 
-
     //TODO use managers
     init_door_(){
         // Door variables
-        let loader = new GLTFLoader();
-
         let Door;
         let doorMixer;
         let doorAnimationAction;
@@ -78,7 +116,8 @@ export class Level1 extends SceneBaseClass {
         // Load the door model
         this.loader.loadModel(currentDoor.scene,(gltf) =>{
             Door = gltf.scene;
-            this.scene.add(Door);
+            this.Door = Door;
+            this.addObject(Door);
 
             Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
             Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
@@ -90,29 +129,21 @@ export class Level1 extends SceneBaseClass {
             if (animations && animations.length > 0) {
                 doorAnimationAction = doorMixer.clipAction(animations[0]);
             }
+
+            this.doorMixer = doorMixer;
         }, undefined, function (error) {
             console.error('An error happened', error);
         });
 
         // Declare a flag variable to track the door state
-        let isDoorOpen = false;
-
-        // Function to open the door
-        const doorPrompt = document.getElementById('doorPrompt');
-        const doorOpenDistance = 2; // Distance at which the prompt appears
+        
     }
 
-
     init_objects_() {
-        let mesh;
-        let characterLight; 
-        // Mini-map setup
-        // First Person Controls        
-        this.controls = new FirstPersonControls(this.camera, this.renderer.domElement);
-        //controls.movementSpeed = 2; // Lower movement speed
-        this.controls.lookSpeed = 0.01; // Lower look speed
+        //load object
+        this.initialize();
 
-        //Texture for ground 
+        //Texture for ground
         const textureLoader = new THREE.TextureLoader();
         const texture = textureLoader.load('PavingStones.jpg', (texture) => {
             texture.wrapS = THREE.RepeatWrapping;
@@ -166,6 +197,8 @@ export class Level1 extends SceneBaseClass {
 
         // Walls
         this.objManager.createObject("bottom","platform","platform",{x:0,y:-0.5,z:20},null);
+        this.objManager.getObject("bottom").isGround=true;
+
 
 
         let topPos = {x:0,y:10,z:20};
@@ -187,6 +220,7 @@ export class Level1 extends SceneBaseClass {
         this.platforms.forEach(platform => {
             this.objManager.addGeometry("temp",new THREE.BoxGeometry(platform.size.x, platform.size.y, platform.size.z));
             this.objManager.createObject("platform","temp","platforms",platform.position);
+            this.objManager.getObject("platform").isGround=true;
             this.objManager.removeGeometry("temp");
         });
 
@@ -199,22 +233,19 @@ export class Level1 extends SceneBaseClass {
 
         let character = this.objManager.getObject("character");
         this.character = character;
-
-
         this.setupCharacterLight(character);
-
-        // Position camera initially at the same place as the character
-        this.camera.position.set(this.character.position.x, this.character.position.y + 0.5, this.character.position.z);
         this.character.rotation.y += Math.PI;
 
+
+        // Position camera initially at the same place as the character
+        // this.camera.position.set(this.character.position.x, this.character.position.y + 0.5, this.character.position.z);
+
         this.restartButton.addEventListener("click", this.restartGame);
-        const lightTimers = {}; // Track time spent near lights
-        let lastMiniMapRenderTime = 0; // To track the last time the mini-map was rendered
-        const miniMapRenderInterval = 100; // 100ms interval for mini-map rendering
     }
 
     init_camera_() {
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.camera.position.set(0,12,20);
     }
 
     init_lighting_() {
@@ -247,58 +278,84 @@ export class Level1 extends SceneBaseClass {
         });
     }
 
-    animate=()=> {
+    animate=(currentTime)=> {
+        if (!this.loader.getLoaded()){
+            //wait till loaded
+            requestAnimationFrame(this.animate);
+            return;
+        }
+        const timeElapsedS = (currentTime - this.lastTime) / 1000;
+        this.lastTime = currentTime;
+
+
+        // // Update the door animation mixer if it exists
+        // if (this.doorMixer) {
+        //     this.doorMixer.update(0.01); // Update the animation mixer
+        // }
+    
+        // // Check proximity to the door
+        // this.checkDoorProximity();
+    
+        // //Handle the 'E' key press to open the door
+        // document.addEventListener('keydown', (e) => {
+        //     if (e.key === 'e') {
+        //         if (this.doorPrompt.style.display === 'block') {
+        //             openDoor(); 
+        //         }
+        //     }
+        // });
+        
+        this.cameraManager.update(timeElapsedS)
+
+        // Render the scene
+        this.renderer.render(this.scene, this.cameraManager.getCamera());
+
+        //update minimap at defined time interval
+        // const currentTimeMiniMap = Date.now();
+
+        // if (currentTimeMiniMap - this.lastMiniMapRenderTime >= this.miniMapRenderInterval) {
+        //     this.miniMapRenderer.render(this.scene, this.miniMapCamera);
+        //     this.lastMiniMapRenderTime = currentTimeMiniMap; // Update the time of last render
+        // }
+
         requestAnimationFrame(this.animate);
-        // console.log(this.scene.children);
-    //     // Update the door animation mixer if it exists
-    //     if (doorMixer) {
-    //         doorMixer.update(0.01); // Update the animation mixer
-    //     }
-    
-    //     // Jumping and gravity application
-    //     if (isJumping) {
-    //         character.position.y += velocityY;
-    //         velocityY += gravity;
-    //     }
-    // // Check proximity to the door
-    // checkDoorProximity();
-    
-    // // Update the red cube's position
-    // updateRedCubePosition();
-    
-    // // Handle the 'E' key press to open the door
-    
-    
-    // // Reset jump count when hitting the ground
-    // if (onPlatform || character.position.y === 0.5) {
-    //     jumpCount = 0; // Reset jump count only when on a platform
-    // }
-    //     // Calculate the forward and right direction based on the camera's rotation
-    //     const cameraDirection = new THREE.Vector3();
-    //     camera.getWorldDirection(cameraDirection);
-    //     cameraDirection.y = 0; // Ignore vertical direction
-    //     cameraDirection.normalize();
-    
-    //     const rightDirection = new THREE.Vector3();
-    //     rightDirection.crossVectors(cameraDirection, new THREE.Vector3(0, 1, 0)); // Get the right direction
-    
-    //     if (forward) {
-    //         character.position.add(cameraDirection.multiplyScalar(moveSpeed * forward));
-    //     }
-    //     if (right) {
-    //         character.position.add(rightDirection.multiplyScalar(moveSpeed * right));
-    //     }
-    
-    //     updateCameraPosition();
-    //     controls.update(0.7); // Update controls with delta time
-    //     // Render the scene
-        this.renderer.render(this.scene, this.camera);
-    //     // Only update the mini-map at the defined interval
-    //     const currentTime = Date.now();
-    //     if (currentTime - lastMiniMapRenderTime >= miniMapRenderInterval) {
-    //         miniMapRenderer.render(scene, miniMapCamera);
-    //         lastMiniMapRenderTime = currentTime; // Update the time of last render
-    //     }
+    }
+
+    async initialize() {
+        try {
+            await this.loader.loadModel('./public/assets/hollow_knight/scene.glb', 'player', (gltf) => {
+                const model = gltf.scene; // Get the loaded model
+                this.addObject(model); // Add the model to the scene
+                model.rotation.set(0, 0, 0); // Rotate the model
+                model.scale.set(1, 1, 1); // Scale the model if necessary
+                model.position.set(0, 0.5, 0);
+                model.name = "player"; // Name the model
+                this.target = model;
+                this.target.visible=false;
+                this.cameraManager = new CameraManager(
+                    this.camera,
+                    this.target,
+                    new Character(5.0,0.4),
+                    this.scene
+                )
+            });
+            console.log('Model loaded and added to the scene.');
+        } catch (error) {
+            console.error('Failed to load model:', error);
+        }
+      }
+      
+      
+
+    openDoor() {
+        if (!isDoorOpen && doorAnimationAction) {
+            doorAnimationAction.reset();
+            doorAnimationAction.play();
+            isDoorOpen = true;
+            playDoorCreakSound(); // Play the door creak sound
+            gameOverScreen.style.display = 'block';
+            gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>";
+        }
     }
 
     setupCharacterLight(attachTo) {
@@ -360,12 +417,15 @@ export class Level1 extends SceneBaseClass {
     }
 
     checkDoorProximity() {
-        const distance = character.position.distanceTo(Door.position);
+        if (this.Door==undefined){
+            return;
+        }
+        const distance = this.character.position.distanceTo(this.Door.position);
         
-        if (distance <= doorOpenDistance) {
-            doorPrompt.style.display = 'block'; // Show prompt
+        if (distance <= this.doorOpenDistance) {
+            this.doorPrompt.style.display = 'block'; // Show prompt
         } else {
-            doorPrompt.style.display = 'none'; // Hide prompt
+            this.doorPrompt.style.display = 'none'; // Hide prompt
         }
     }
 
@@ -378,11 +438,6 @@ export class Level1 extends SceneBaseClass {
             gameOverScreen.style.display = 'block'; // Assuming this is your success screen
             gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>"; // Update success message
         }
-    }
-
-    updateRedCubePosition() {
-        redCube.position.x = character.position.x;
-        redCube.position.z = character.position.z;
     }
 
     handleCharacterDeath() {

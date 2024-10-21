@@ -9,7 +9,7 @@ export class AnimationManager {
     startAnimationLoop() {
         const animate = () => {
             if (this.currentScene && !this.isPaused) {
-                this.animationId = requestAnimationFrame(animate);
+                // this.animationId = requestAnimationFrame(animate);
                 this.currentScene.animate();
             }
         };

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { CameraManager } from './src/scripts/Camera/CameraManager';
 import { LoadingManager } from './src/scripts/Loaders/Loader';
-import { Characater } from './src/scripts/Characters/Chararcter';
+import { Character } from './src/scripts/Characters/Character';
 
 
 let loadingManager = new LoadingManager();
@@ -89,7 +89,7 @@ async function initialize() {
           cameraManager = new CameraManager(
             camera,
             targetted,
-            new Characater(5.0,0.4),
+            new Character(5.0,0.4),
           scene
         )
       });
@@ -134,11 +134,9 @@ document.addEventListener("keydown", (e) => {
         cameraManager.toggleThirdPerson()
       }else{
         cameraManager.toggleFirstPerson()
-
       }
       break;
   }
-
 })
 
 

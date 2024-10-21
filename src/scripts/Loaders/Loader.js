@@ -12,6 +12,7 @@ export class LoadingManager{
         this.onLoadCallback = null; // Optional callback when loading is complete
         this.progressBar = document.getElementById("progress-bar");
         this.progressBarContainer = document.querySelector(".progress-bar-container");
+        this.loaded = false;
         this.init_();
     }
 
@@ -19,6 +20,7 @@ export class LoadingManager{
         this.loadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
             // console.log(`Started loading: ${url}.`);
             this.progressBarContainer.style.display = 'flex';
+            this.loaded = false;
 
         };
 
@@ -35,7 +37,7 @@ export class LoadingManager{
         this.loadingManager.onLoad = () => {
             // console.log('All items loaded.');
             this.progressBarContainer.style.display = 'none';
-
+            this.loaded = true;
             if (this.onLoadCallback) {
                 this.onLoadCallback(this.models); // Pass all loaded models
             }
@@ -46,6 +48,11 @@ export class LoadingManager{
         };
     }
 
+
+    getLoaded(){
+        return this.loaded;
+    }
+    
     loadModel(url, modelName, customLoadingFunction = null) {
         return new Promise((resolve, reject) => {
             this.gltfLoader.load(

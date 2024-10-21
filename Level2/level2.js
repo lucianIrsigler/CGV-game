@@ -287,14 +287,9 @@ Object.values(lamps).forEach((currentLamp) => {
                 model.lookAt(0, model.position.y, 0);
 
                 platform.add(model);
-
-                // Adjust the light position to point downwards
-                // const lampLight = new THREE.PointLight(0xA96CC3, 15, 15); // Purple light 
-                // lampLight.position.set(0, 2, 0); // Position it below the lamp model
-                // model.add(lampLight);
                 
                 // Create a cone light to point at the platform
-                const coneLight = new THREE.SpotLight(0xA96CC3, 15, 10, Math.PI / 4, 0.5, 2); // Adjust parameters as needed
+                const coneLight = new THREE.SpotLight(0xA96CC3, 20, 10, Math.PI / 4, 0.5, 2); // Adjust parameters as needed
                 coneLight.position.copy(lampPos).add(new THREE.Vector3(0, 5, 0)); // Adjust height if necessary
                 coneLight.target.position.copy(lampPos); // Point towards the lamp position
                 coneLight.target.updateMatrixWorld(); // Ensure target is updated
@@ -386,7 +381,7 @@ directionalLight2.target.position.set(0, 100, 0); // Make the light face upwards
 scene.add(directionalLight2);
 scene.add(directionalLight2.target); // Add the target to the scene
 
-const ambientLight = new THREE.AmbientLight(0x0000ff, 0.05); // Soft white light
+const ambientLight = new THREE.AmbientLight(0x0000ff, 0.02); // Soft white light
 scene.add(ambientLight);
 
 // Animation loop
@@ -406,7 +401,7 @@ function animate(time) {
         // camera.position.y = Math.min(Math.max(camera.position.y, minHeight), maxHeight);
 
         // Update circular base's height to match the camera's Y position
-        circularBase.position.y = camera.position.y - 4;
+        circularBase.position.y = Math.min(Math.max(camera.position.y - 4, minHeight), maxHeight);
 
         // Update positions of platforms based on defined actions
         platformArray.forEach((group, index) => {

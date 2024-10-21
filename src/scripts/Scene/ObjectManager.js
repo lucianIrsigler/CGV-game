@@ -47,6 +47,7 @@ export class ObjectManager {
 
     createObject(name,geometryName,materialName, position=null,rotation=null) {
         if (!this.geometries[geometryName] || !this.materials[materialName]){
+            console.error(`Cant find nodes for ${name}`);
             return;
         }
         const mesh = new THREE.Mesh(this.geometries[geometryName], this.materials[materialName]);
