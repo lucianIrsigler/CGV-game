@@ -7,7 +7,7 @@ export class Characater{
     }
 
     calcGravity(){
-        return this.H / 2 * Math.pow(this.t,2);
+        return this.H / (2 * Math.pow(this.t,2));
     }
 
     calcJumpSpeed(){
