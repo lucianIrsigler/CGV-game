@@ -598,7 +598,7 @@ function enemyShoot() {
 let maxHealth = 100;
 let health = maxHealth;
 let loaded = false;
-const damageRate = 10; // Define the damage rate
+const damageRate = 1; // Define the damage rate
 const healingRate = 100; // Define the healing rate
 let points = lampsArray.map(lamp => new THREE.Vector3(lamp.positionX, lamp.positionY, lamp.positionZ)); // Convert lamp positions to Vector3 objects
 
@@ -645,7 +645,7 @@ function startDamageTimer() {
                 takeDamage(damageRate); // Take damage if not within any light
             }
         }
-    }, 1000); // Call this function every second
+    }, 200); // Call this function every 200ms
 }
 
 function flickerLight(light, index) {
