@@ -20,20 +20,6 @@ controls.movementSpeed = 10;
 controls.lookSpeed = 0.1;
 camera.position.set(-51.5, 31, -13);
 
-// Directional light for testing
-const directionalLight1 = new THREE.DirectionalLight(0x0000ff, 0.2);
-directionalLight1.position.set(0, 50, 0); // Position the light
-directionalLight1.target.position.set(0, 100, 0); // Make the light face upwards
-scene.add(directionalLight1);
-scene.add(directionalLight1.target); // Add the target to the scene
-
-// Add a second directional light opposite to the first
-const directionalLight2 = new THREE.DirectionalLight(0x0000ff, 0.2);
-directionalLight2.position.set(0, -50, 0); // Position the light
-directionalLight2.target.position.set(0, -100, 0); // Make the light face downwards
-scene.add(directionalLight2);
-scene.add(directionalLight2.target); // Add the target to the scene
-
 // Crates
 const textureLoader = new THREE.TextureLoader();
 const colorMap = textureLoader.load('Planks/PlanksColor.jpg');
@@ -375,6 +361,8 @@ bottomCap.rotation.x = -Math.PI / 2;
 bottomCap.position.y = -roomHeight / 2 + 30;
 scene.add(bottomCap);
 
+//LIGHTING
+
 // const centerLight = new THREE.PointLight(0xffffff, 1, 100);
 // centerLight.position.set(0, roomHeight / 2, 0); // Position the light in the center of the room
 // scene.add(centerLight);
@@ -383,6 +371,23 @@ scene.add(bottomCap);
 // const pointLight = new THREE.PointLight(0x0000ff, 0.5, roomRadius * 2);
 // pointLight.position.set(0, roomHeight / 2, 0); // Position the light in the center of the room
 // scene.add(pointLight);
+
+// Directional light for testing
+const directionalLight1 = new THREE.DirectionalLight(0x0000ff, 0.1);
+directionalLight1.position.set(0, -50, 0); // Position the light
+directionalLight1.target.position.set(0, -100, 0); // Make the light face downwards
+scene.add(directionalLight1);
+scene.add(directionalLight1.target); // Add the target to the scene
+
+// Add a second directional light opposite to the first
+const directionalLight2 = new THREE.DirectionalLight(0x0000ff, 0.1);
+directionalLight2.position.set(0, 50, 0); // Position the light
+directionalLight2.target.position.set(0, 100, 0); // Make the light face upwards
+scene.add(directionalLight2);
+scene.add(directionalLight2.target); // Add the target to the scene
+
+const ambientLight = new THREE.AmbientLight(0x0000ff, 0.05); // Soft white light
+scene.add(ambientLight);
 
 // Animation loop
 let lastUpdate = 0; // Track the last update time
