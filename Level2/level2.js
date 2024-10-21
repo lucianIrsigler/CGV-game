@@ -75,7 +75,7 @@ function definePlatformAction(platformIndex, action) {
 // Load textures for the base and platforms
 //const platformTexture = textureLoader.load('PavingStones.jpg');
 const platformTexture = loadTextures('PavingStones');
-applyTextureSettings(platformTexture, 0.2, 0.2); 
+applyTextureSettings(platformTexture, 0.07, 0.07); 
 
 const baseTexture = textureLoader.load('PavingStones.jpg');
 
