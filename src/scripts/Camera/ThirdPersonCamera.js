@@ -13,6 +13,10 @@ export class ThirdPersonCamera{
         this.input_ = new ThirdPersonInputController(target,scene,character.calcGravity(),character.calcJumpSpeed());
     }
 
+    reset(){
+        this.input_.reset();
+    }
+
     calculateIdealOffset_(){
         const idealOffset =  new THREE.Vector3(-1,3,-3);
 

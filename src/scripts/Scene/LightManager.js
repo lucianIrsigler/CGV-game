@@ -54,8 +54,6 @@ export class LightManager {
         light.target = targetObject;
     }
 
-
-
     // Remove a light from the scene
     removeLight(name) {
         if (this.lights[name]) {

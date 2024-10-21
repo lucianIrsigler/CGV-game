@@ -62,7 +62,16 @@ export class SceneBaseClass {
         throw new Error("Render method must be implemented in subclasses");
     }
 
+    restart(){
+        throw new Error("animate method must be implemented in subclasses");
+
+    }
+
     animate(){
+        throw new Error("animate method must be implemented in subclasses");
+    }
+
+    stopAnimate(){
         throw new Error("animate method must be implemented in subclasses");
     }
 

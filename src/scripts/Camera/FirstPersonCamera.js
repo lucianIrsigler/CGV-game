@@ -41,7 +41,21 @@ export class FirstPersonCamera {
       this.groundCheckDistance_=0.5;
       this.hasJumped = false;
     }
-  
+    
+    reset(){
+      this.rotation_ = new THREE.Quaternion();
+      this.translation_ = new THREE.Vector3();
+      this.phi_ = 0;
+      this.theta_ = 0;
+      this.jumping = false;
+      this.grounded = true;
+      this.verticalVelocity_=0;
+      this.rayCaster = new THREE.Raycaster();
+      this.groundCheckDistance_=0.5;
+      this.hasJumped = false;
+
+    }
+
     update(timeElapsedS) {
       this.updateRotation_(timeElapsedS);
       this.updateCamera_(timeElapsedS);

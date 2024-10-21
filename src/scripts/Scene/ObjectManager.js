@@ -85,6 +85,8 @@ export class ObjectManager {
     // Remove all objects from the scene
     removeAllObjects() {
         this.objects.forEach(obj => this.scene.remove(obj));  // Remove each object from the scene
+        this.materials={}
+        this.geometries={}
         this.objects = [];  // Clear the objects array
     }
     

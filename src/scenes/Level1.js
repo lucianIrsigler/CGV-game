@@ -52,6 +52,7 @@ export class Level1 extends SceneBaseClass {
         //for animation
         this.lastTime = 0;
         this.points = [];
+        this.animationId = null;
 
         //health
         this.health =100;
@@ -70,9 +71,7 @@ export class Level1 extends SceneBaseClass {
 
         //Start functions
         this.startDamageTimer();
-        console.log(this.scene.children);
     }
-
 
     init_eventHandlers_(){
         document.addEventListener("keydown", (e) => {
@@ -90,7 +89,9 @@ export class Level1 extends SceneBaseClass {
             }
           })
 
-        this.restartButton.addEventListener("click", this.restartGame.bind(this));
+        
+
+        this.restartButton.addEventListener("click", this.restart.bind(this));
     }
 
     //TODO make into class
@@ -124,29 +125,30 @@ export class Level1 extends SceneBaseClass {
         const currentDoor = door.doorOne;
 
         // Load the door model
-        this.loader.loadModel(currentDoor.scene,(gltf) =>{
-            Door = gltf.scene;
-            this.Door = Door;
-            this.addObject(Door);
+        try{
+            this.loader.loadModel(currentDoor.scene,(gltf) =>{
+                Door = gltf.scene;
+                this.Door = Door;
+                this.addObject(Door);
 
-            Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
-            Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
-            Door.castShadow = true;
+                Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
+                Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
+                Door.castShadow = true;
 
-            doorMixer = new THREE.AnimationMixer(Door);
+                doorMixer = new THREE.AnimationMixer(Door);
 
-            const animations = gltf.animations;
-            if (animations && animations.length > 0) {
-                doorAnimationAction = doorMixer.clipAction(animations[0]);
-            }
+                const animations = gltf.animations;
+                if (animations && animations.length > 0) {
+                    doorAnimationAction = doorMixer.clipAction(animations[0]);
+                }
 
-            this.doorMixer = doorMixer;
-        }, undefined, function (error) {
+                this.doorMixer = doorMixer;
+            });
+            
+            console.log("Door loaded");
+        }catch(error){
             console.error('An error happened', error);
-        });
-
-        // Declare a flag variable to track the door state
-        
+        };
     }
 
     init_objects_() {
@@ -286,8 +288,6 @@ export class Level1 extends SceneBaseClass {
             }
         });
 
-        console.log(this.points);
-
     }
 
     animate=(currentTime)=> {
@@ -330,7 +330,12 @@ export class Level1 extends SceneBaseClass {
             this.lastMiniMapRenderTime = currentTimeMiniMap; // Update the time of last render
         }
 
-        requestAnimationFrame(this.animate);
+        this.animationId = requestAnimationFrame(this.animate);
+    }
+
+    stopAnimate=()=> {
+        cancelAnimationFrame(this.animationId)
+        this.animationId=null;
     }
 
     async initialize() {
@@ -358,9 +363,7 @@ export class Level1 extends SceneBaseClass {
         } catch (error) {
             console.error('Failed to load model:', error);
         }
-      }
-      
-      
+    }
 
     openDoor() {
         if (!isDoorOpen && doorAnimationAction) {
@@ -374,11 +377,10 @@ export class Level1 extends SceneBaseClass {
     }
 
     setupCharacterLight() {
-        this.characterLight = new THREE.PointLight(0xffffff, 1, 5);
+        this.characterLight = new THREE.PointLight(0xffffff, 1, 10);
         this.characterLight.position.set(0, 2, 0); // Slightly above the character
         this.target.add(this.characterLight); // Attach the light to the character
     }
-
 
     // Function to load lamps
     async loadLamps() {
@@ -386,10 +388,10 @@ export class Level1 extends SceneBaseClass {
         
         this.lampsArray.forEach(lamp => {
             i+=1;
+            try{
             this.loader.loadModel(lamp.scene,"lamp"+Math.random(),(gltf) => {  // Use an arrow function here
                 let model = gltf.scene;
                 this.addObject(model);
-                console.log("lamp loaded");
                 model.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
                 model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
                 model.castShadow = true;
@@ -397,10 +399,11 @@ export class Level1 extends SceneBaseClass {
                 const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
                 let position={x:lamp.positionX, y:lamp.positionY + 2, z:lamp.positionZ}; 
                 this.lightManager.addLight(null,lampLight,position)
-            }, undefined, (error) => {
-                console.error('An error happened while loading the lamp model:', error);
             });
-        });
+            console.log('Lamp loaded and added to the scene.');
+        }catch(error){
+            console.error('An error happened while loading the lamp model:', error);
+        }});
     }
 
 
@@ -460,12 +463,12 @@ export class Level1 extends SceneBaseClass {
         document.body.style.cursor = "pointer"
     }
 
-    restartGame() {
+    restart() {
         this.gameOverScreen.style.display = "none";
 
         // Reset character position and camera
         this.target.position.set(0, 0.5, 0);
-        this.camera.position.set(this.target.position.x, this.target.position.y + 0.5, this.target.position.z);
+        // this.camera.position.set(this.target.position.x, this.target.position.y + 0.5, this.target.position.z);
         this.target.rotation.y = Math.PI;
 
         // Reset health
@@ -485,9 +488,8 @@ export class Level1 extends SceneBaseClass {
         });
         this.updateCharacterLight();
         document.body.style.cursor = "none"
-
+        this.cameraManager.resetStates();
     }
-
 
     //TODO PUT INTO CLASS OF ITS OWN
     toggleLightIntensity(light) {
@@ -526,8 +528,6 @@ export class Level1 extends SceneBaseClass {
         this.healthNumberElement.textContent = this.health;
         this.updateCharacterLight(); // Update light when health changes
     }
-
-    
     
     startDamageTimer() {
         setInterval(() => {
@@ -570,5 +570,25 @@ export class Level1 extends SceneBaseClass {
                 }
             }
         }, 1000); // Call this function every second
+    }
+
+    disposeLevel(){
+        if (!this.scene) return;
+
+        this.objManager.removeAllObjects();
+        this.lightManager.removeAllLights();
+    
+        
+        if (this.renderer) {
+            this.renderer.dispose();
+            // Ensure that the renderer's DOM element is removed safely
+            try {
+                document.body.removeChild(this.renderer.domElement);
+            } catch (e) {
+                console.warn("Renderer's DOM element could not be removed:", e);
+            }
+        }
+
+
     }
 }

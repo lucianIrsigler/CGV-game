@@ -2,19 +2,38 @@
 export class AnimationManager {
     constructor() {
         this.currentScene = null;
-        this.animationId = null;
         this.isPaused = false;
     }
 
     startAnimationLoop() {
         const animate = () => {
             if (this.currentScene && !this.isPaused) {
-                // this.animationId = requestAnimationFrame(animate);
                 this.currentScene.animate();
             }
         };
         animate(); // Start the loop
     }
+
+    exitScene(){
+        if (this.currentScene){
+            this.stopAnimationLoop();
+            this.currentScene.disposeLevel(); // Dispose the current scene
+            this.currentScene=null;
+        }
+    }
+
+
+    restartScene(){
+        if (this.currentScene){
+            this.stopAnimationLoop();
+            this.currentScene.restart();
+        }
+
+        if (this.currentScene.animationId===null) {
+            this.startAnimationLoop();
+        }
+    }
+
 
     switchScene(newScene) {
         if (this.currentScene) {
@@ -27,15 +46,14 @@ export class AnimationManager {
         this.currentScene.initScene(); // Initialize the new scene
 
         // Start the animation loop if it wasn't already running
-        if (this.animationId===null) {
+        if (this.currentScene.animationId===null) {
             this.startAnimationLoop();
         }
     }
 
     stopAnimationLoop() {
-        if (this.animationId) {
-            cancelAnimationFrame(this.animationId);
-            this.animationId = null; // Reset the ID to null
+        if (this.currentScene) {
+            this.currentScene.stopAnimate();
         }
     }
 
@@ -48,7 +66,7 @@ export class AnimationManager {
 
     resumeAnimation() {
         this.isPaused = false; // Clear pause state
-        if (this.animationId === null) {
+        if (this.currentScene!=null && this.currentScene.animationId === null) {
             this.startAnimationLoop(); // Restart the loop if it was stopped
         }
     }

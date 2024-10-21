@@ -17,6 +17,12 @@ export class CameraManager{
         }
     }
 
+
+    resetStates(){
+        this.fps.reset();
+        this.thirdPerson.reset();
+    }
+
     getFirstPerson(){
         return this.firstPerson;
     }

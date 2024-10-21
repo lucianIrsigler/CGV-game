@@ -4,6 +4,9 @@ import * as THREE from 'three';
 export class CustomScene1 extends SceneBaseClass {
     constructor() {
         super(); // Call the base class constructor
+        this.animationId = null;
+        this.cube;
+
     }
 
     initScene(){
@@ -17,6 +20,7 @@ export class CustomScene1 extends SceneBaseClass {
         const material = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
         const cube = new THREE.Mesh(geometry, material);
         this.addObject(cube);
+        this.cube = cube;
     }
 
     init_camera_() {
@@ -33,9 +37,20 @@ export class CustomScene1 extends SceneBaseClass {
     }
 
     animate=()=> {
-        console.log("HERE1");
         this.scene.rotation.z += 0.01;
         this.renderer.render(this.scene, this.camera);
+        this.animationId = requestAnimationFrame(this.animate);
+    }
+
+    stopAnimate=()=> {
+        cancelAnimationFrame(this.animationId)
+        this.animationId=null;
+    }
+
+    restart(){
+        this.scene.rotation.z =0;
+
+
     }
 
 }

@@ -35,6 +35,19 @@ export class ThirdPersonInputController {
 
         this.initialize_();
     }
+
+    reset(){
+      this.speed_ = 0.1;
+      this.phi_ = 0;
+      this.theta_ = 0;
+
+      this.groundCheckDistance_=0.5;
+      this.hasJumped = false;
+      this.jumping = false;
+      this.grounded = true;
+      this.verticalVelocity_=0;
+      this.rayCaster = new THREE.Raycaster();
+    }
   
     initialize_() {
         this.current_ = {
