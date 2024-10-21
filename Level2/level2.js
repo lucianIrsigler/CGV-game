@@ -18,7 +18,7 @@ document.body.appendChild(renderer.domElement);
 const controls = new FirstPersonControls(camera, renderer.domElement);
 controls.movementSpeed = 10;
 controls.lookSpeed = 0.1;
-camera.position.set(-51.5, 31, -13);
+camera.position.set(55, 2,2);
 
 // Crates
 const textureLoader = new THREE.TextureLoader();
