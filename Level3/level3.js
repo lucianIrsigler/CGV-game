@@ -3,6 +3,9 @@ import { Bullet } from './bullet.js'; // Import the Bullet class
 import Crosshair from './crosshair.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { lamps } from './lampPos1.js'; // Import the lamps object from lampPos.js
+import { cubeMapNode } from 'three/src/nodes/utils/CubeMapNode.js';
+import { update } from 'three/examples/jsm/libs/tween.module.js';
+import { max } from 'three/webgpu';
 
 // Scene and Camera Setup
 const scene = new THREE.Scene();
@@ -38,12 +41,16 @@ function restartGame() {
     enemyCurrentHealth = enemyMaxHealth; // Reset current health to max
     enemyHits = 0; // Reset hit counter
     document.getElementById('health-bar-container').style.display = 'none';
-    updateHealthBar(); // Update health bar to full width
-    // make bar full
+    updateEnemyHealthBar(); // Update health bar to full width
+    updatePlayerHealthBar(); // Update player health bar
+
+    // Reset health
+    health = maxHealth; // Reset current health to max
 
     // make enemy visible again
     cubeEnemy.visible = true;
     enemyLight.visible = true;
+    enemyLight.intensity = 1; // Reset light intensity
 
     // crosshair
     crosshair.showCrosshair();
@@ -61,7 +68,7 @@ scene.background = new THREE.Color(0x333333);
 
 // Cube (Player)
 const geometry = new THREE.BoxGeometry(0.5, 2, 0.5);
-const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+const material = new THREE.MeshStandardMaterial({ color: 0x00a6ff });
 const cube = new THREE.Mesh(geometry, material);
 cube.position.set(0, 1.5, 0); // Set initial position of the cube
 scene.add(cube);
@@ -77,6 +84,11 @@ scene.add(cubeEnemy);
 const enemyLight = new THREE.PointLight(0xff0400, 1, 100); // Color, intensity, distance
 enemyLight.position.set(10, 2, 5);  // Set the light position to the cube's position
 scene.add(enemyLight);
+
+// Create a point light to simulate the player emitting light
+const playerLight = new THREE.PointLight(0xA96CC3, 1, 100); // Color, intensity, distance
+playerLight.position.set(0, 1.5, 0);  // Set the light position to the cube's position
+scene.add(playerLight);
 
 // Enemy movement variables
 const enemyMovementSpeed = 0.1; // Adjusted speed for slower movement
@@ -291,12 +303,13 @@ document.addEventListener('mousedown', (event) => {
         bullets.push(bullet); // Add bullet to the array
         scene.add(bullet.mesh); // Add bullet mesh to the scene
         scene.add(bullet.light); // Add bullet light to the scene
-
+        handlePlayerHit(5); // Handle player hit logic
     }
 });
 
 // Update camera position to always follow the cube
 function updateCamera() {
+    loaded = true;
     // Calculate the new camera position based on cube's rotation around the Y-axis
     const offset = new THREE.Vector3(0, 1.5, -2.5); // Adjust this for the right shoulder view (left right, up down, front back)
     offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), cubeRotationY); // Rotate offset based on cube's Y rotation
@@ -347,6 +360,8 @@ function movePlayer() {
 
 // Animation Loop
 function animate() {
+    updatePlayerHealthBar();
+    playerLight.position.set(cube.position.x, cube.position.y + 1.5, cube.position.z);
     if (isGamePaused) return; // Skip updates if the game is paused
     movePlayer();  // Update player movement
     updateCamera();  // Update camera to follow the player
@@ -379,7 +394,7 @@ function animate() {
         // Check for collision with the player cube
         if (detectCollision(enemyBullets[i], cube)) {
             console.log("Player has been hit!");
-            youLose(); // Call the lose condition function
+            handlePlayerHit(30); // Handle player hit logic - take 30 damage
             scene.remove(enemyBullets[i].mesh); // Remove bullet from the scene
             scene.remove(enemyBullets[i].light); // Remove bullet light from the scene
             enemyBullets.splice(i, 1); // Remove bullet from array
@@ -449,7 +464,7 @@ let enemyHits = 0; // Initialize hit counter
 let enemyHitCooldown = false; // Flag to check if enemy is already hit and waiting to reset color
 
 // Function to update the health bar based on current health
-function updateHealthBar() {
+function updateEnemyHealthBar() {
     const healthBar = document.getElementById('health-bar');
     const healthPercentage = (enemyCurrentHealth / enemyMaxHealth) * 100; // Calculate percentage
     healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
@@ -471,7 +486,7 @@ function handleEnemyHit() {
 
         // Reduce enemy health
         enemyCurrentHealth -= 10; // Reduce health by 10 (or any amount you choose)
-        updateHealthBar(); // Update the health bar after taking damage
+        updateEnemyHealthBar(); // Update the health bar after taking damage
 
         if (enemyCurrentHealth <= 0) {
             if(enemyAlive){
@@ -502,6 +517,12 @@ function handleEnemyHit() {
             }, 50); // milliseconds delay
         }
     }
+}
+
+// Handle Player hit
+function handlePlayerHit(dmg) {
+    
+    takeDamage(dmg); // Take 10 damage when hit
 }
 
 // Function to detect collision between bullet and enemy
@@ -571,4 +592,92 @@ function enemyShoot() {
             enemyShootCooldown = false; // Reset cooldown flag after 1 second
         }, randomTime); // milliseconds delay
     }
+}
+
+// Health System
+let maxHealth = 100;
+let health = maxHealth;
+let loaded = false;
+const damageRate = 10; // Define the damage rate
+const healingRate = 100; // Define the healing rate
+let points = lampsArray.map(lamp => new THREE.Vector3(lamp.positionX, lamp.positionY, lamp.positionZ)); // Convert lamp positions to Vector3 objects
+
+//Update Player Health
+function updatePlayerHealthBar(){
+    const healthBar = document.getElementById('user-health-bar');
+    const healthPercentage = (health / maxHealth) * 100; // Calculate percentage
+    healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
+}
+
+function takeDamage(amount) {
+    health -= amount;
+    health = Math.max(0, health); // Ensure health doesn't go below 0
+    // updateCharacterLight(); // Update light when health changes
+    if (health <= 0 && !isGamePaused) {
+        youLose(); // Call the lose condition function
+    }
+}
+
+function heal(amount) {
+    health += amount;
+    health = Math.min(100, health); // Cap health at 100
+    // updateCharacterLight(); // Update light when health changes
+}
+
+
+const lightTimers = {}; // Track time spent near lights
+
+function startDamageTimer() {
+    setInterval(() => {
+        if (loaded) {
+            let valid = false;
+
+            points.forEach((light, index) => {
+                // Check distance to each light
+                if (calcEuclid(cube.position.x, cube.position.z, light.x, light.z)) {
+                    valid = true;
+                    heal(healingRate);
+                    
+                }
+            });
+
+            if (!valid) {
+                takeDamage(damageRate); // Take damage if not within any light
+            }
+        }
+    }, 1000); // Call this function every second
+}
+
+function flickerLight(light, index) {
+    let flickerDuration = 2; // Flicker for 2 seconds
+    let flickerInterval = 100; // Flicker every 200ms
+    let flickerCount = flickerDuration * 1000 / flickerInterval; // Total flickers
+    let originalIntensity = light.intensity;
+
+    let flickerEffect = setInterval(() => {
+        light.intensity = light.intensity === 0 ? originalIntensity : 0; // Toggle light intensity
+        flickerCount--;
+
+        if (flickerCount <= 0) {
+            clearInterval(flickerEffect);
+            light.intensity = 0; // Turn off the light
+            // Reset the timer for this light
+            if (lightTimers[index]) {
+                lightTimers[index].time = 0;
+                lightTimers[index].flickering = false;
+            }
+
+            // Apply damage if the character is still near the light
+            if (calcEuclid(cube.position.x, cube.position.z, light.x, light.z)) {
+                takeDamage(damageRate); // Take the same damage as usual when the light goes off
+            }
+        }
+    }, flickerInterval);
+}
+
+startDamageTimer();
+
+function calcEuclid(x1, z1, x2, z2) {
+    const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
+    return distance <= 3;
 }

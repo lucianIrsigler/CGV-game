@@ -38,38 +38,73 @@
 		}
 
 		#health-bar-container {
-			position: fixed;  /* Fixed position to stay at the bottom of the screen */
-			bottom: 20px;     /* Space from the bottom of the screen */
-			left: 50%;        /* Center horizontally */
-			transform: translateX(-50%); /* Adjust to center */
-			width: 80%;       /* Width of the health bar */
-			height: 20px;     /* Height of the health bar container */
-			background-color: rgba(255, 255, 255, 0.3); /* Background color (optional) */
-			border: 2px solid #000000; /* Border color */
-			border-radius: 5px; /* Rounded corners */
-			overflow: hidden; /* Hide overflow to create a filling effect */
+			position: fixed;
+			bottom: 20px;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 80%;
+			height: 20px;
+			background-color: rgba(255, 255, 255, 0.3);
+			border: 2px solid #000000;
+			border-radius: 5px;
+			overflow: hidden;
 		}
 
 		#health-bar {
-			height: 100%;     /* Fill the height of the container */
-			background-color: red; /* Color of the health bar */
-			width: 100%;      /* Start at full width */
-			transition: width 0.3s ease; /* Smooth transition for width change */
+			height: 100%;
+			background-color: red;
+			width: 100%;
+			transition: width 0.3s ease;
 		}
 
 		#boss-name {
-			position: absolute; /* Absolute position to stay at the top of the health bar */
-			top: -30px;         /* Space from the top of the health bar */
-			left: 50%;          /* Center horizontally */
-			transform: translateX(-50%); /* Adjust to center */
-			font-size: 20px;    /* Font size */
-			font-weight: bold;  /* Bold text */
+			position: absolute;
+			top: -30px;
+			left: 50%;
+			transform: translateX(-50%);
+			font-size: 20px;
+			font-weight: bold;
 		}
 
+		/* New styles for the user's vertical health bar */
+		#user-health-bar-container {
+			position: fixed;
+			top: 50%;
+			left: 20px;
+			transform: translateY(-50%) rotate(-90deg); /* Rotates the container to make it vertical */
+			width: 200px;
+			height: 20px;
+			background-color: #ffffff4d;
+			border: 2px solid #000000;
+			border-radius: 5px;
+			overflow: hidden;
+		}
 
+		#user-health-bar {
+			height: 100%;
+			background-color: #A96CC3; /* Different color for user's health bar */
+			width: 100%;
+			transition: width 0.3s ease;
+		}
+
+		#user-name {
+			position: absolute;
+			top: -30px;
+			left: 50%;
+			transform: translateX(-50%);
+			font-size: 16px;
+			font-weight: bold;
+			color: white;
+		}
 	</style>
 </head>
 <body>
+
+	<!-- User health bar -->
+	<div id="user-health-bar-container">
+		<div id="user-name">Player Health</div>
+		<div id="user-health-bar"></div>
+	</div>
 
 	<!-- Settings Modal (Popup) -->
 	<div id="settingsModal" class="modal">
@@ -88,7 +123,6 @@
 			 <br>
 			<label for="sensitivity">Sensitivity:</label>
 			<input type="range" id="sensitivitySlider" name="sensitivity" min="0.1" max="1" step="0.1" value="0.5">
-
 		</div>
 	</div>
 
@@ -97,11 +131,11 @@
         <button id="restartButton" style="padding: 10px 20px; font-size: 20px;">Restart</button>
     </div>
 
+	<!-- Boss health bar -->
 	<div id="health-bar-container">
 		<div id="boss-name">Boss Name</div>
 		<div id="health-bar"></div>
 	</div>
-	
 
 	<script type="module" src="/level3.js"></script>
 </body>
