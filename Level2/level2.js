@@ -5,6 +5,7 @@ import { lamps } from './lampPos2';
 import { door } from './doorPos';
 import { gun } from './gunPos';
 import { loadTextures, applyTextureSettings } from './TextureLoaderUtil';
+import { FirstPersonControls } from 'three/examples/jsm/controls/FirstPersonControls.js';
 
 // Set up the scene, camera, and renderer
 const scene = new THREE.Scene();
@@ -14,19 +15,10 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Directional light for testing
-const directionalLight1 = new THREE.DirectionalLight(0x0000ff, 0.2);
-directionalLight1.position.set(0, 50, 0); // Position the light
-directionalLight1.target.position.set(0, 100, 0); // Make the light face upwards
-scene.add(directionalLight1);
-scene.add(directionalLight1.target); // Add the target to the scene
-
-// Add a second directional light opposite to the first
-const directionalLight2 = new THREE.DirectionalLight(0x0000ff, 0.2);
-directionalLight2.position.set(0, -50, 0); // Position the light
-directionalLight2.target.position.set(0, -100, 0); // Make the light face downwards
-scene.add(directionalLight2);
-scene.add(directionalLight2.target); // Add the target to the scene
+const controls = new FirstPersonControls(camera, renderer.domElement);
+controls.movementSpeed = 10;
+controls.lookSpeed = 0.1;
+camera.position.set(-51.5, 31, -13);
 
 // Crates
 const textureLoader = new THREE.TextureLoader();
@@ -75,7 +67,7 @@ function definePlatformAction(platformIndex, action) {
 // Load textures for the base and platforms
 //const platformTexture = textureLoader.load('PavingStones.jpg');
 const platformTexture = loadTextures('PavingStones');
-applyTextureSettings(platformTexture, 0.2, 0.2); 
+applyTextureSettings(platformTexture, 0.07, 0.07); 
 
 const baseTexture = textureLoader.load('PavingStones.jpg');
 
@@ -295,14 +287,9 @@ Object.values(lamps).forEach((currentLamp) => {
                 model.lookAt(0, model.position.y, 0);
 
                 platform.add(model);
-
-                // Adjust the light position to point downwards
-                // const lampLight = new THREE.PointLight(0xA96CC3, 15, 15); // Purple light 
-                // lampLight.position.set(0, 2, 0); // Position it below the lamp model
-                // model.add(lampLight);
                 
                 // Create a cone light to point at the platform
-                const coneLight = new THREE.SpotLight(0xA96CC3, 15, 10, Math.PI / 4, 0.5, 2); // Adjust parameters as needed
+                const coneLight = new THREE.SpotLight(0xA96CC3, 20, 10, Math.PI / 4, 0.5, 2); // Adjust parameters as needed
                 coneLight.position.copy(lampPos).add(new THREE.Vector3(0, 5, 0)); // Adjust height if necessary
                 coneLight.target.position.copy(lampPos); // Point towards the lamp position
                 coneLight.target.updateMatrixWorld(); // Ensure target is updated
@@ -327,14 +314,14 @@ const minHeight = 0;
 const maxHeight = (numPlatforms - 1) * platformSpacing;
 
 // Adjust camera position
-camera.position.z = 20;
-camera.position.y = 10;
+// camera.position.z = 20;
+// camera.position.y = 10;
 
-// Set up OrbitControls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; 
-controls.dampingFactor = 0.25;
-controls.screenSpacePanning = false;
+// // Set up OrbitControls
+// const controls = new OrbitControls(camera, renderer.domElement);
+// controls.enableDamping = true; 
+// controls.dampingFactor = 0.25;
+// controls.screenSpacePanning = false;
 
 // Create a big cylindrical structure around the existing elements
 const roomRadius = 100;
@@ -369,6 +356,8 @@ bottomCap.rotation.x = -Math.PI / 2;
 bottomCap.position.y = -roomHeight / 2 + 30;
 scene.add(bottomCap);
 
+//LIGHTING
+
 // const centerLight = new THREE.PointLight(0xffffff, 1, 100);
 // centerLight.position.set(0, roomHeight / 2, 0); // Position the light in the center of the room
 // scene.add(centerLight);
@@ -377,6 +366,23 @@ scene.add(bottomCap);
 // const pointLight = new THREE.PointLight(0x0000ff, 0.5, roomRadius * 2);
 // pointLight.position.set(0, roomHeight / 2, 0); // Position the light in the center of the room
 // scene.add(pointLight);
+
+// Directional light for testing
+const directionalLight1 = new THREE.DirectionalLight(0x0000ff, 0.1);
+directionalLight1.position.set(0, -50, 0); // Position the light
+directionalLight1.target.position.set(0, -100, 0); // Make the light face downwards
+scene.add(directionalLight1);
+scene.add(directionalLight1.target); // Add the target to the scene
+
+// Add a second directional light opposite to the first
+const directionalLight2 = new THREE.DirectionalLight(0x0000ff, 0.1);
+directionalLight2.position.set(0, 50, 0); // Position the light
+directionalLight2.target.position.set(0, 100, 0); // Make the light face upwards
+scene.add(directionalLight2);
+scene.add(directionalLight2.target); // Add the target to the scene
+
+const ambientLight = new THREE.AmbientLight(0x0000ff, 0.02); // Soft white light
+scene.add(ambientLight);
 
 // Animation loop
 let lastUpdate = 0; // Track the last update time
@@ -389,13 +395,13 @@ function animate(time) {
         lastUpdate = time; // Update the last update time
 
         // Update the camera controls
-        controls.update();
+        controls.update(0.1);
 
         // Constrain camera's Y position between minHeight and maxHeight
         // camera.position.y = Math.min(Math.max(camera.position.y, minHeight), maxHeight);
 
         // Update circular base's height to match the camera's Y position
-        circularBase.position.y = camera.position.y - 4;
+        circularBase.position.y = Math.min(Math.max(camera.position.y - 4, minHeight), maxHeight);
 
         // Update positions of platforms based on defined actions
         platformArray.forEach((group, index) => {
