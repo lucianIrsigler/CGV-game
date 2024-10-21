@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { FirstPersonCamera } from "./src/scripts/Camera/FirstPersonCamera"
 import { ThirdPersonCamera } from './src/scripts/Camera/ThirdPersonCamera';
 import { LoadingManager } from './src/scripts/Loaders/Loader';
+import { Characater } from './src/scripts/Characters/Chararcter';
 
 
 let loadingManager = new LoadingManager();
@@ -63,7 +64,11 @@ async function initialize() {
           model.name = "player"; // Name the model
 
           targetted = model;
-          fpsCamera = new FirstPersonCamera(camera,targetted,scene)
+          fpsCamera = new FirstPersonCamera(camera,
+            targetted,
+            new Characater(5.0,2.0),
+            scene)
+
           thirdPersonCamera = new ThirdPersonCamera(camera,targetted)
 
       });
@@ -106,14 +111,9 @@ document.addEventListener("keydown", (e) => {
   }
 
 })
-
-
-
 let current = 0;
 
-
 function animate() {
-
   requestAnimationFrame(animate);
   const timeElapsed = current + 0.001;
   if (targetted!=undefined && thirdPersonCamera!=undefined && fpsCamera!=undefined){

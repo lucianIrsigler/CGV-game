@@ -13,11 +13,15 @@ function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
+//https://medium.com/@brazmogu/physics-for-game-dev-a-platformer-physics-cheatsheet-f34b09064558
+
 export class FirstPersonCamera {
-    constructor(camera,target,scene) {
+    constructor(camera,target,character,scene) {
       this.camera_ = camera;
       this.input_ = new FirstPersonInputController();
       this.scene = scene;
+      this.character = character;
+
 
       this.rotation_ = new THREE.Quaternion();
       this.translation_ = new THREE.Vector3();
@@ -28,13 +32,13 @@ export class FirstPersonCamera {
 
       this.sensitivity=5;
 
-      this.jumpSpeed_ = 6;
-      this.jumpAlready_=false;
-      this.isGrounded_ = true;
-      this.raycaster_ = new THREE.Raycaster();
-      this.groundCheckDistance_ = 4;
-      this.gravity_ = -0.05; // Gravity acceleration
-      this.verticalVelocity_ = 0;
+      this.gravity = this.character.calcGravity();
+      this.jumpSpeed = this.character.calcJumpSpeed();
+      this.jumping = false;
+      this.grounded = true;
+      this.verticalVelocity_=0;
+      this.rayCaster = new THREE.Raycaster();
+      this.groundCheckDistance_=0.5;
     }
   
     update(timeElapsedS) {
@@ -46,10 +50,10 @@ export class FirstPersonCamera {
     }
   
     updateCamera_(_) {
-      console.log(this.camera_.position,this.target_.position)
+      // console.log(this.camera_.position,this.target_.position)
       this.camera_.quaternion.copy(this.rotation_);
       this.camera_.position.copy(this.translation_);
-      this.camera_.position.y = 1.2;
+      this.camera_.position.y +=1.2;
       this.target_.visible=false;
 
 
@@ -57,55 +61,48 @@ export class FirstPersonCamera {
       this.target_.position.copy(this.translation_);
       // this.camera_.position.y += Math.sin(this.headBobTimer_ * 10) * 0.1;  // Slight head bob effect
     }
-  
-    // updateHeadBob_(timeElapsedS) {
-    //   if (this.headBobActive_) {
-    //     const waveLength = Math.PI;
-    //     const nextStep = 1 + Math.floor((this.headBobTimer_ + 0.000001) * 10 / waveLength);
-    //     const nextStepTime = nextStep * waveLength / 10;
-  
-    //     this.headBobTimer_ = Math.min(this.headBobTimer_ + timeElapsedS, nextStepTime);
-  
-    //     if (this.headBobTimer_ === nextStepTime) {
-    //       this.headBobActive_ = false;
-    //     }
-    //   }
-    // }
     
 
-    checkGrounded(){
-      this.raycaster_.set(this.translation_.clone().add(new THREE.Vector3(0, 1, 0)), new THREE.Vector3(0, -1, 0)); // A ray going downwards
-
-      const intersects = this.raycaster_.intersectObjects(this.scene.children, true); // Use appropriate object group
-      
-      if (intersects.length > 0 && intersects[0].distance < this.groundCheckDistance_) {
-          // If we hit something within the ground check distance
-          this.translation_.y = intersects[0].point.y + 0.5; // Adjust position slightly above the ground
-          this.verticalVelocity_ = 0; // Reset vertical velocity
-          this.isGrounded_ = true; // Set grounded state
-          this.jumpAlready_=false;
-      } else {
-          this.isGrounded_ = false; // Player is in the air
-
+    checkIfGround() {
+      // If already grounded, exit
+      if (this.grounded) {
+          return;
       }
-
+  
+      // Shoot raycast downwards
+      this.rayCaster.set(this.translation_.clone().add(new THREE.Vector3(0, 1, 0)), new THREE.Vector3(0, -1, 0));
+      const intersects = this.rayCaster.intersectObjects(this.scene.children, true);
+  
+      // Check if the ray hit something
+      if (intersects.length > 0) {  // Fixed here: check length not > 0
+          if (intersects[0].distance < this.groundCheckDistance_) {
+              // Position slightly above the ground
+              this.translation_.y = intersects[0].point.y + 0.5; 
+              this.verticalVelocity_ = 0; // Reset vertical velocity
+              this.grounded = true; // Set grounded state
+              this.jumping = false; // Reset jumping state when grounded
+          }
+      } else {
+          // If no intersections were found, set grounded to false
+          this.grounded = false; 
+      }
     }
 
     updateTranslation_(timeElapsedS) {
       const forwardVelocity = (this.input_.keys_[KEYS.w] ? 1 : 0) + (this.input_.keys_[KEYS.s] ? -1 : 0);
       const strafeVelocity = (this.input_.keys_[KEYS.a] ? 1 : 0) + (this.input_.keys_[KEYS.d] ? -1 : 0);
 
-      // if (this.input_.keys_[KEYS.space] && this.isGrounded_ && !this.jumpAlready_) {
-      // console.log(this.input_.keys_[KEYS.space])
+      if (!this.grounded) {
+        this.verticalVelocity_ -= this.gravity * timeElapsedS; // Apply gravity over time
+      } else {
+        this.verticalVelocity_ = 0; // Reset vertical velocity if grounded
+      }
 
-      //   this.input_.keys_[KEYS.space] = false;
-      //   this.verticalVelocity_ = this.jumpSpeed_; // Start the jump
-      //   this.isGrounded_ = false; // The player is now in the air
-      // }
-
-      // if (!this.isGrounded_) {
-      //   this.verticalVelocity_ += -0.50; // Apply gravity over time
-      // }
+      if (this.input_.keys_[KEYS.space] && this.grounded) {
+        this.verticalVelocity_ = this.jumpSpeed; // Set vertical velocity for jumping
+        this.jumping = true; // Set jumping state
+        this.grounded = false; // Player is now in the air
+    }
 
       const qx = new THREE.Quaternion();
       qx.setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.phi_);
@@ -120,16 +117,9 @@ export class FirstPersonCamera {
       
       this.translation_.add(forward);
       this.translation_.add(left);
+      this.translation_.y+=this.verticalVelocity_;
 
-      // if (!this.isGrounded_ || !this.jumpAlready_){
-      //   this.translation_.y += this.verticalVelocity_;
-      //   this.jumpAlready_=true;
-
-
-      // }
-
-      // // Perform raycasting to check if grounded
-      // this.checkGrounded();
+      this.checkIfGround()
     }
   
 
