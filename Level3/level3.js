@@ -6,6 +6,7 @@ import { lamps } from './lampPos1.js'; // Import the lamps object from lampPos.j
 import { cubeMapNode } from 'three/src/nodes/utils/CubeMapNode.js';
 import { update } from 'three/examples/jsm/libs/tween.module.js';
 import { max } from 'three/webgpu';
+import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 
 // Scene and Camera Setup
 const scene = new THREE.Scene();
@@ -131,26 +132,50 @@ function updateEnemyMovement() {
 
 // Ground
 //Texture for ground 
-const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load('PavingStones.jpg', (texture) => {
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(10, 10);
+// const textureLoader = new THREE.TextureLoader();
+// const texture = textureLoader.load('PavingStones.jpg', (texture) => {
+//   texture.wrapS = THREE.RepeatWrapping;
+//   texture.wrapT = THREE.RepeatWrapping;
+//   texture.repeat.set(10, 10);
+// });
+
+const textureLoader = loadTextures('PavingStones');
+applyTextureSettings(textureLoader, 10, 10);
+
+//const platformMaterial = new THREE.MeshStandardMaterial({ map: texture }); 
+const platformMaterial = new THREE.MeshStandardMaterial({
+    map: textureLoader.colorMap,
+    aoMap: textureLoader.aoMap,
+    displacementMap: textureLoader.displacementMap,
+    metalnessMap: textureLoader.metalnessMap,
+    normalMap: textureLoader.normalMapDX, 
+    roughnessMap: textureLoader.roughnessMap,
+    displacementScale: 0,
+    metalness: 0.1,
+    roughness: 0.5
 });
-const platformMaterial = new THREE.MeshStandardMaterial({ map: texture }); 
+
 const platformGeometry = new THREE.BoxGeometry(100, 1, 100);
 const platform = new THREE.Mesh(platformGeometry, platformMaterial);
 scene.add(platform);
 
 // Walls
-const textureLoaderWall = new THREE.TextureLoader();
-const textureWall = textureLoaderWall.load('PavingStones.jpg', (texture) => {
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(10,10);
-});
+const textureLoaderWall = loadTextures('PavingStones');
+applyTextureSettings(textureLoaderWall, 10, 10);
+
 const sideWallGeometry = new THREE.BoxGeometry(1, 100, 100);
-const sideWallMaterial = new THREE.MeshStandardMaterial({ map: textureWall }); 
+const sideWallMaterial  = new THREE.MeshStandardMaterial({
+    map: textureLoaderWall.colorMap,
+    aoMap: textureLoaderWall.aoMap,
+    displacementMap: textureLoaderWall.displacementMap,
+    metalnessMap: textureLoaderWall.metalnessMap,
+    normalMap: textureLoaderWall.normalMapDX, 
+    roughnessMap: textureLoaderWall.roughnessMap,
+    displacementScale: 0,
+    metalness: 0.1,
+    roughness: 0.5
+});
+
 const wall1 = new THREE.Mesh(sideWallGeometry, sideWallMaterial);
 wall1.position.set(0, 50, -50); 
 wall1.rotation.y = Math.PI / 2; // Rotate the wall 90 degrees
