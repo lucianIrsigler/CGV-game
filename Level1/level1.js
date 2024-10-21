@@ -676,6 +676,7 @@ greenBlock.position.set(-3, topThingy.position.y + 2, 39);
 scene.add(greenBlock);
 
 
+console.log(scene.children);
 
 function animate() {
     requestAnimationFrame(animate);
@@ -717,11 +718,16 @@ document.addEventListener('keydown', (e) => {
                 character.position.y + 0.5 >= platform.position.y &&
                 character.position.y <= platform.position.y + platform.size.y
             ) {
+                // Check if hitting the platform from below
+            if (character.position.y + 0.5 < platform.position.y + platform.size.y) {
+                velocityY = -Math.abs(velocityY); // Ensure downward velocity
+            } else {
                 character.position.y = platform.position.y + platform.size.y;
                 velocityY = 0;
                 isJumping = false;
                 jumpCount = 0; // Reset jump count when landing on a platform
                 onPlatform = true;
+            }
             }
         }
     });

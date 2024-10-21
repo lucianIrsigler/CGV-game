@@ -10,11 +10,11 @@ export class ObjectManager {
 
 
     addGeometry(name,geometry){
-        this.geometries.add({name:name,geometry:geometry})
+        this.geometries[name] = geometry;
     }
 
     addMaterial(name,material){
-        this.materials.add({name:name,material:material})
+        this.materials[name] = material;
     }
 
     removeGeometry(name) {
@@ -32,6 +32,17 @@ export class ObjectManager {
             console.error(`Material "${name}" not found.`);
         }
     }
+
+    getObject(name) {
+        const object = this.scene.getObjectByName(name);
+        if (object) {
+            return object;  // Return the object if found
+        } else {
+            console.error(`Object "${name}" not found.`);
+            return null;  // Return null if the object is not found
+        }
+    }
+    
 
 
     createObject(name,geometryName,materialName, position=null,rotation=null) {
