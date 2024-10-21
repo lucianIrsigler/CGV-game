@@ -1,9 +1,7 @@
 import * as THREE from 'three';
-import { FirstPersonCamera } from "./src/scripts/Camera/FirstPersonCamera"
-import { ThirdPersonCamera } from './src/scripts/Camera/ThirdPersonCamera';
+import { CameraManager } from './src/scripts/Camera/CameraManager';
 import { LoadingManager } from './src/scripts/Loaders/Loader';
 import { Characater } from './src/scripts/Characters/Chararcter';
-import { compressSync } from 'three/examples/jsm/libs/fflate.module.js';
 
 
 let loadingManager = new LoadingManager();
@@ -11,9 +9,8 @@ let loadingManager = new LoadingManager();
 let targetted;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-let fpsCamera;
-let thirdPersonCamera;
-let thirdPerson = false;
+
+let cameraManager;
 
 
 
@@ -88,18 +85,13 @@ async function initialize() {
           model.name = "player"; // Name the model
 
           targetted = model;
-          fpsCamera = new FirstPersonCamera(camera,
-            targetted,
-            new Characater(5.0,0.4),
-            scene)
 
-          thirdPersonCamera = new ThirdPersonCamera(
+          cameraManager = new CameraManager(
             camera,
             targetted,
             new Characater(5.0,0.4),
-            scene
-          )
-
+          scene
+        )
       });
       console.log('Model loaded and added to the scene.');
   } catch (error) {
@@ -135,30 +127,31 @@ window.addEventListener('resize', () => {
 document.addEventListener("keydown", (e) => {
   switch (e.code) {
     case "KeyR":
-      thirdPerson = !thirdPerson;
+      if (cameraManager==undefined){
+        return;
+      }
+      if (cameraManager.getFirstPerson()){
+        cameraManager.toggleThirdPerson()
+      }else{
+        cameraManager.toggleFirstPerson()
+
+      }
       break;
   }
 
 })
-let lastTime = 0;
 
+
+let lastTime = 0;
 function animate(currentTime) {
   const timeElapsedS = (currentTime - lastTime) / 1000;
   lastTime = currentTime;
 
-
-  if (targetted!=undefined && thirdPersonCamera!=undefined && fpsCamera!=undefined){
-    if (!thirdPerson){
-      fpsCamera.update(timeElapsedS);
-      renderer.render(scene, fpsCamera.camera_);
-    }else{
-      thirdPersonCamera.update(timeElapsedS);
-      renderer.render(scene, thirdPersonCamera.camera_);
-
-    }
+  if (targetted!=undefined && cameraManager!=undefined){
+      cameraManager.update(timeElapsedS)
+      renderer.render(scene, cameraManager.getCamera());
   }
   requestAnimationFrame(animate);
-
 }
 
 animate();
