@@ -4,7 +4,8 @@ const KEYS = {
     w: 87,  // W key
     a: 65,  // A key
     s: 83,  // S key
-    d: 68   // D key
+    d: 68,   // D key
+    space:32
 };
 
 function clamp(value, min, max) {
@@ -12,11 +13,26 @@ function clamp(value, min, max) {
 }
 
 export class ThirdPersonInputController {
-    constructor(target) {
+    constructor(target,scene,gravity,jumpSpeed) {
+        this.scene=scene;
         this.target_ = target;
+
+
         this.speed_ = 0.1;
         this.phi_ = 0;
         this.theta_ = 0;
+
+
+        //Jump stuff
+        this.gravity = gravity;
+        this.jumpSpeed = jumpSpeed;
+        this.groundCheckDistance_=0.5;
+        this.hasJumped = false;
+        this.jumping = false;
+        this.grounded = true;
+        this.verticalVelocity_=0;
+        this.rayCaster = new THREE.Raycaster();
+
         this.initialize_();
     }
   
@@ -83,8 +99,62 @@ export class ThirdPersonInputController {
     }
     
 
-    updatePositon_(){
+    checkIfGround() {
+        // Only perform raycast if the player is not grounded or if jumping/falling
+        if (!this.jumping) {
+          return;  // Skip raycast if grounded and not jumping
+        }
+      
+        // Create a ray starting from the player position, pointing downwards
+        let start = this.target_.position.clone();
+        let direction = new THREE.Vector3(0, -1, 0);  // Cast directly down
+        this.rayCaster.set(start, direction);
+        
+        // Limit raycast to specific objects in the scene (e.g., ground only)
+        const groundObjects = this.scene.children.filter(child => child.isGround);  // Tag or mark ground objects
+        const intersects = this.rayCaster.intersectObjects(groundObjects, true);
+      
+        if (intersects.length > 0) {
+          // If the intersection is within a certain distance, mark as grounded
+          if (intersects[0].distance < this.groundCheckDistance_ && this.hasJumped) {
+            console.log("Ground detected, resetting position.");
+            this.target_.position.y = intersects[0].point.y;
+            this.verticalVelocity_ = 0;  // Stop falling when we hit the ground
+            this.grounded = true;        // Set grounded to true
+            this.jumping = false;        // Reset jumping state
+            this.hasJumped=false;
+          } else {
+            this.grounded = false;
+          }
+  
+          if (intersects[0].distance>this.groundCheckDistance_ && !this.hasJumped){
+            this.hasJumped=true;
+          }
+        } else {
+          this.grounded = false;  // If no intersections found, we are in the air
+        }
+      }
+
+
+
+    updatePositon_(timeElapsedS){
         const moveDirection = new THREE.Vector3();
+
+        if (!this.grounded) {
+            this.verticalVelocity_ -= this.gravity * timeElapsedS;  // Apply gravity if not grounded
+        } else {
+            this.verticalVelocity_ = 0;  // Reset vertical velocity when grounded
+        }
+
+        if (this.keys_[KEYS.space] && this.grounded) {
+            console.log("Jump initiated");
+            this.verticalVelocity_ = this.jumpSpeed; // Set vertical velocity for jumping
+            this.jumping = true;                      // Set jumping state
+            this.grounded = false;                    // Player is now in the air
+          }
+          
+
+
         if (this.keys_[KEYS.w]) {
             moveDirection.z += this.speed_;
         }
@@ -100,6 +170,9 @@ export class ThirdPersonInputController {
 
         moveDirection.applyQuaternion(this.target_.quaternion);
         this.target_.position.add(moveDirection);
+        this.target_.position.y += this.verticalVelocity_ * timeElapsedS;
+
+        this.checkIfGround()
     }
 
 
@@ -111,7 +184,9 @@ export class ThirdPersonInputController {
       }
     }
 
-    updateRotation_() {  
+   
+
+    updateRotation_(timeElapsedS) {  
       let rotate = true;
       let edge = false;
 
@@ -173,9 +248,9 @@ export class ThirdPersonInputController {
 
 
 
-    update() {
-        this.updatePositon_();
-        this.updateRotation_(); 
+    update(timeElapsedS) {
+        this.updatePositon_(timeElapsedS);
+        this.updateRotation_(timeElapsedS); 
         // console.log("target:",this.target_.position);
         this.previous_ = { ...this.current_ };
     }

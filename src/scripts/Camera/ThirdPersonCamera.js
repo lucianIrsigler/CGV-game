@@ -3,11 +3,14 @@ import { ThirdPersonInputController } from "../InputController/ThirdPersonInputC
 
 //https://www.youtube.com/watch?v=UuNPHOJ_V5o&ab_channel=SimonDev
 export class ThirdPersonCamera{
-    constructor(camera,target) {
+    constructor(camera,target,character,scene) {
+        this.scene = scene;
+        this.character = character;
         this.camera_ = camera;
+
         this.currentPositon_ = new THREE.Vector3();
         this.currentLookat_ = new THREE.Vector3();
-        this.input_ = new ThirdPersonInputController(target);
+        this.input_ = new ThirdPersonInputController(target,scene,character.calcGravity(),character.calcJumpSpeed());
     }
 
     calculateIdealOffset_(){
@@ -34,18 +37,19 @@ export class ThirdPersonCamera{
         return idealLookAt;
     }
 
+    
+
+
     update(timeElapsedS){
         this.input_.target_.visible=true;
+        this.input_.update(timeElapsedS);
 
-        this.input_.update();
         const idealOffset = this.calculateIdealOffset_();
 
         const idealLookAt = this.calculateIdealLookAt_();
 
-
         // const t = 1.0 - Math.pow(0.001,timeElapsedS);
 
-        
         // this.currentPositon_.lerp(idealOffset,t);
         // this.currentLookat_.lerp(idealLookAt,t);
         

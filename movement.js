@@ -3,6 +3,7 @@ import { FirstPersonCamera } from "./src/scripts/Camera/FirstPersonCamera"
 import { ThirdPersonCamera } from './src/scripts/Camera/ThirdPersonCamera';
 import { LoadingManager } from './src/scripts/Loaders/Loader';
 import { Characater } from './src/scripts/Characters/Chararcter';
+import { compressSync } from 'three/examples/jsm/libs/fflate.module.js';
 
 
 let loadingManager = new LoadingManager();
@@ -32,7 +33,30 @@ function addRandomStuff(scene,camera){
   const plane = new THREE.Mesh(planeGeometry, planeMaterial);
   plane.rotation.x = -Math.PI / 2;
   plane.position.y = 0;
+  plane.isGround=true;
   scene.add(plane);
+
+
+  const planeGeometry1 = new THREE.BoxGeometry(10, 10,2);
+  const planeMaterial1 = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
+  const plane1 = new THREE.Mesh(planeGeometry1, planeMaterial1);
+  plane1.rotation.x = -Math.PI / 2;
+  plane1.position.y = 2;
+  plane1.position.x=-10;
+  plane1.position.z=-10;
+  plane1.isGround=true;
+  scene.add(plane1);
+
+
+  const plane2 = new THREE.Mesh(planeGeometry1, planeMaterial1);
+  plane2.rotation.x = -Math.PI / 2;
+  plane2.position.y = 4;
+  plane2.position.x=5;
+  plane2.position.z=-10;
+  plane2.isGround=true;
+  scene.add(plane2);
+
+
 
   // Add some random cubes
   for (let i = 0; i < 10; i++) {
@@ -66,10 +90,15 @@ async function initialize() {
           targetted = model;
           fpsCamera = new FirstPersonCamera(camera,
             targetted,
-            new Characater(5.0,2.0),
+            new Characater(5.0,0.4),
             scene)
 
-          thirdPersonCamera = new ThirdPersonCamera(camera,targetted)
+          thirdPersonCamera = new ThirdPersonCamera(
+            camera,
+            targetted,
+            new Characater(5.0,0.4),
+            scene
+          )
 
       });
       console.log('Model loaded and added to the scene.');
@@ -111,21 +140,25 @@ document.addEventListener("keydown", (e) => {
   }
 
 })
-let current = 0;
+let lastTime = 0;
 
-function animate() {
-  requestAnimationFrame(animate);
-  const timeElapsed = current + 0.001;
+function animate(currentTime) {
+  const timeElapsedS = (currentTime - lastTime) / 1000;
+  lastTime = currentTime;
+
+
   if (targetted!=undefined && thirdPersonCamera!=undefined && fpsCamera!=undefined){
     if (!thirdPerson){
-      fpsCamera.update(timeElapsed);
+      fpsCamera.update(timeElapsedS);
       renderer.render(scene, fpsCamera.camera_);
     }else{
-      thirdPersonCamera.update(timeElapsed);
+      thirdPersonCamera.update(timeElapsedS);
       renderer.render(scene, thirdPersonCamera.camera_);
 
     }
   }
+  requestAnimationFrame(animate);
+
 }
 
 animate();
