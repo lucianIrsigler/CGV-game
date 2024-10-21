@@ -7,6 +7,37 @@ import { cubeMapNode } from 'three/src/nodes/utils/CubeMapNode.js';
 import { update } from 'three/examples/jsm/libs/tween.module.js';
 import { max } from 'three/webgpu';
 import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
+import { monster } from './monster.js';
+import { player } from './player.js';
+
+
+// load monster
+let monsterModel = null;
+const monsterLoader = new GLTFLoader();
+monsterLoader.load(monster.tall_monster.scene, function (gltf) {
+    monsterModel = gltf.scene;
+    scene.add(monsterModel);
+    monsterModel.position.set(2, monster.tall_monster.positionY, 3);
+    monsterModel.scale.set(monster.tall_monster.scaleX, monster.tall_monster.scaleY, monster.tall_monster.scaleZ);
+    monsterModel.castShadow = true;
+}, undefined, function (error) {
+    console.error('An error happened while loading the monster monsterModel:', error);
+}
+);
+
+// Load player
+let playerModel = null;
+const playerLoader = new GLTFLoader();
+playerLoader.load(player.hollow_knight.scene, function (gltf) {
+    playerModel = gltf.scene;
+    scene.add(playerModel);
+    playerModel.position.set(0, player.hollow_knight.positionY, 0);
+    playerModel.scale.set(player.hollow_knight.scaleX, player.hollow_knight.scaleY, player.hollow_knight.scaleZ);
+    playerModel.castShadow = true;
+    // playerModel.rotation.x = Math.PI / 2;
+}, undefined, function (error) {
+    console.error('An error happened while loading the player model:', error);
+});
 
 // Scene and Camera Setup
 const scene = new THREE.Scene();
@@ -49,7 +80,7 @@ function restartGame() {
     health = maxHealth; // Reset current health to max
 
     // make enemy visible again
-    cubeEnemy.visible = true;
+    // cubeEnemy.visible = true;
     enemyLight.visible = true;
     enemyLight.intensity = 1; // Reset light intensity
 
@@ -73,13 +104,15 @@ const material = new THREE.MeshStandardMaterial({ color: 0x00a6ff });
 const cube = new THREE.Mesh(geometry, material);
 cube.position.set(0, 1.5, 0); // Set initial position of the cube
 scene.add(cube);
+cube.visible = false;
 
 // Cube (enemy)
-const geometryEnemy = new THREE.BoxGeometry(2, 4, 2);
+const geometryEnemy = new THREE.BoxGeometry(1.3, 3, 1.3);
 const materialEnemy = new THREE.MeshStandardMaterial({ color: 0x040405 });
 const cubeEnemy = new THREE.Mesh(geometryEnemy, materialEnemy);
 cubeEnemy.position.set(10, 2, 5); // Set initial position of the cube
 scene.add(cubeEnemy);
+cubeEnemy.visible = false;
 
 // Create a point light to simulate the enemy emitting light
 const enemyLight = new THREE.PointLight(0xff0400, 1, 100); // Color, intensity, distance
@@ -383,9 +416,29 @@ function movePlayer() {
     }
 }
 
+// Make sure monster rotates to face the player
+function rotateMonster() {
+    if (monsterModel) {
+        const direction = cube.position.clone().sub(monsterModel.position).normalize();
+        monsterModel.rotation.y = Math.atan2(direction.x, direction.z);
+    }
+}
+
 // Animation Loop
 function animate() {
     updatePlayerHealthBar();
+    // Ensure playerModel and cube are loaded before accessing their properties
+    if (playerModel && cube) {
+        playerModel.position.copy(cube.position);
+        playerModel.rotation.copy(cube.rotation);
+    }
+
+    // Ensure monsterModel and cubeEnemy are loaded before accessing their properties
+    if (monsterModel && cubeEnemy) {
+        monsterModel.position.copy(cubeEnemy.position);
+        monsterModel.rotation.copy(cubeEnemy.rotation);
+    }
+
     playerLight.position.set(cube.position.x, cube.position.y + 1.5, cube.position.z);
     if (isGamePaused) return; // Skip updates if the game is paused
     movePlayer();  // Update player movement
@@ -394,6 +447,7 @@ function animate() {
         updateEnemyMovement(); // Update enemy's random movement
         enemyShoot(); // Enemy shooting logic
         document.getElementById('health-bar-container').style.display = 'block';
+        rotateMonster();
     }
     
 
@@ -569,7 +623,7 @@ function youWin() {
     document.exitPointerLock(); // Exit mouse lock
     document.getElementById('health-bar-container').style.display = 'none';
     crosshair.hideCrosshair();
-    cubeEnemy.visible = false;
+    // cubeEnemy.visible = false;
     enemyLight.visible = false;
     //stop ambient sound
     ambientSound.pause();
@@ -585,7 +639,7 @@ function youLose() {
     document.exitPointerLock(); // Exit mouse lock
     crosshair.hideCrosshair();
     document.getElementById('health-bar-container').style.display = 'none';
-    cubeEnemy.visible = false;
+    // cubeEnemy.visible = false;
     enemyLight.visible = false;
     ambientSound.pause();
 }
