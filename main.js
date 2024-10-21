@@ -1,5 +1,6 @@
 import { CustomScene } from "./src/scenes/testScene";
 import { CustomScene1 } from "./src/scenes/testScene1";
+import { Level1 } from "./src/scenes/Level1";
 import { AnimationManager } from "./src/scripts/Animation/AnimationLoopHandler";
 
 const animationManager = new AnimationManager();
@@ -22,7 +23,7 @@ function toggleMenu() {
 }
 
 document.getElementById('lvl1').addEventListener('click', function() {
-    animationManager.switchScene(new CustomScene());
+    animationManager.switchScene(new Level1());
     toggleMenu();
 });
 

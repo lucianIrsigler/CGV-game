@@ -676,6 +676,7 @@ greenBlock.position.set(-3, topThingy.position.y + 2, 39);
 scene.add(greenBlock);
 
 
+console.log(scene.children);
 
 function animate() {
     requestAnimationFrame(animate);
