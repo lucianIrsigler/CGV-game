@@ -81,7 +81,7 @@ const baseTexture = textureLoader.load('PavingStones.jpg');
 
 // Set texture wrapping and repeat if needed
 platformTexture.wrapS = platformTexture.wrapT = THREE.RepeatWrapping;
-platformTexture.repeat.set(0.1, 0.1); // Increase the wrapping scale
+//platformTexture.repeat.set(0.1, 0.1); // Increase the wrapping scale
 baseTexture.wrapS = baseTexture.wrapT = THREE.RepeatWrapping;
 baseTexture.repeat.set(5, 5);
 // Apply textures to the materials
