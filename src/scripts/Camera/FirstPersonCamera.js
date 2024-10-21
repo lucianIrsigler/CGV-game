@@ -117,7 +117,7 @@ export class FirstPersonCamera {
       
       this.translation_.add(forward);
       this.translation_.add(left);
-      this.translation_.y+=this.verticalVelocity_;
+      this.translation_.y+=this.verticalVelocity_*timeElapsedS;
 
       this.checkIfGround()
     }
