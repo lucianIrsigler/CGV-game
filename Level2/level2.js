@@ -5,6 +5,7 @@ import { lamps } from './lampPos2';
 import { door } from './doorPos';
 import { gun } from './gunPos';
 import { loadTextures, applyTextureSettings } from './TextureLoaderUtil';
+import { FirstPersonControls } from 'three/examples/jsm/controls/FirstPersonControls.js';
 
 // Set up the scene, camera, and renderer
 const scene = new THREE.Scene();
@@ -13,6 +14,11 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+const controls = new FirstPersonControls(camera, renderer.domElement);
+controls.movementSpeed = 10;
+controls.lookSpeed = 0.1;
+camera.position.set(-51.5, 31, -13);
 
 // Directional light for testing
 const directionalLight1 = new THREE.DirectionalLight(0x0000ff, 0.2);
@@ -327,14 +333,14 @@ const minHeight = 0;
 const maxHeight = (numPlatforms - 1) * platformSpacing;
 
 // Adjust camera position
-camera.position.z = 20;
-camera.position.y = 10;
+// camera.position.z = 20;
+// camera.position.y = 10;
 
-// Set up OrbitControls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; 
-controls.dampingFactor = 0.25;
-controls.screenSpacePanning = false;
+// // Set up OrbitControls
+// const controls = new OrbitControls(camera, renderer.domElement);
+// controls.enableDamping = true; 
+// controls.dampingFactor = 0.25;
+// controls.screenSpacePanning = false;
 
 // Create a big cylindrical structure around the existing elements
 const roomRadius = 100;
@@ -389,7 +395,7 @@ function animate(time) {
         lastUpdate = time; // Update the last update time
 
         // Update the camera controls
-        controls.update();
+        controls.update(0.1);
 
         // Constrain camera's Y position between minHeight and maxHeight
         // camera.position.y = Math.min(Math.max(camera.position.y, minHeight), maxHeight);
