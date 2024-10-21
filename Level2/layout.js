@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { lamps } from './lampPos2';
 import { door } from './doorPos';
 import { gun } from './gunPos';
+import { loadTextures, applyTextureSettings } from './TextureLoaderUtil';
 
 // Set up the scene, camera, and renderer
 const scene = new THREE.Scene();
@@ -63,7 +64,10 @@ function definePlatformAction(platformIndex, action) {
 }
 
 // Load textures for the base and platforms
-const platformTexture = textureLoader.load('PavingStones.jpg');
+//const platformTexture = textureLoader.load('PavingStones.jpg');
+const platformTexture = loadTextures('PavingStones');
+applyTextureSettings(platformTexture, 0.2, 0.2); 
+
 const baseTexture = textureLoader.load('PavingStones.jpg');
 
 // Set texture wrapping and repeat if needed
@@ -72,8 +76,17 @@ baseTexture.wrapS = baseTexture.wrapT = THREE.RepeatWrapping;
 
 // Apply textures to the materials
 const platformMaterial = new THREE.MeshStandardMaterial({
-    map: platformTexture
+    map: platformTexture.colorMap,
+    aoMap: platformTexture.aoMap,
+    displacementMap: platformTexture.displacementMap,
+    metalnessMap: platformTexture.metalnessMap,
+    normalMap: platformTexture.normalMapDX, 
+    roughnessMap: platformTexture.roughnessMap,
+    displacementScale: 0,
+    metalness: 0.1,
+    roughness: 0.5
 });
+
 
 const baseMaterial = new THREE.MeshStandardMaterial({
     map: baseTexture
