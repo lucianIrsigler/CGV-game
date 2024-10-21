@@ -13,6 +13,12 @@ let isGamePaused = false; // Flag to track if the game is paused
 let isEnemyAsleep = true;
 document.getElementById('health-bar-container').style.display = 'none';
 
+//ambient sound
+const ambientSound = new Audio('ambience.mp3');
+ambientSound.volume = 0.3;
+ambientSound.loop = true;
+ambientSound.play();
+
 restartButton.addEventListener("click", restartGame);
 
 // Restart Game Function
@@ -41,6 +47,7 @@ function restartGame() {
     // crosshair
     crosshair.showCrosshair();
 
+    ambientSound.play(); // Restart ambient sound
 }
 
 // Renderer Setup
@@ -150,7 +157,7 @@ wall4.position.set(-50, 50, 0);
 scene.add(wall4);
 
 // Create Ambient Light
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.01); // Soft white light, 0.5 is the intensity
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.01); // Soft white light, 0.01 is the intensity
 scene.add(ambientLight);
 
 // Convert lamps object to an array
@@ -265,11 +272,11 @@ document.addEventListener('mousemove', (event) => {
 let bullets = [];
 
 document.addEventListener('mousedown', (event) => {
-    if (event.button === 0 && !isSettingsMenuOpen) { // Only shoot if menu is not open
+    if (event.button === 0 && !isSettingsMenuOpen && !isGamePaused) { // Only shoot if menu is not open
         const position = camera.position.clone();
         // position.x -= 1.3;
         const bulletSound = new Audio('light_bullet_sound.mp3'); // Load the sound
-        bulletSound.volume = 0.4; // Set volume for the sound (adjust as needed)
+        bulletSound.volume = 0.5; // Set volume for the sound (adjust as needed)
         bulletSound.play(); // Play the sound
         const bullet = new Bullet(position, 0xA96CC3); // Create bullet at the cube's position
 
@@ -452,7 +459,7 @@ function handleEnemyHit() {
     // const enemyHit = detectCollision(bullet, cubeEnemy); // Check for collision with the enemy
     if(isEnemyAsleep){
         const monsterNoise = new Audio('monster_moan.mp3');
-        monsterNoise.volume = 0.3;
+        monsterNoise.volume = 0.4;
         monsterNoise.play();
         console.log("Enemy has been hit! WAKE UP");
     }
@@ -503,6 +510,8 @@ function youWin() {
     crosshair.hideCrosshair();
     cubeEnemy.visible = false;
     enemyLight.visible = false;
+    //stop ambient sound
+    ambientSound.pause();
 }
 
 // Function to handle loss condition
@@ -517,6 +526,7 @@ function youLose() {
     document.getElementById('health-bar-container').style.display = 'none';
     cubeEnemy.visible = false;
     enemyLight.visible = false;
+    ambientSound.pause();
 }
 
 // Enemy shooting at user
@@ -529,7 +539,7 @@ function enemyShoot() {
     if (!enemyShootCooldown) {
         const position = cubeEnemy.position.clone();
         const bulletSound = new Audio('dark_bullet_sound.mp3'); // Load the sound
-        bulletSound.volume = 0.2; // Set volume for the sound (adjust as needed)
+        bulletSound.volume = 0.3; // Set volume for the sound (adjust as needed)
         bulletSound.play(); // Play the sound
         const bullet = new Bullet(position, 0xff0000); // Create bullet at the enemy's position
 
