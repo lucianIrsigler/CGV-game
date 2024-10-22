@@ -48,7 +48,6 @@ export class Level1 extends SceneBaseClass {
 
 
 
-
         //minimap
         this.lightTimers = {}; // Track time spent near lights
         this.lastMiniMapRenderTime = 0; // To track the last time the mini-map was rendered
@@ -62,7 +61,7 @@ export class Level1 extends SceneBaseClass {
         //health
         this.health =100;
         this.healthNumberElement =document.getElementById('health-number');
-        this.damageRate = 0; // Define the damage rate
+        this.damageRate = 20; // Define the damage rate
         this.healingRate = 10; // Define the healing rate
     }
 
@@ -76,10 +75,12 @@ export class Level1 extends SceneBaseClass {
 
         //Start functions
         this.startDamageTimer();
+
+        window.addEventListener('load', this.initAudio);
     }
 
     init_eventHandlers_(){
-        window.addEventListener('load', this.initAudio.bind(this));
+
         
         document.addEventListener("keydown", (e) => {
             switch (e.code) {
@@ -380,15 +381,19 @@ export class Level1 extends SceneBaseClass {
     
     // Load door creak sound
     loadDoorCreakSound() {
+        const self = this;
         fetch('../audio/wooden-door-creaking.mp3')
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
+            .then((response) => {
+                return response.arrayBuffer(); // Return the promise
+            })
+            .then(arrayBuffer => self.audioContext.decodeAudioData(arrayBuffer))
             .then(audioBuffer => {
-                this.doorCreakBuffer = audioBuffer;
-                console.log(audioBuffer);
+                self.doorCreakBuffer = audioBuffer;
+                console.log('Audio buffer loaded:', audioBuffer); // Log the loaded buffer
             })
             .catch(error => console.error('Error loading door creak sound:', error));
     }
+    
 
 
     async initialize() {
@@ -397,7 +402,7 @@ export class Level1 extends SceneBaseClass {
                 const model = gltf.scene; // Get the loaded model
                 this.addObject(model); // Add the model to the scene
                 model.rotation.set(0, 0, 0); // Rotate the model
-                model.scale.set(0.7, 0.7, 0.7); // Scale the model if necessary
+                model.scale.set(0.5, 0.5, 0.5); // Scale the model if necessary
                 model.position.set(0, 0.5, 0);
                 model.name = "player"; // Name the model
                 this.target = model;
@@ -430,6 +435,7 @@ export class Level1 extends SceneBaseClass {
     }
 
     playDoorCreakSound() {
+        console.log(this.doorCreakBuffer);
         if (this.doorCreakBuffer) {
             const source = this.audioContext.createBufferSource();
             source.buffer = this.doorCreakBuffer;

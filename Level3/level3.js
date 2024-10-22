@@ -55,6 +55,7 @@ const loaderObject = new GLTFLoader(loadingManager);
 
 const monsterLoader = new GLTFLoader(loadingManager);
 const currentMonster = getRandomMonster();
+// const currentMonster = monster.anya;
 
 loaderObject.load(currentMonster.scene, function (gltf) {
     monsterModel = gltf.scene;
@@ -479,7 +480,9 @@ function animate() {
     // Ensure monsterModel and cubeEnemy are loaded before accessing their properties
     if (monsterModel && cubeEnemy) {
         monsterModel.position.copy(cubeEnemy.position);
-        monsterModel.rotation.copy(cubeEnemy.rotation);
+        let temp = cube.rotation*-1;
+        // monsterModel.rotation.copy(cubeEnemy.rotation);
+        monsterModel.rotation.copy(temp);
         monsterModel.lookAt(cube.position);
     }
 
