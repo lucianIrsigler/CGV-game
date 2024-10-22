@@ -2,11 +2,17 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import * as dat from 'dat.gui'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 
+
+// hallow night
+const hallowURL = new URL('../assets/HallowKnight.glb', import.meta.url)
 
 const carUrl = new URL('../assets/car.glb', import.meta.url)
 const duckUrl = new URL('../assets/duck.glb', import.meta.url)
 const halloweenBackgroundUrl = new URL('../img/Halloween-Background-Horror-Theme-Graphics.png', import.meta.url)
+// const halloweenBackgroundUrl = new URL('../img/spooky_house.jpg', import.meta.url)
+// const halloweenBackgroundUrl = new URL('../img/spooky_trees.jpg', import.meta.url)
 const bricksTexture = new URL('../img/bricks-texture.jpg', import.meta.url)
 
 let grounds = []
@@ -40,7 +46,7 @@ let lightFollowsDuck = false
 let groundsDescend = false
 let groundsOscilate = false
 
-let boulderCanDamage = false
+let boulderCanDamage = true
 
 //#region NON THREE utilities =========================
 function getRandomNumber(min, max) {
@@ -540,7 +546,7 @@ let groundZLocationTracker = groundDepth / 2;
 
 let numGroundsTracker = 0
 
-let maxGroundsAllowed = 50;
+let maxGroundsAllowed = 5;
 
 let previousGroundX = 0
 let previousGroundY = groundYDisplacement
@@ -587,8 +593,31 @@ const createGrounds = (numGrounds = 10) => {
 
         // if last ground
         if (numGroundsTracker == maxGroundsAllowed && i == numGrounds - 1) {
-            ground.material = new THREE.MeshStandardMaterial({ color: '#FFFF00' });
+            // ground.material = new THREE.MeshStandardMaterial({ color: '#FFFF00' });
+
+
+
+            const platformTexture = loadTextures('PavingStones');
+            // applyTextureSettings(platformTexture, 6, 3);
+            applyTextureSettings(platformTexture, 6, 6); // 6,6 works well
+
+            const platformMaterial = new THREE.MeshStandardMaterial({
+                map: platformTexture.colorMap,
+                aoMap: platformTexture.aoMap,
+                displacementMap: platformTexture.displacementMap,
+                metalnessMap: platformTexture.metalnessMap,
+                normalMap: platformTexture.normalMapDX,
+                roughnessMap: platformTexture.roughnessMap,
+                displacementScale: 0,
+                metalness: 0.1,
+                roughness: 0.5
+            });
+
+
+
             lastGround = ground
+            // lastGround.material = platformMaterial
+            lastGround.material = new THREE.MeshStandardMaterial({ color: '#FFFF00' });
         }
 
         scene.add(ground)
@@ -614,7 +643,7 @@ const insertModel = ({ url, x, y, z, desiredHeight }) => {
 
 // Example: Insert the duck model at (0, 0, 0) and scale it to have a height of 5 units
 duckModel = insertModel({ url: duckUrl, x: 0, y: 20, z: 0, desiredHeight: 5 });
-
+duckModel.visible = false // Change the color of the duck model
 
 
 
@@ -701,279 +730,321 @@ const clock = new THREE.Clock()
 
 const animate = (time) => {
 
-    step += options.speed
-    const deltaTime = clock.getDelta()
+    if (gameStarted) {
 
-    if (!isHitBySpotlight(spotLight, duckModel.position)) {
-        document.getElementById('powerLevel').setAttribute('value', document.getElementById('powerLevel').getAttribute('value') - 0.1)
-        document.querySelector('.progress-text').textContent = Math.round(document.getElementById('powerLevel').getAttribute('value') * 100) / 100 // two decimal places
-    }
-
-    //#region LIGHTING =======================
-    spotLight.angle = options.angle
-    spotLight.penumbra = options.penumbra
-    spotLight.intensity = options.intensity
+        step += options.speed
+        const deltaTime = clock.getDelta()
 
 
+        if (!isHitBySpotlight(spotLight, duckModel.position)) {
+            document.getElementById('powerLevel').setAttribute('value', document.getElementById('powerLevel').getAttribute('value') - 0.1)
+            document.querySelector('.progress-text').textContent = Math.round(document.getElementById('powerLevel').getAttribute('value') * 100) / 100 // two decimal places
 
-
-
-    if (lightFollowsDuck) {
-        if (spotLightTarget.position.z < duckModel.position.z) {
-            spotLightTarget.position.z += spotLightFollowSpeed * deltaTime
-        } else if (spotLightTarget.position.z > duckModel.position.z) {
-            spotLightTarget.position.z -= spotLightFollowSpeed * deltaTime
-        }
-    } else {
-        spotLightTarget.position.z -= spotLightSpeed * deltaTime
-        spotLightTarget.position.z = Math.max(spotLightTarget.position.z, grounds[grounds.length - 1].position.z - grounds[grounds.length - 1].depth / 2)
-    }
-
-
-    spotLight.position.z = spotLightTarget.position.z
-
-    if (stage == 4) {
-        oscilateXSpotLight(deltaTime)
-    } else {
-        spotLight.position.x = spotLightTarget.position.x
-
-        // make spotlight x follow DUCK but smoothly
-        if (spotLightTarget.position.x < duckModel.position.x) {
-            spotLightTarget.position.x += spotLightFollowSpeed * deltaTime
-        } else if (spotLightTarget.position.x > duckModel.position.x) {
-            spotLightTarget.position.x -= spotLightFollowSpeed * deltaTime
-        }
-    }
-
-
-    // spotLightTarget.position.x = duckModel.position.x
-    sLightHelper.update()
-    //#endregion LIGHTING =======================
-
-    //#region HELPERS ======================= 
-    rayCaster.setFromCamera(mousePosition, camera)
-    const intersects = rayCaster.intersectObjects(scene.children)
-
-    for (let i = 0; i < intersects.length; i++) {
-        if (intersects[i].object.doChangeColor) {
-            intersects[i].object.material.color.set(0xff0000)
+            if (document.getElementById('powerLevel').getAttribute('value') <= 0) {
+                alert("You are not ready for the boss fight!")
+                renderer.setAnimationLoop(null)
+            }
         }
 
-        if (intersects[i].object.doRotate == true) {
-            intersects[i].object.rotation.x = time / 1000
-            intersects[i].object.rotation.y = time / 1000
-
-        }
-    }
-    //#endregion HELPERS =======================
-
-    //#region DUCK =======================
-    duckModel.update()
-
-    duckModel.velocity.x = 0
-    duckModel.velocity.z = 0
-    if (keys.left.pressed) {
-        duckModel.velocity.x = - (duckMovementSpeed * deltaTime)
-    }
-    else if (keys.right.pressed) {
-        duckModel.velocity.x = (duckMovementSpeed * deltaTime)
-    }
-    if (keys.down.pressed) {
-        duckModel.velocity.z = (duckMovementSpeed * deltaTime)
-    }
-    else if (keys.up.pressed) {
-        duckModel.velocity.z = - (duckMovementSpeed * deltaTime)
-        duckMovementSpeed = Math.min(maxDuckMovementSpeed, duckMovementSpeed + (duckAcceleration * deltaTime))
-        // console.log(duckMovementSpeed)
-    }
-    if (duckModel.position.y <= -100) {
-        alert("Game Over")
-        renderer.setAnimationLoop(null)
-    }
-    if (duckModel.position.z <= grounds[grounds.length - 1].position.z - lastStageGroundDepth / 2) {
-        alert("You are a legend")
-    }
+        //#region LIGHTING =======================
+        spotLight.angle = options.angle
+        spotLight.penumbra = options.penumbra
+        spotLight.intensity = options.intensity
 
 
-    // Follow the duck model
-    // Inside the animate function:
-    if (duckModel && followDuck) {
-        // Calculate the target position for the camera based on the current followOffset
-        const targetPosition = duckModel.position.clone().add(followOffset);
 
-        // Interpolate the camera position for smooth movement
-        camera.position.lerp(targetPosition, 0.15);  // The '0.15' controls the smoothness (smaller is smoother/slower)
 
-        if (!options.firstPerson) {
-            // Third-person view: camera looks at the duck
-            camera.lookAt(duckModel.position.clone());
+
+        if (lightFollowsDuck) {
+            if (spotLightTarget.position.z < duckModel.position.z) {
+                spotLightTarget.position.z += spotLightFollowSpeed * deltaTime
+            } else if (spotLightTarget.position.z > duckModel.position.z) {
+                spotLightTarget.position.z -= spotLightFollowSpeed * deltaTime
+            }
         } else {
-            // First-person view: look forward relative to the duck
-            const forwardDirection = new THREE.Vector3(0, 0, -1);  // Duck is facing negative Z (forward)
-
-            // Get the duck's rotation and apply it to the forward direction vector
-            forwardDirection.applyQuaternion(duckModel.quaternion);  // Apply duck's current rotation
-
-            // Now position the camera to look ahead in the direction the duck is facing
-            const firstPersonLookAt = duckModel.position.clone().add(forwardDirection.multiplyScalar(10));
-            camera.lookAt(firstPersonLookAt);
+            spotLightTarget.position.z -= spotLightSpeed * deltaTime
+            spotLightTarget.position.z = Math.max(spotLightTarget.position.z, grounds[grounds.length - 1].position.z - grounds[grounds.length - 1].depth / 2)
         }
-    }
 
 
-
-    // Create more grounds as duck gets close to last ground
-    if (duckModel.position.z < grounds[grounds.length - 1].position.z + groundDepth * 10) {
-        createGrounds(10);
-
-        // remove last grounds
-
-    }
-    //#endregion DUCK =======================
-
-
-    //#region BOULDERS =======================
-    boulders.forEach(boulder => {
-        boulder.update()
-
-        if (boulder.position.z > duckModel.position.z + 50) {
-            scene.remove(boulder)
-            boulders.splice(boulders.indexOf(boulder), 1)
-        }
-        if (boulder.position.y < -50) {
-            scene.remove(boulder)
-            boulders.splice(boulders.indexOf(boulder), 1)
-        }
-        if (boxCollision({ box1: boulder, box2: duckModel }) && boulderCanDamage) {
-            console.log('hit enemy')
-            renderer.setAnimationLoop(null)
-        }
-    })
-
-    // console.log('boulders length', boulders.length)
-
-    // Spawn boulders
-    if (frames % spawnRate === 0 && spawnBoulders) {
-
-        spawnRate = Math.max(30, spawnRate - 10)
-
-        let boulderX = getRandomNumber(duckModel.position.x - 20, duckModel.position.x + 20)
-        let boulderZ = getRandomNumber(duckModel.position.z - 300, duckModel.position.z)
-        let boulderY = getRandomNumber(30, 60)
+        spotLight.position.z = spotLightTarget.position.z
 
         if (stage == 4) {
-            boulderZ = getRandomNumber(lastGround.back - 100, lastGround.back)
-            boulderY = getRandomNumber(20, 30)
+            oscilateXSpotLight(deltaTime)
+        } else {
+            spotLight.position.x = spotLightTarget.position.x
+
+            // make spotlight x follow DUCK but smoothly
+            if (spotLightTarget.position.x < duckModel.position.x) {
+                spotLightTarget.position.x += spotLightFollowSpeed * deltaTime
+            } else if (spotLightTarget.position.x > duckModel.position.x) {
+                spotLightTarget.position.x -= spotLightFollowSpeed * deltaTime
+            }
         }
 
-        const boulder = new Boulder({
-            radius: 2,
-            color: '#D2691E',
-            gravity: -0.01, // 0.01 is normal gravity
-            zAcceleration: true,
-            velocity: {
-                x: 0,
-                y: 0,
-                z: 0
-            },
-            position: {
-                x: boulderX,
-                y: boulderY,
-                z: boulderZ
+
+        // spotLightTarget.position.x = duckModel.position.x
+        sLightHelper.update()
+        //#endregion LIGHTING =======================
+
+        //#region HELPERS ======================= 
+        rayCaster.setFromCamera(mousePosition, camera)
+        const intersects = rayCaster.intersectObjects(scene.children)
+
+        for (let i = 0; i < intersects.length; i++) {
+            if (intersects[i].object.doChangeColor) {
+                intersects[i].object.material.color.set(0xff0000)
+            }
+
+            if (intersects[i].object.doRotate == true) {
+                intersects[i].object.rotation.x = time / 1000
+                intersects[i].object.rotation.y = time / 1000
+
+            }
+        }
+        //#endregion HELPERS =======================
+
+        //#region DUCK =======================
+        duckModel.update()
+
+        duckModel.velocity.x = 0
+        duckModel.velocity.z = 0
+        if (keys.left.pressed) {
+            duckModel.velocity.x = - (duckMovementSpeed * deltaTime)
+        }
+        else if (keys.right.pressed) {
+            duckModel.velocity.x = (duckMovementSpeed * deltaTime)
+        }
+        if (keys.down.pressed) {
+            duckModel.velocity.z = (duckMovementSpeed * deltaTime)
+        }
+        else if (keys.up.pressed) {
+            duckModel.velocity.z = - (duckMovementSpeed * deltaTime)
+            duckMovementSpeed = Math.min(maxDuckMovementSpeed, duckMovementSpeed + (duckAcceleration * deltaTime))
+            // console.log(duckMovementSpeed)
+        }
+        if (duckModel.position.y <= -100) {
+            alert("You are not ready for the boss fight! :(")
+            renderer.setAnimationLoop(null)
+        }
+        if (duckModel.position.z <= grounds[grounds.length - 1].position.z - lastStageGroundDepth / 2) {
+
+            const rulesBoardInnerHtml = `
+        <h1 class="rules-title">You are a legend!</h1>
+        <ul class="rules-list">
+            <li>Well done!</li>
+            <li>You are looking quite delicious!</li>
+            <li>Head over to the FINAL FIGHT!</li>
+            <li>The boss could use a good feast!</li>
+            <button class="start-level-button">Take me to him!!!</button>
+        </ul>`
+
+            document.querySelector('.rules-board').innerHTML = rulesBoardInnerHtml
+            document.querySelector('.rules-board').style.display = 'block'
+
+            // stop animation
+            renderer.setAnimationLoop(null)
+            // document.location.href = '../../Level3/index.html'
+        }
+
+
+        // Follow the duck model
+        // Inside the animate function:
+        if (duckModel && followDuck) {
+            // Calculate the target position for the camera based on the current followOffset
+            const targetPosition = duckModel.position.clone().add(followOffset);
+
+            // Interpolate the camera position for smooth movement
+            camera.position.lerp(targetPosition, 0.15);  // The '0.15' controls the smoothness (smaller is smoother/slower)
+
+            if (!options.firstPerson) {
+                // Third-person view: camera looks at the duck
+                camera.lookAt(duckModel.position.clone());
+            } else {
+                // First-person view: look forward relative to the duck
+                const forwardDirection = new THREE.Vector3(0, 0, -1);  // Duck is facing negative Z (forward)
+
+                // Get the duck's rotation and apply it to the forward direction vector
+                forwardDirection.applyQuaternion(duckModel.quaternion);  // Apply duck's current rotation
+
+                // Now position the camera to look ahead in the direction the duck is facing
+                const firstPersonLookAt = duckModel.position.clone().add(forwardDirection.multiplyScalar(10));
+                camera.lookAt(firstPersonLookAt);
+            }
+        }
+
+
+
+        // Create more grounds as duck gets close to last ground
+        if (duckModel.position.z < grounds[grounds.length - 1].position.z + groundDepth * 10) {
+            createGrounds(10);
+
+            // remove last grounds
+
+        }
+        //#endregion DUCK =======================
+
+
+        //#region BOULDERS =======================
+        boulders.forEach(boulder => {
+            boulder.update()
+
+            if (boulder.position.z > duckModel.position.z + 50) {
+                scene.remove(boulder)
+                boulders.splice(boulders.indexOf(boulder), 1)
+            }
+            if (boulder.position.y < -50) {
+                scene.remove(boulder)
+                boulders.splice(boulders.indexOf(boulder), 1)
+            }
+            if (boxCollision({ box1: boulder, box2: duckModel }) && boulderCanDamage) {
+                console.log('hit enemy')
+
+                // just decrease hp by 10
+                document.getElementById('powerLevel').setAttribute('value',
+                    document.getElementById('powerLevel').getAttribute('value') - 10)
+
+                document.querySelector('.progress-text').textContent = Math.round(document.getElementById('powerLevel').getAttribute('value') * 100) / 100 // two decimal places
+
+                if (document.getElementById('powerLevel').getAttribute('value') <= 0) {
+                    alert("You are not ready for the boss fight!")
+                    renderer.setAnimationLoop(null)
+                }
             }
         })
 
-        boulder.castShadow = true
-        scene.add(boulder)
-        boulders.push(boulder)
-    }
-    //#endregion BOULDERS =======================
+        // console.log('boulders length', boulders.length)
 
-    //#region GROUNDS =======================
-    grounds.forEach(ground => {
-        ground.update()
+        // Spawn boulders
+        if (frames % spawnRate === 0 && spawnBoulders) {
 
-        if (ground.position.z > duckModel.position.z + 100 && ground != grounds[grounds.length - 1]) {
-            scene.remove(ground)
-            // grounds.splice(grounds.indexOf(ground), 1)
+            spawnRate = Math.max(30, spawnRate - 10)
+
+            let boulderX = getRandomNumber(duckModel.position.x - 20, duckModel.position.x + 20)
+            let boulderZ = getRandomNumber(duckModel.position.z - 300, duckModel.position.z)
+            let boulderY = getRandomNumber(30, 60)
+
+            if (stage == 4) {
+                boulderZ = getRandomNumber(lastGround.back - 100, lastGround.back)
+                boulderY = getRandomNumber(20, 30)
+            }
+
+            const boulder = new Boulder({
+                radius: 2,
+                color: '#D2691E',
+                gravity: -0.01, // 0.01 is normal gravity
+                zAcceleration: true,
+                velocity: {
+                    x: 0,
+                    y: 0,
+                    z: 0
+                },
+                position: {
+                    x: boulderX,
+                    y: boulderY,
+                    z: boulderZ
+                }
+            })
+
+            boulder.castShadow = true
+            scene.add(boulder)
+            boulders.push(boulder)
+        }
+        //#endregion BOULDERS =======================
+
+        //#region GROUNDS =======================
+        grounds.forEach(ground => {
+            ground.update()
+
+            if (ground.position.z > duckModel.position.z + 100 && ground != grounds[grounds.length - 1]) {
+                scene.remove(ground)
+                // grounds.splice(grounds.indexOf(ground), 1)
+            }
+
+            if (ground.position.y < -50) {
+                scene.remove(ground)
+                // grounds.splice(grounds.indexOf(ground), 1)
+            }
+        })
+        //#endregion GROUNDS =======================
+
+        //#region TIMING =======================
+        if (time - previousTime > interval) {
+            // Action to perform every second
+
+            // console.log(`This happens every ${interval} milliseconds!`);
+            previousTime = time;
+
+            grounds[lastDescendingGround]?.startDescent();
+            // grounds[lastDescendingGround - 1]?.stopDescent();
+
+            lastDescendingGround = (lastDescendingGround + 1);
+        }
+        //#endregion TIMING =======================
+
+
+        //#region STAGES =======================
+
+        // if duck is on lastGround, make it stage 4
+        if (lastGround && duckModel.position.z < lastGround.front) {
+            stage = 4
+            console.log('ON THE LAST GROUND')
         }
 
-        if (ground.position.y < -50) {
-            scene.remove(ground)
-            // grounds.splice(grounds.indexOf(ground), 1)
-        }
-    })
-    //#endregion GROUNDS =======================
+        if (time - previousLevelTime > levelInterval) {
+            previousLevelTime = time;
 
-    //#region TIMING =======================
-    if (time - previousTime > interval) {
-        // Action to perform every second
-
-        // console.log(`This happens every ${interval} milliseconds!`);
-        previousTime = time;
-
-        grounds[lastDescendingGround]?.startDescent();
-        // grounds[lastDescendingGround - 1]?.stopDescent();
-
-        lastDescendingGround = (lastDescendingGround + 1);
-    }
-    //#endregion TIMING =======================
+            if (stage != 4) {
+                stage = Math.min(3, stage + 1);
+            }
 
 
-    //#region STAGES =======================
-
-    // if duck is on lastGround, make it stage 4
-    if (lastGround && duckModel.position.z < lastGround.front) {
-        stage = 4
-        console.log('ON THE LAST GROUND')
-    }
-
-    if (time - previousLevelTime > levelInterval) {
-        previousLevelTime = time;
-
-        if (stage != 4) {
-            stage = Math.min(3, stage + 1);
+            console.log(`Stage Change After ${levelInterval} milliseconds, stage ${stage}`);
         }
 
-
-        console.log(`Stage Change After ${levelInterval} milliseconds, stage ${stage}`);
-    }
-
-    switch (stage) {
-        case 1: {
-            lightFollowsDuck = false;
-            groundsDescend = false;
-            groundsOscilate = false;
-            spawnBoulders = false;
-            break;
+        switch (stage) {
+            case 1: {
+                lightFollowsDuck = false;
+                groundsDescend = false;
+                groundsOscilate = false;
+                spawnBoulders = false;
+                document.querySelector('.level-display').textContent = 'Stage 1: Stay in the LIGHT!'
+                break;
+            }
+            case 2: {
+                lightFollowsDuck = true;
+                spawnBoulders = true;
+                document.querySelector('.level-display').textContent = 'Stage 2: Watch out for the BOULDERS! The light follows you now :)'
+                break
+            }
+            case 3: {
+                groundsDescend = true;
+                lightFollowsDuck = true;
+                spawnBoulders = true;
+                document.querySelector('.level-display').textContent = 'Stage 3: Move fast, some grounds will DESCEND!'
+                break
+            }
+            case 4: {
+                lightFollowsDuck = false;
+                spawnBoulders = true;
+                groundsDescend = false;
+                groundGap = 40;
+                document.querySelector('.level-display').textContent = 'Stage 4: The FINAL STAGE. Follow the Light. Watch out for the boulders! GOOD LUCK'
+                break
+            }
         }
-        case 2: {
-            lightFollowsDuck = true;
-            spawnBoulders = true;
-            break
-        }
-        case 3: {
-            groundsDescend = true;
-            lightFollowsDuck = true;
-            spawnBoulders = true;
-            break
-        }
-        case 4: {
-            lightFollowsDuck = false;
-            spawnBoulders = true;
-            groundsDescend = false;
-            groundGap = 40;
-            break
-        }
-    }
 
-    //#endregion STAGES =======================
+        //#endregion STAGES =======================
 
 
+
+        renderer.render(scene, camera)
+
+        frames++
+
+    }// end if (gameStarted)
 
     renderer.render(scene, camera)
-
-    frames++
 
 }
 
@@ -1041,7 +1112,6 @@ window.addEventListener('keyup', (event) => {
             break
         case 'KeyW':
         case 'ArrowUp':
-            gameStarted = true
             keys.up.pressed = false
             duckMovementSpeed = originalDuckMovementSpeed
             break
@@ -1073,5 +1143,22 @@ window.addEventListener('keydown', (event) => {
     }
 });
 
+document.querySelector('.start-level-button').addEventListener('click', (event) => {
+
+
+    console.log("START LEVEL BUTTON CLICKED")
+    gameStarted = true
+    ambientSound.play();
+    document.querySelector('.rules-board').style.display = 'none'
+})
+
 
 //#endregion ANIMATE and EVENTS =========================
+
+
+// AUDIO =========================
+
+//ambient sound
+const ambientSound = new Audio('../assets/alexander-nakarada-chase(chosic.com).mp3');
+ambientSound.volume = 0.3;
+ambientSound.loop = true;
