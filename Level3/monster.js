@@ -12,9 +12,9 @@ export const monster = {
     "monster_ignan":{
         height_diff:270,
         scene:"monster_ignan/scene.gltf",
-        scaleX:0.7,
-        scaleY:0.7,
-        scaleZ:0.7,
+        scaleX:1.5,
+        scaleY:1.5,
+        scaleZ:1.5,
         positionX:2,
         positionY:2,
         positionZ:3
@@ -32,9 +32,9 @@ export const monster = {
     "anya":{
        height_diff:350,
        scene:"anya/scene.gltf",
-       scaleX:5,
-       scaleY:5,
-       scaleZ:5,
+       scaleX:20,
+       scaleY:20,
+       scaleZ:20,
        positionX:2,
        positionY:0,
        positionZ:3
