@@ -449,7 +449,7 @@ const movement = { forward: 0, right: 0 };
 
 let maxHealth = 100;
 let health = 100;
-const healthNumberElement = document.getElementById('use-health-bar');
+const healthNumberElement = document.getElementById('health-number');
 const damageRate = 20; // Define the damage rate
 const healingRate = 10; // Define the healing rate
 
@@ -563,7 +563,7 @@ function heal(amount) {
 
 //Update Player Health
 function updatePlayerHealthBar(){
-    const healthBar = document.getElementById('user-health-bar');
+    const healthBar = document.getElementById('health-number');
     const healthPercentage = (health / maxHealth) * 100; // Calculate percentage
     healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
 }
