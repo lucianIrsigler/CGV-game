@@ -35,7 +35,7 @@ export class LoadingManager{
         };
 
         this.loadingManager.onLoad = () => {
-            // console.log('All items loaded.');
+            console.log('All items loaded.');
             this.progressBarContainer.style.display = 'none';
             this.loaded = true;
             if (this.onLoadCallback) {

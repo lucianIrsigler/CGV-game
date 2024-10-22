@@ -9,26 +9,69 @@ import { max } from 'three/webgpu';
 import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 import { monster } from './monster.js';
 import { player } from './player.js';
+import { LoadingManager } from 'three';
+
+
+
+//get random monster
+function getRandomMonster() {
+    const keys = Object.keys(monster); // Get the keys of the monster object
+    const randomIndex = Math.floor(Math.random() * keys.length); // Generate a random index
+    const randomKey = keys[randomIndex]; // Select a random key
+    return monster[randomKey]; // Return the key and the monster details
+}
+
+// Example usage
+//LOADING
+let loadingManager = new LoadingManager();
+
+const progressBar = document.getElementById("progress-bar");
+const progressBarContainer = document.querySelector(".progress-bar-container");
+
+loadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
+    // console.log(`Started loading: ${url}.`);
+    progressBarContainer.style.display = 'flex';
+};
+
+
+loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    // console.log(`Loading: ${url}. Loaded ${itemsLoaded} of ${itemsTotal} items.`);
+    progressBar.value=(itemsLoaded/itemsTotal)*100;
+};
+
+loadingManager.onLoad = () => {
+    console.log('All items loaded.');
+    progressBarContainer.style.display = 'none';
+};
+
+loadingManager.onError = (url) => {
+    console.error(`Error loading: ${url}`);
+};
 
 
 // load monster
 let monsterModel = null;
-const monsterLoader = new GLTFLoader();
-monsterLoader.load(monster.tall_monster.scene, function (gltf) {
+const loaderObject = new GLTFLoader(loadingManager);
+
+const monsterLoader = new GLTFLoader(loadingManager);
+const currentMonster = getRandomMonster();
+
+loaderObject.load(currentMonster.scene, function (gltf) {
     monsterModel = gltf.scene;
     scene.add(monsterModel);
-    monsterModel.position.set(2, monster.tall_monster.positionY, 3);
-    monsterModel.scale.set(monster.tall_monster.scaleX, monster.tall_monster.scaleY, monster.tall_monster.scaleZ);
+    monsterModel.position.set(currentMonster.positionX, currentMonster.positionY, currentMonster.positionZ);
+    monsterModel.scale.set(currentMonster.scaleX, currentMonster.scaleY, currentMonster.scaleZ);
     monsterModel.castShadow = true;
 }, undefined, function (error) {
     console.error('An error happened while loading the monster monsterModel:', error);
 }
 );
 
+
 // Load player
 let playerModel = null;
-const playerLoader = new GLTFLoader();
-playerLoader.load(player.hollow_knight.scene, function (gltf) {
+const playerLoader = new GLTFLoader(loadingManager);
+loaderObject.load(player.hollow_knight.scene, function (gltf) {
     playerModel = gltf.scene;
     scene.add(playerModel);
     playerModel.position.set(0, player.hollow_knight.positionY, 0);
@@ -120,7 +163,7 @@ enemyLight.position.set(10, 2, 5);  // Set the light position to the cube's posi
 scene.add(enemyLight);
 
 // Create a point light to simulate the player emitting light
-const playerLight = new THREE.PointLight(0xA96CC3, 1, 100); // Color, intensity, distance
+const playerLight = new THREE.PointLight(0xffffff, 1, 100); // Color, intensity, distance
 playerLight.position.set(0, 1.5, 0);  // Set the light position to the cube's position
 scene.add(playerLight);
 
@@ -349,7 +392,7 @@ document.addEventListener('mousedown', (event) => {
         const bulletSound = new Audio('light_bullet_sound.mp3'); // Load the sound
         bulletSound.volume = 0.5; // Set volume for the sound (adjust as needed)
         bulletSound.play(); // Play the sound
-        const bullet = new Bullet(position, 0xA96CC3); // Create bullet at the cube's position
+        const bullet = new Bullet(position, 0xffffff); // Create bullet at the cube's position
 
         // Calculate the bullet direction based on the camera's forward direction
         const direction = new THREE.Vector3(); // Create a new vector for direction
@@ -437,6 +480,7 @@ function animate() {
     if (monsterModel && cubeEnemy) {
         monsterModel.position.copy(cubeEnemy.position);
         monsterModel.rotation.copy(cubeEnemy.rotation);
+        monsterModel.lookAt(cube.position);
     }
 
     playerLight.position.set(cube.position.x, cube.position.y + 1.5, cube.position.z);

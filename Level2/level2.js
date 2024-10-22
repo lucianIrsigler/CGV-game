@@ -170,6 +170,21 @@ const baseMaterial = new THREE.MeshStandardMaterial({
     map: baseTexture
 });
 
+const cylinderTexture = loadTextures('PavingStones');
+applyTextureSettings(cylinderTexture, 20, 10); 
+
+const cylinderMaterial = new THREE.MeshStandardMaterial({
+    map: cylinderTexture.colorMap,
+    aoMap: cylinderTexture.aoMap,
+    displacementMap: cylinderTexture.displacementMap,
+    metalnessMap: cylinderTexture.metalnessMap,
+    normalMap: cylinderTexture.normalMapDX, 
+    roughnessMap: cylinderTexture.roughnessMap,
+    displacementScale: 0,
+    metalness: 0.1,
+    roughness: 0.5
+});
+
 //Gun Stuff
 let currentGun = gun.gunOne; 
 Object.values(gun).forEach((currentGun) => {
@@ -282,7 +297,7 @@ const radiusBottom = 50;
 const height = 2;
 const radialSegments = 32;
 const circularBaseGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
-const circularBase = new THREE.Mesh(circularBaseGeometry, baseMaterial);
+const circularBase = new THREE.Mesh(circularBaseGeometry, cylinderMaterial);
 scene.add(circularBase);
 
 // Define the number of platforms
@@ -444,6 +459,18 @@ const roomMaterial = new THREE.MeshStandardMaterial({
     map: baseTexture,
     side: THREE.DoubleSide // Render both sides of the cylinder
 });
+
+// const roomMaterial = new THREE.MeshStandardMaterial({
+//     map: cylinderTexture.colorMap,
+//     aoMap: cylinderTexture.aoMap,
+//     displacementMap: cylinderTexture.displacementMap,
+//     metalnessMap: cylinderTexture.metalnessMap,
+//     normalMap: cylinderTexture.normalMapDX, 
+//     roughnessMap: cylinderTexture.roughnessMap,
+//     displacementScale: 0,
+//     metalness: 0.1,
+//     roughness: 0.5
+// });
 const room = new THREE.Mesh(roomGeometry, roomMaterial);
 room.position.y = roomHeight / 2 - 20; // Adjust position to match the base height
 scene.add(room);

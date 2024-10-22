@@ -5,8 +5,39 @@ export const monster = {
         scaleX:3,
         scaleY:3,
         scaleZ:3,
+        positionX:2,
         positionY:2,
-        positionX:0,
-        positionZ:0
+        positionZ:3
+    },
+    "monster_ignan":{
+        height_diff:270,
+        scene:"monster_ignan/scene.gltf",
+        scaleX:0.7,
+        scaleY:0.7,
+        scaleZ:0.7,
+        positionX:2,
+        positionY:2,
+        positionZ:3
+    },
+    "toon_spike":{
+        height_diff:150,
+       scene:"toon_spike/scene.gltf",
+       scaleX:1,
+       scaleY:1,
+       scaleZ:1,
+       positionX:2,
+       positionY:-5,
+       positionZ:3
+    },
+    "anya":{
+       height_diff:350,
+       scene:"anya/scene.gltf",
+       scaleX:5,
+       scaleY:5,
+       scaleZ:5,
+       positionX:2,
+       positionY:0,
+       positionZ:3
     }
+
 };
