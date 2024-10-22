@@ -487,7 +487,7 @@ scene.add(directionalLight1);
 scene.add(directionalLight1.target); // Add the target to the scene
 
 // Add a second directional light opposite to the first
-const directionalLight2 = new THREE.DirectionalLight(0x101010, 5);
+const directionalLight2 = new THREE.DirectionalLight(0x101010, 2);
 directionalLight2.position.set(0, 50, 0); // Position the light
 directionalLight2.target.position.set(0, 100, 0); // Make the light face upwards
 scene.add(directionalLight2);
