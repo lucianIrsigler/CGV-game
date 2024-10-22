@@ -120,7 +120,7 @@ enemyLight.position.set(10, 2, 5);  // Set the light position to the cube's posi
 scene.add(enemyLight);
 
 // Create a point light to simulate the player emitting light
-const playerLight = new THREE.PointLight(0xA96CC3, 1, 100); // Color, intensity, distance
+const playerLight = new THREE.PointLight(0xffffff, 1, 100); // Color, intensity, distance
 playerLight.position.set(0, 1.5, 0);  // Set the light position to the cube's position
 scene.add(playerLight);
 
@@ -349,7 +349,7 @@ document.addEventListener('mousedown', (event) => {
         const bulletSound = new Audio('light_bullet_sound.mp3'); // Load the sound
         bulletSound.volume = 0.5; // Set volume for the sound (adjust as needed)
         bulletSound.play(); // Play the sound
-        const bullet = new Bullet(position, 0xA96CC3); // Create bullet at the cube's position
+        const bullet = new Bullet(position, 0xffffff); // Create bullet at the cube's position
 
         // Calculate the bullet direction based on the camera's forward direction
         const direction = new THREE.Vector3(); // Create a new vector for direction

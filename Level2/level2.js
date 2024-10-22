@@ -30,6 +30,7 @@ const characterMaterial = new THREE.MeshStandardMaterial({
 // Create a simple character (a cube)
 const character = new THREE.Mesh(characterGeometry, characterMaterial);
 character.position.set(55,0.5, 2.5);
+// character.position.set(-50, 62, -15)//testing gun position
 scene.add(character);
 let moveSpeed = 0.1;
 let rotateSpeed = 0.1;
@@ -175,27 +176,63 @@ Object.values(gun).forEach((currentGun) => {
     const loader = new GLTFLoader();  // Use GLTFLoader directly, not THREE.GLTFLoader
     
     loader.load(currentGun.scene, function (gltf) {
-      let model = gltf.scene;
-      scene.add(model);
-  
-      model.position.set(-53, 59, -15);
-      model.scale.set(currentGun.scaleX, currentGun.scaleY, currentGun.scaleZ);
-      model.castShadow = true;
-  
-      const gunLight = new THREE.PointLight(0xffffff, 5, 15); // Purple light 
-      gunLight.position.set(-53, 62, -15); 
-      model.rotation.y = THREE.MathUtils.degToRad(-110);
+        let model = gltf.scene;
+        scene.add(model);
+    
+        model.position.set(-53, 59, -15);
+        model.scale.set(currentGun.scaleX, currentGun.scaleY, currentGun.scaleZ);
+        model.castShadow = true;
+    
+        const gunLight = new THREE.PointLight(0xffffff, 5, 15); // Purple light 
+        gunLight.position.set(-53, 62, -15); 
+        model.rotation.y = THREE.MathUtils.degToRad(-110);
 
-      scene.add(gunLight);
+        scene.add(gunLight);
 
-      // Add the gun model to the animation loop for rotation
-      function rotateGun() {
-          model.rotation.y += 0.01; // Adjust the speed of rotation as needed
-          requestAnimationFrame(rotateGun);
-      }
-      rotateGun();
+        // Add the gun model to the animation loop for rotation
+        let isGunAttached = false;
+        function rotateGun() {
+            if (!isGunAttached) {
+                model.rotation.y += 0.01; // Adjust the speed of rotation as needed
+                requestAnimationFrame(rotateGun);
+            }
+        }
+        rotateGun();
+
+        // Check for collision with the character
+        function checkGunCollision() {
+            const gunBox = new THREE.Box3().setFromObject(model);
+            const characterBox = new THREE.Box3().setFromObject(character);
+
+            if (gunBox.intersectsBox(characterBox)) {
+                // Remove the gun from the scene
+                scene.remove(model);
+                scene.remove(gunLight);
+
+                // Attach the gun to the character
+                character.add(model);
+                model.position.set(0.3, 0.3, -0.2); // Adjust the position relative to the character
+                model.rotation.set(0, Math.PI / 2, 0); // Adjust the rotation if needed
+                model.scale.set(currentGun.scaleX * 0.2, currentGun.scaleY * 0.2, currentGun.scaleZ * 0.2); // Make the gun smaller
+                model.rotateY(THREE.MathUtils.degToRad(90)); // Rotate the gun to face forward
+                isGunAttached = true; // Stop the gun from spinning
+
+                // Update the gun's position and rotation with the camera
+                function updateGunPosition() {
+                    if (isGunAttached) {
+                        model.position.set(0.3, 0.3, -0.2); // Adjust the position relative to the character
+                        model.rotation.copy(camera.rotation); // Copy the camera's rotation
+                    }
+                    requestAnimationFrame(updateGunPosition);
+                }
+                updateGunPosition();
+            } else {
+                requestAnimationFrame(checkGunCollision);
+            }
+        }
+        checkGunCollision();
     }, undefined, function (error) {
-      console.error('An error happened while loading the gun model:', error);
+        console.error('An error happened while loading the gun model:', error);
     });
 });
 
@@ -443,20 +480,20 @@ scene.add(bottomCap);
 // scene.add(pointLight);
 
 // Directional light for testing
-const directionalLight1 = new THREE.DirectionalLight(0x101010, 0.75);
+const directionalLight1 = new THREE.DirectionalLight(0x101010, 5);
 directionalLight1.position.set(0, -50, 0); // Position the light
 directionalLight1.target.position.set(0, -100, 0); // Make the light face downwards
 scene.add(directionalLight1);
 scene.add(directionalLight1.target); // Add the target to the scene
 
 // Add a second directional light opposite to the first
-const directionalLight2 = new THREE.DirectionalLight(0x101010, 0.75);
+const directionalLight2 = new THREE.DirectionalLight(0x101010, 2);
 directionalLight2.position.set(0, 50, 0); // Position the light
 directionalLight2.target.position.set(0, 100, 0); // Make the light face upwards
 scene.add(directionalLight2);
 scene.add(directionalLight2.target); // Add the target to the scene
 
-const ambientLight = new THREE.AmbientLight(0x000022, 0.4); // Soft white light
+const ambientLight = new THREE.AmbientLight(0x000022, 0.6); // Soft white light
 scene.add(ambientLight);
 
 // Animation loop
@@ -464,15 +501,19 @@ let lastUpdate = 0; // Track the last update time
 const updateInterval = 1; // Time in milliseconds for each update
 
 function animate(time) {
-    requestAnimationFrame(animate);
+    
     // Check if 100ms has passed since the last update
     if (time - lastUpdate >= updateInterval) {
         lastUpdate = time; // Update the last update time
         if (isJumping) {
             character.position.y += velocityY;
             velocityY += gravity;
+        } else {
+            // Apply gravity when not jumping
+            character.position.y += velocityY;
+            velocityY += gravity;
         }
-        velocityY += gravity;
+
         // Calculate camera direction
         const cameraDirection = new THREE.Vector3();
         camera.getWorldDirection(cameraDirection);
@@ -491,12 +532,39 @@ function animate(time) {
             character.position.add(rightDirection.multiplyScalar(moveSpeed * movement.right));
         }
 
-    updateCameraPosition();
+        // Check for collisions with platforms
+        platformArray.forEach((group) => {
+            group.children.forEach((platform) => {
+                if (platform.geometry instanceof THREE.ExtrudeGeometry) { // Ensure it's a platform
+                    const platformBox = new THREE.Box3().setFromObject(platform);
+                    const characterBox = new THREE.Box3().setFromObject(character);
+
+                    if (platformBox.intersectsBox(characterBox)) {
+                        // Adjust character's position to be on top of the platform
+                        character.position.y = platformBox.max.y + 0.5; // Adjust the offset as needed
+                        velocityY = 0; // Reset vertical velocity
+                        isJumping = false; // Stop jumping
+                        jumpCount = 0; // Reset jump count
+                    }
+                }
+            });
+        });
+
+        // Check for collision with the bottom of the big cylinder
+        const roomBottomY = -roomHeight / 2 + 30;
+        if (character.position.y < roomBottomY) {
+            character.position.y = roomBottomY + 0.5; // Adjust the offset as needed
+            velocityY = 0; // Reset vertical velocity
+            isJumping = false; // Stop jumping
+            jumpCount = 0; // Reset jump count
+        }
+
+        requestAnimationFrame(animate);
+        updateCameraPosition();
         // Update the camera controls
         controls.update(0.1)
 
         // Constrain camera's Y position between minHeight and maxHeight
-        // camera.position.y = Math.min(Math.max(camera.position.y, minHeight), maxHeight);
 
         // Update circular base's height to match the camera's Y position
         circularBase.position.y = Math.min(Math.max(camera.position.y - 4, minHeight), maxHeight);
@@ -558,9 +626,9 @@ function animate(time) {
             }
         });
 
-    // Render the scene with updated camera and base position
-    renderer.render(scene, camera);
-}
+        // Render the scene with updated camera and base position
+        renderer.render(scene, camera);
+    }
 }
 //animate(); 
 requestAnimationFrame(animate);
