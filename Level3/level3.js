@@ -39,7 +39,6 @@ loadingManager.onError = (url) => {
 };
 
 
-
 // load monster
 let monsterModel = null;
 const loaderObject = new GLTFLoader(loadingManager);
