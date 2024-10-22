@@ -27,6 +27,12 @@ const characterMaterial = new THREE.MeshStandardMaterial({
     transparent: true, 
     opacity: 0.0
 });
+
+let maxHealth = 100;
+let health = 100;
+const healthNumberElement = document.getElementById('health-number');
+const damageRate = 20; // Define the damage rate
+const healingRate = 10; // Define the healing rate
 // Create a simple character (a cube)
 const character = new THREE.Mesh(characterGeometry, characterMaterial);
 character.position.set(55,0.5, 2.5);
@@ -85,6 +91,10 @@ document.addEventListener('keyup', (e) => {
 // Movement state
 const movement = { forward: 0, right: 0 };
 
+function calcEuclid(x1, x2, z1, z2,y1,y2) {
+    const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2)+ Math.sqrt(Math.pow(y1 - y2, 2)));
+    return distance <= 2;
+}
 
 function updateCameraPosition() {
     camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
@@ -404,6 +414,10 @@ Object.values(lamps).forEach((currentLamp) => {
                 const coneLight = new THREE.SpotLight(0xA96CC3, 20, 10, Math.PI / 4, 0.5, 2); // Adjust parameters as needed
                 coneLight.position.copy(lampPos).add(new THREE.Vector3(0, 5, 0)); // Adjust height if necessary
                 coneLight.target.position.copy(lampPos); // Point towards the lamp position
+                //i want to save the x,y and z of the target position
+                console.log(coneLight.target.position.x, coneLight.target.position.y, coneLight.target.position.z);
+               
+
                 coneLight.target.updateMatrixWorld(); // Ensure target is updated
                 scene.add(coneLight.target); // Add target to scene
                 scene.add(coneLight); // Add the light to the scene
@@ -495,16 +509,58 @@ scene.add(directionalLight2.target); // Add the target to the scene
 
 const ambientLight = new THREE.AmbientLight(0x000022, 0.6); // Soft white light
 scene.add(ambientLight);
-
+//add ambient light
+const ambientLight4 = new THREE.AmbientLight(0x506886, 0.1);
+scene.add(ambientLight4);
 // Animation loop
 let lastUpdate = 0; // Track the last update time
 const updateInterval = 1; // Time in milliseconds for each update
+function startDamageTimer() {
+    setInterval(() => {
+        if (loaded) {
+            let valid = false;
 
+            // the light coord are in lampPos2.js which is imported as lamps
+            // check if the character is within the light
+            Object.values(lamps).forEach((lamp) => {
+                const lampPos = new THREE.Vector3(lamp.positionX, lamp.positionY, lamp.positionZ);
+                if (calcEuclid(character.position.x, lampPos.x, character.position.y,lampPos.y, character.position.z, lampPos.z)) {
+                    console.log('Character is within the light');
+                    valid = true;
+                }
+            });
+
+            if (!valid) {
+                takeDamage(damageRate); // Take damage if not within any light
+            }
+        }
+    }, 1000); // Call this function every second
+}
+function takeDamage(amount) {
+    health -= amount;
+    health = Math.max(0, health); // Ensure health doesn't go below 0
+    //updateCharacterLight(); // Update light when health changes
+    if (health <= 0) {
+        console.log('Game over!'); // Game over logic
+        updatePlayerHealthBar();
+    }
+}
+function updatePlayerHealthBar() {
+    const healthBar = document.getElementById('health-number');
+    if (!healthBar) {
+        console.error('Health bar element not found');
+        return;
+    }
+    const healthPercentage = (health / maxHealth) * 100; // Calculate percentage
+    healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
+}
 function animate(time) {
     
     // Check if 100ms has passed since the last update
     if (time - lastUpdate >= updateInterval) {
         lastUpdate = time; // Update the last update time
+        updatePlayerHealthBar(); // Update the player's health bar  
+        
         if (isJumping) {
             character.position.y += velocityY;
             velocityY += gravity;
@@ -630,6 +686,7 @@ function animate(time) {
         renderer.render(scene, camera);
     }
 }
+startDamageTimer();
 //animate(); 
 requestAnimationFrame(animate);
 
