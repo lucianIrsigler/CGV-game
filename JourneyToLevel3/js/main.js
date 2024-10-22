@@ -546,7 +546,7 @@ let groundZLocationTracker = groundDepth / 2;
 
 let numGroundsTracker = 0
 
-let maxGroundsAllowed = 5;
+let maxGroundsAllowed = 30;
 
 let previousGroundX = 0
 let previousGroundY = groundYDisplacement
