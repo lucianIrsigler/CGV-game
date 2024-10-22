@@ -447,8 +447,9 @@ let loaded = false;
 // Movement state
 const movement = { forward: 0, right: 0 };
 
+let maxHealth = 100;
 let health = 100;
-const healthNumberElement = document.getElementById('health-number');
+const healthNumberElement = document.getElementById('use-health-bar');
 const damageRate = 20; // Define the damage rate
 const healingRate = 10; // Define the healing rate
 
@@ -510,8 +511,7 @@ function restartGame() {
     character.rotation.y = Math.PI;
 
     // Reset health
-    health = 100;
-    healthNumberElement.textContent = health; // Reset health number in the HTML
+    health = maxHealth;
 
     // Reload textures
     textures.forEach(texture => {
@@ -549,7 +549,6 @@ function updateCharacterLight() {
 function takeDamage(amount) {
     health -= amount;
     health = Math.max(0, health); // Ensure health doesn't go below 0
-    healthNumberElement.textContent = health;
     updateCharacterLight(); // Update light when health changes
     if (health <= 0) {
         handleCharacterDeath();
@@ -559,11 +558,15 @@ function takeDamage(amount) {
 function heal(amount) {
     health += amount;
     health = Math.min(100, health); // Cap health at 100
-    healthNumberElement.textContent = health;
     updateCharacterLight(); // Update light when health changes
 }
 
-
+//Update Player Health
+function updatePlayerHealthBar(){
+    const healthBar = document.getElementById('user-health-bar');
+    const healthPercentage = (health / maxHealth) * 100; // Calculate percentage
+    healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
+}
 
 
 restartButton.addEventListener("click", restartGame);
@@ -680,6 +683,7 @@ scene.add(greenBlock);
 console.log(scene.children);
 
 function animate() {
+    updatePlayerHealthBar();
     requestAnimationFrame(animate);
     // Update the door animation mixer if it exists
     if (doorMixer) {
