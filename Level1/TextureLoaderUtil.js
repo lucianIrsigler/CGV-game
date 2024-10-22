@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 
+
+
 export function loadTextures(textureFolder) {
     const textureLoader = new THREE.TextureLoader();
 

@@ -9,6 +9,7 @@ import { LoadingManager } from "../scripts/Loaders/Loader";
 import { CameraManager } from "../scripts/Camera/CameraManager";
 import { Character } from "../scripts/Characters/Character";
 import { calcEuclid } from '../scripts/util/calcEuclid';
+import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil';
 
 
 export class Level1 extends SceneBaseClass {
@@ -41,13 +42,17 @@ export class Level1 extends SceneBaseClass {
         this.isDoorOpen = false;
         this.doorPrompt = document.getElementById('doorPrompt');
         this.doorOpenDistance = 2; // Distance at which the prompt appears
+        this.audioContext;
+        this.doorCreakBuffer;
+        this.doorAnimationAction;
+
+
 
 
         //minimap
         this.lightTimers = {}; // Track time spent near lights
         this.lastMiniMapRenderTime = 0; // To track the last time the mini-map was rendered
         this.miniMapRenderInterval = 100; // 100ms interval for mini-map rendering
-
 
         //for animation
         this.lastTime = 0;
@@ -57,7 +62,7 @@ export class Level1 extends SceneBaseClass {
         //health
         this.health =100;
         this.healthNumberElement =document.getElementById('health-number');
-        this.damageRate = 20; // Define the damage rate
+        this.damageRate = 0; // Define the damage rate
         this.healingRate = 10; // Define the healing rate
     }
 
@@ -74,6 +79,8 @@ export class Level1 extends SceneBaseClass {
     }
 
     init_eventHandlers_(){
+        window.addEventListener('load', this.initAudio.bind(this));
+        
         document.addEventListener("keydown", (e) => {
             switch (e.code) {
               case "KeyR":
@@ -121,28 +128,32 @@ export class Level1 extends SceneBaseClass {
         // Door variables
         let Door;
         let doorMixer;
-        let doorAnimationAction;
         const currentDoor = door.doorOne;
+
 
         // Load the door model
         try{
-            this.loader.loadModel(currentDoor.scene,(gltf) =>{
+            this.loader.loadModel(currentDoor.scene,"Door",(gltf) =>{
+
+                console.log(this.scene.children);
+
                 Door = gltf.scene;
                 this.Door = Door;
-                this.addObject(Door);
 
                 Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
                 Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
                 Door.castShadow = true;
 
-                doorMixer = new THREE.AnimationMixer(Door);
+                doorMixer = new THREE.AnimationMixer(this.Door);
 
                 const animations = gltf.animations;
                 if (animations && animations.length > 0) {
-                    doorAnimationAction = doorMixer.clipAction(animations[0]);
+                    this.doorAnimationAction = doorMixer.clipAction(animations[0]);
                 }
-
                 this.doorMixer = doorMixer;
+                this.Door = Door;
+                this.addObject(Door);
+
             });
             
             console.log("Door loaded");
@@ -155,29 +166,17 @@ export class Level1 extends SceneBaseClass {
         //load object
         this.initialize();
 
-        //Texture for ground
-        const textureLoader = new THREE.TextureLoader();
-        const texture = textureLoader.load('PavingStones.jpg', (texture) => {
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(1, 5);
-        });
+        const groundTextures = loadTextures('src/textures/',this.loader);
+        applyTextureSettings(groundTextures, 1, 5);
+
         //Texture for walls
-        const textureLoaderWall = new THREE.TextureLoader();
-        const textureWall = textureLoaderWall.load('PavingStones.jpg', (texture) => {
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(4, 1);
-        });
-        // Texture for platforms 
-        const textureLoaderPlatforms = new THREE.TextureLoader();
-        const texturePlatform = textureLoaderPlatforms.load('PavingStones.jpg', (texture) => {
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(3, 2);
-        });
+        const wallTextures = loadTextures('src/textures/',this.loader);
+        applyTextureSettings(wallTextures, 4, 1); 
 
-
+        //Texture for platforms 
+        const platformTextures = loadTextures('src/textures/',this.loader);
+        applyTextureSettings(platformTextures, 3, 2); 
+            
         
         //add geometries
         this.objManager.addGeometry("sideWall",new THREE.BoxGeometry(50, 1, 20));
@@ -189,14 +188,49 @@ export class Level1 extends SceneBaseClass {
 
 
         //add materials
-        this.objManager.addMaterial("sideWall",new THREE.MeshStandardMaterial({ map: textureWall }));
-        this.objManager.addMaterial("platform",new THREE.MeshStandardMaterial({ map: texture }));
+        this.objManager.addMaterial("sideWall",new THREE.MeshStandardMaterial({
+                map: wallTextures.colorMap,
+                aoMap: wallTextures.aoMap,
+                displacementMap: wallTextures.displacementMap,
+                metalnessMap: wallTextures.metalnessMap,
+                normalMap: wallTextures.normalMapDX, 
+                roughnessMap: wallTextures.roughnessMap,
+                displacementScale: 0,
+                metalness: 0.1,
+                roughness: 0.5
+            })
+        );
+
+        this.objManager.addMaterial("platform", new THREE.MeshStandardMaterial({
+            map: groundTextures.colorMap,
+            aoMap: groundTextures.aoMap,
+            displacementMap: groundTextures.displacementMap,
+            metalnessMap: groundTextures.metalnessMap,
+            normalMap: groundTextures.normalMapDX, 
+            roughnessMap: groundTextures.roughnessMap,
+            displacementScale: 0,
+            metalness: 0.1,
+            roughness: 0.5
+        }));
+
         this.objManager.addMaterial("character",new THREE.MeshStandardMaterial({ 
             color: 0xff0000, 
             transparent: true, 
             opacity: 0.0
         }));
-        this.objManager.addMaterial("platforms",new THREE.MeshStandardMaterial({ map: texturePlatform }));
+        this.objManager.addMaterial("platforms",new THREE.MeshStandardMaterial({
+            map: platformTextures.colorMap,
+            aoMap: platformTextures.aoMap,
+            displacementMap: platformTextures.displacementMap,
+            metalnessMap: platformTextures.metalnessMap,
+            normalMap: platformTextures.normalMapDX, 
+            roughnessMap: platformTextures.roughnessMap,
+            displacementScale: 0,
+            metalness: 0.1,
+            roughness: 0.5
+        })
+        )
+        
         this.objManager.addMaterial("ground",new THREE.MeshStandardMaterial({ color: 0x808080 }));
         this.objManager.addMaterial("redCube",new THREE.MeshBasicMaterial({ color: 0x0000ff }));
         this.objManager.addMaterial("greenCube",new THREE.MeshBasicMaterial({ color: 0x008000 }));
@@ -338,6 +372,25 @@ export class Level1 extends SceneBaseClass {
         this.animationId=null;
     }
 
+    initAudio() {
+        console.log("hello");
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.loadDoorCreakSound();
+    }
+    
+    // Load door creak sound
+    loadDoorCreakSound() {
+        fetch('../audio/wooden-door-creaking.mp3')
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
+            .then(audioBuffer => {
+                this.doorCreakBuffer = audioBuffer;
+                console.log(audioBuffer);
+            })
+            .catch(error => console.error('Error loading door creak sound:', error));
+    }
+
+
     async initialize() {
         try {
             await this.loader.loadModel('./public/assets/hollow_knight/scene.glb', 'player', (gltf) => {
@@ -366,15 +419,25 @@ export class Level1 extends SceneBaseClass {
     }
 
     openDoor() {
-        if (!isDoorOpen && doorAnimationAction) {
-            doorAnimationAction.reset();
-            doorAnimationAction.play();
+        if (!this.isDoorOpen && this.doorAnimationAction) {
+            this.doorAnimationAction.reset();
+            this.doorAnimationAction.play();
             this.isDoorOpen = true;
-            playDoorCreakSound(); // Play the door creak sound
+            this.playDoorCreakSound(); // Play the door creak sound
             this.gameOverScreen.style.display = 'block';
             this.gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>";
         }
     }
+
+    playDoorCreakSound() {
+        if (this.doorCreakBuffer) {
+            const source = this.audioContext.createBufferSource();
+            source.buffer = this.doorCreakBuffer;
+            source.connect(this.audioContext.destination);
+            source.start();
+        }
+    }
+
 
     setupCharacterLight() {
         this.characterLight = new THREE.PointLight(0xffffff, 1, 10);
@@ -447,16 +510,6 @@ export class Level1 extends SceneBaseClass {
         }
     }
 
-    openDoor() {
-        if (!isDoorOpen && doorAnimationAction) {
-            doorAnimationAction.reset();
-            doorAnimationAction.play();
-            isDoorOpen = true; // Set the flag to true so it won't open again
-            // Transition to success screen
-            this.gameOverScreen.style.display = 'block'; // Assuming this is your success screen
-            this.gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>"; // Update success message
-        }
-    }
 
     handleCharacterDeath() {
         this.gameOverScreen.style.display = "block";
