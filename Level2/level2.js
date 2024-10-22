@@ -30,6 +30,7 @@ const characterMaterial = new THREE.MeshStandardMaterial({
 // Create a simple character (a cube)
 const character = new THREE.Mesh(characterGeometry, characterMaterial);
 character.position.set(55,0.5, 2.5);
+character.position.set(-50, 62, -15)//testing gun position
 scene.add(character);
 let moveSpeed = 0.1;
 let rotateSpeed = 0.1;
@@ -175,27 +176,63 @@ Object.values(gun).forEach((currentGun) => {
     const loader = new GLTFLoader();  // Use GLTFLoader directly, not THREE.GLTFLoader
     
     loader.load(currentGun.scene, function (gltf) {
-      let model = gltf.scene;
-      scene.add(model);
-  
-      model.position.set(-53, 59, -15);
-      model.scale.set(currentGun.scaleX, currentGun.scaleY, currentGun.scaleZ);
-      model.castShadow = true;
-  
-      const gunLight = new THREE.PointLight(0xffffff, 5, 15); // Purple light 
-      gunLight.position.set(-53, 62, -15); 
-      model.rotation.y = THREE.MathUtils.degToRad(-110);
+        let model = gltf.scene;
+        scene.add(model);
+    
+        model.position.set(-53, 59, -15);
+        model.scale.set(currentGun.scaleX, currentGun.scaleY, currentGun.scaleZ);
+        model.castShadow = true;
+    
+        const gunLight = new THREE.PointLight(0xffffff, 5, 15); // Purple light 
+        gunLight.position.set(-53, 62, -15); 
+        model.rotation.y = THREE.MathUtils.degToRad(-110);
 
-      scene.add(gunLight);
+        scene.add(gunLight);
 
-      // Add the gun model to the animation loop for rotation
-      function rotateGun() {
-          model.rotation.y += 0.01; // Adjust the speed of rotation as needed
-          requestAnimationFrame(rotateGun);
-      }
-      rotateGun();
+        // Add the gun model to the animation loop for rotation
+        let isGunAttached = false;
+        function rotateGun() {
+            if (!isGunAttached) {
+                model.rotation.y += 0.01; // Adjust the speed of rotation as needed
+                requestAnimationFrame(rotateGun);
+            }
+        }
+        rotateGun();
+
+        // Check for collision with the character
+        function checkGunCollision() {
+            const gunBox = new THREE.Box3().setFromObject(model);
+            const characterBox = new THREE.Box3().setFromObject(character);
+
+            if (gunBox.intersectsBox(characterBox)) {
+                // Remove the gun from the scene
+                scene.remove(model);
+                scene.remove(gunLight);
+
+                // Attach the gun to the character
+                character.add(model);
+                model.position.set(0.3, 0.3, -0.2); // Adjust the position relative to the character
+                model.rotation.set(0, Math.PI / 2, 0); // Adjust the rotation if needed
+                model.scale.set(currentGun.scaleX * 0.2, currentGun.scaleY * 0.2, currentGun.scaleZ * 0.2); // Make the gun smaller
+                model.rotateY(THREE.MathUtils.degToRad(90)); // Rotate the gun to face forward
+                isGunAttached = true; // Stop the gun from spinning
+
+                // Update the gun's position and rotation with the camera
+                function updateGunPosition() {
+                    if (isGunAttached) {
+                        model.position.set(0.3, 0.3, -0.2); // Adjust the position relative to the character
+                        model.rotation.copy(camera.rotation); // Copy the camera's rotation
+                    }
+                    requestAnimationFrame(updateGunPosition);
+                }
+                updateGunPosition();
+            } else {
+                requestAnimationFrame(checkGunCollision);
+            }
+        }
+        checkGunCollision();
     }, undefined, function (error) {
-      console.error('An error happened while loading the gun model:', error);
+        console.error('An error happened while loading the gun model:', error);
     });
 });
 
