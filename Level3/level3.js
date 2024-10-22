@@ -9,12 +9,44 @@ import { max } from 'three/webgpu';
 import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 import { monster } from './monster.js';
 import { player } from './player.js';
+import { LoadingManager } from 'three';
+
+
+//LOADING
+let loadingManager = new LoadingManager();
+
+const progressBar = document.getElementById("progress-bar");
+const progressBarContainer = document.querySelector(".progress-bar-container");
+
+loadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
+    // console.log(`Started loading: ${url}.`);
+    progressBarContainer.style.display = 'flex';
+};
+
+
+loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    // console.log(`Loading: ${url}. Loaded ${itemsLoaded} of ${itemsTotal} items.`);
+    progressBar.value=(itemsLoaded/itemsTotal)*100;
+};
+
+loadingManager.onLoad = () => {
+    console.log('All items loaded.');
+    progressBarContainer.style.display = 'none';
+};
+
+loadingManager.onError = (url) => {
+    console.error(`Error loading: ${url}`);
+};
+
 
 
 // load monster
 let monsterModel = null;
-const monsterLoader = new GLTFLoader();
-monsterLoader.load(monster.tall_monster.scene, function (gltf) {
+const loaderObject = new GLTFLoader(loadingManager);
+
+const monsterLoader = new GLTFLoader(loadingManager);
+
+loaderObject.load(monster.tall_monster.scene, function (gltf) {
     monsterModel = gltf.scene;
     scene.add(monsterModel);
     monsterModel.position.set(2, monster.tall_monster.positionY, 3);
@@ -25,10 +57,11 @@ monsterLoader.load(monster.tall_monster.scene, function (gltf) {
 }
 );
 
+
 // Load player
 let playerModel = null;
-const playerLoader = new GLTFLoader();
-playerLoader.load(player.hollow_knight.scene, function (gltf) {
+const playerLoader = new GLTFLoader(loadingManager);
+loaderObject.load(player.hollow_knight.scene, function (gltf) {
     playerModel = gltf.scene;
     scene.add(playerModel);
     playerModel.position.set(0, player.hollow_knight.positionY, 0);
