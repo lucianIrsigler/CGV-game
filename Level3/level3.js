@@ -12,6 +12,16 @@ import { player } from './player.js';
 import { LoadingManager } from 'three';
 
 
+
+//get random monster
+function getRandomMonster() {
+    const keys = Object.keys(monster); // Get the keys of the monster object
+    const randomIndex = Math.floor(Math.random() * keys.length); // Generate a random index
+    const randomKey = keys[randomIndex]; // Select a random key
+    return monster[randomKey]; // Return the key and the monster details
+}
+
+// Example usage
 //LOADING
 let loadingManager = new LoadingManager();
 
@@ -44,12 +54,13 @@ let monsterModel = null;
 const loaderObject = new GLTFLoader(loadingManager);
 
 const monsterLoader = new GLTFLoader(loadingManager);
+const currentMonster = getRandomMonster();
 
-loaderObject.load(monster.tall_monster.scene, function (gltf) {
+loaderObject.load(currentMonster.scene, function (gltf) {
     monsterModel = gltf.scene;
     scene.add(monsterModel);
-    monsterModel.position.set(2, monster.tall_monster.positionY, 3);
-    monsterModel.scale.set(monster.tall_monster.scaleX, monster.tall_monster.scaleY, monster.tall_monster.scaleZ);
+    monsterModel.position.set(currentMonster.positionX, currentMonster.positionY, currentMonster.positionZ);
+    monsterModel.scale.set(currentMonster.scaleX, currentMonster.scaleY, currentMonster.scaleZ);
     monsterModel.castShadow = true;
 }, undefined, function (error) {
     console.error('An error happened while loading the monster monsterModel:', error);
@@ -469,6 +480,7 @@ function animate() {
     if (monsterModel && cubeEnemy) {
         monsterModel.position.copy(cubeEnemy.position);
         monsterModel.rotation.copy(cubeEnemy.rotation);
+        monsterModel.lookAt(cube.position);
     }
 
     playerLight.position.set(cube.position.x, cube.position.y + 1.5, cube.position.z);
