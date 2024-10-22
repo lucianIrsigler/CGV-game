@@ -431,7 +431,36 @@ bottomCap.rotation.x = -Math.PI / 2;
 bottomCap.position.y = -roomHeight / 2 + 30;
 scene.add(bottomCap);
 
-//LIGHTING
+const restartButton = document.getElementById("restartButton");
+
+function restartGame() {
+    gameOverScreen.style.display = "none";
+
+    // Reset character position and camera
+    character.position.set(0, 0.5, 0);
+    camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
+    character.rotation.y = Math.PI;
+
+    // Reset health
+    health = 100;
+    healthNumberElement.textContent = health; // Reset health number in the HTML
+
+    // Reload textures
+    textures.forEach(texture => {
+        texture.needsUpdate = true; // Mark texture for update
+    });  
+
+    // Use the toggleLightIntensity function to turn on all lights at intensity 5
+    points.forEach(light => toggleLightIntensity(light));
+    lampLights.forEach(lampLight => {
+        lampLight.intensity = 0.5; // Reset to original intensity
+    });
+
+    updateCharacterLight();
+}
+restartButton.addEventListener("click", restartGame);
+
+// LIGHTING
 
 // const centerLight = new THREE.PointLight(0xffffff, 1, 100);
 // centerLight.position.set(0, roomHeight / 2, 0); // Position the light in the center of the room
@@ -464,15 +493,19 @@ let lastUpdate = 0; // Track the last update time
 const updateInterval = 1; // Time in milliseconds for each update
 
 function animate(time) {
-    requestAnimationFrame(animate);
+    
     // Check if 100ms has passed since the last update
     if (time - lastUpdate >= updateInterval) {
         lastUpdate = time; // Update the last update time
         if (isJumping) {
             character.position.y += velocityY;
             velocityY += gravity;
+        } else {
+            // Apply gravity when not jumping
+            character.position.y += velocityY;
+            velocityY += gravity;
         }
-        velocityY += gravity;
+
         // Calculate camera direction
         const cameraDirection = new THREE.Vector3();
         camera.getWorldDirection(cameraDirection);
@@ -491,12 +524,37 @@ function animate(time) {
             character.position.add(rightDirection.multiplyScalar(moveSpeed * movement.right));
         }
 
-    updateCameraPosition();
+        // Check for collisions with platforms
+        platformArray.forEach((group) => {
+            group.children.forEach((platform) => {
+                if (platform.geometry instanceof THREE.ExtrudeGeometry) { // Ensure it's a platform
+                    const platformBox = new THREE.Box3().setFromObject(platform);
+                    const characterBox = new THREE.Box3().setFromObject(character);
+
+                    if (platformBox.intersectsBox(characterBox)) {
+                        // Adjust character's position to be on top of the platform
+                        character.position.y = platformBox.max.y + 0.5; // Adjust the offset as needed
+                        velocityY = 0; // Reset vertical velocity
+                        isJumping = false; // Stop jumping
+                        jumpCount = 0; // Reset jump count
+                    }
+                }
+            });
+        });
+
+        // Check if the character has fallen to the bottom of the cylinder
+        if (character.position.y <= -roomHeight / 2 + 30) {
+            health = 0; // Set health to 0
+            healthNumberElement.textContent = health; // Update health number in the HTML
+            restartButton.style.display = "block"; // Show the restart button
+        }
+
+        requestAnimationFrame(animate);
+        updateCameraPosition();
         // Update the camera controls
         controls.update(0.1)
 
         // Constrain camera's Y position between minHeight and maxHeight
-        // camera.position.y = Math.min(Math.max(camera.position.y, minHeight), maxHeight);
 
         // Update circular base's height to match the camera's Y position
         circularBase.position.y = Math.min(Math.max(camera.position.y - 4, minHeight), maxHeight);
@@ -511,56 +569,32 @@ function animate(time) {
 
                 switch (type) {
                     case 'updown':
-                        // Reset the group position to the original position
-                        if (group.position.y !== originalPosition.y) {
-                            group.position.y = originalPosition.y; // Set to original position
-                        }
-                        group.position.y = Math.sin(Date.now() * speed) * range;
+                        group.position.y = originalPosition.y + Math.sin(Date.now() * speed) * range;
                         break;
                     case 'downup':
-                        // Reset the group position to the original position
-                        if (group.position.y !== originalPosition.y) {
-                            group.position.y = originalPosition.y; // Set to original position
-                        }
-                        group.position.y = -Math.sin(Date.now() * speed) * range;
+                        group.position.y = originalPosition.y - Math.sin(Date.now() * speed) * range;
                         break;
                     case 'leftright':
-                        // Reset the group position to the original position
-                        if (group.position.x !== originalPosition.x) {
-                            group.position.x = originalPosition.x; // Set to original position
-                        }
-                        group.position.x = Math.sin(Date.now() * speed) * range;
+                        group.position.x = originalPosition.x + Math.sin(Date.now() * speed) * range;
                         break;
                     case 'rightleft':
-                        // Reset the group position to the original position
-                        if (group.position.x !== originalPosition.x) {
-                            group.position.x = originalPosition.x; // Set to original position
-                        }
-                        group.position.x = -Math.sin(Date.now() * speed) * range;
+                        group.position.x = originalPosition.x - Math.sin(Date.now() * speed) * range;
                         break;
                     case 'leftrightupdown':
-                        // Reset the group position to the original position
-                        if (group.position.x !== originalPosition.x || group.position.y !== originalPosition.y) {
-                            group.position.set(originalPosition.x, originalPosition.y, originalPosition.z); // Set to original position
-                        }
-                        group.position.x = Math.sin(Date.now() * speed) * range;
-                        group.position.y = Math.cos(Date.now() * speed) * range;
+                        group.position.x = originalPosition.x + Math.sin(Date.now() * speed) * range;
+                        group.position.y = originalPosition.y + Math.cos(Date.now() * speed) * range;
                         break;
                     case 'rightleftdownup':
-                        // Reset the group position to the original position
-                        if (group.position.x !== originalPosition.x || group.position.y !== originalPosition.y) {
-                            group.position.set(originalPosition.x, originalPosition.y, originalPosition.z); // Set to original position
-                        }
-                        group.position.x = Math.sin(Date.now() * speed) * range;
-                        group.position.y = -Math.cos(Date.now() * speed) * range;
+                        group.position.x = originalPosition.x + Math.sin(Date.now() * speed) * range;
+                        group.position.y = originalPosition.y - Math.cos(Date.now() * speed) * range;
                         break;
                 }
             }
         });
 
-    // Render the scene with updated camera and base position
-    renderer.render(scene, camera);
-}
+        // Render the scene with updated camera and base position
+        renderer.render(scene, camera);
+    }
 }
 //animate(); 
 requestAnimationFrame(animate);
