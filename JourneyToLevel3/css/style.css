@@ -117,3 +117,84 @@ header.game-header {
 .header-btn:active {
     background-color: #666;
 }
+
+/* RULES BOARD */
+
+
+.rules-board {
+    background-color: #1e1e1e;
+    border-radius: 15px;
+    box-shadow: 0px 0px 20px rgba(0, 255, 255, 0.2);
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    border: 1px solid #00c3ff;
+    position: absolute;
+    /* Ensures that it's not dependent on parent elements */
+    top: 50%;
+    /* Centers vertically */
+    left: 50%;
+    /* Centers horizontally */
+    transform: translate(-50%, -50%);
+    /* Adjusts the element to be fully centered */
+}
+
+.rules-title {
+    color: #00c3ff;
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 5px rgba(0, 195, 255, 0.7);
+}
+
+.rules-list {
+    list-style: none;
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+.rules-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #333;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+.rules-list li:last-child {
+    border-bottom: none;
+}
+
+.rules-list li:hover {
+    color: #00c3ff;
+    transition: color 0.3s ease;
+}
+
+
+/* 
+ */
+
+.start-level-button {
+    width: 100%;
+    /* Makes the button stretch to fill its container's width */
+    padding: 15px;
+    font-size: 1.2rem;
+    background-color: #00c3ff;
+    color: #1e1e1e;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0px 4px 15px rgba(0, 195, 255, 0.2);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.start-level-button:hover {
+    background-color: #00a6cc;
+    box-shadow: 0px 6px 20px rgba(0, 195, 255, 0.4);
+}
+
+
+/* AUDIO */
+audio {
+    display: none;
+}
