@@ -63,10 +63,22 @@ loaderObject.load(currentMonster.scene, function (gltf) {
     monsterModel.position.set(currentMonster.positionX, currentMonster.positionY, currentMonster.positionZ-2);
     monsterModel.scale.set(currentMonster.scaleX, currentMonster.scaleY, currentMonster.scaleZ);
     monsterModel.castShadow = true;
+
+    // Traverse the model and update the material
+    monsterModel.traverse((node) => {
+        if (node.isMesh) {
+            node.material = new THREE.MeshStandardMaterial({
+                color: node.material.color,
+                map: node.material.map,
+                normalMap: node.material.normalMap,
+                roughness: 0.5, // Adjust as needed
+                metalness: 0.5  // Adjust as needed
+            });
+        }
+    });
 }, undefined, function (error) {
-    console.error('An error happened while loading the monster monsterModel:', error);
-}
-);
+    console.error('An error happened while loading the monster model:', error);
+});
 
 
 // Load player
@@ -96,7 +108,14 @@ document.getElementById('health-bar-container').style.display = 'none';
 const ambientSound = new Audio('ambience.mp3');
 ambientSound.volume = 0.3;
 ambientSound.loop = true;
-ambientSound.play();
+
+document.addEventListener('click', () => {
+    if (!ambientSound.playing) {
+        ambientSound.play().catch(error => {
+            console.error('Failed to play ambient sound:', error);
+        });
+    }
+});
 
 restartButton.addEventListener("click", restartGame);
 
@@ -254,8 +273,8 @@ function updateEnemyMovement() {
     }
 
     // Optionally: Add bounds to keep the enemy within a certain area
-    cubeEnemy.position.x = THREE.MathUtils.clamp(cubeEnemy.position.x, -49, 49); // Adjust bounds as necessary
-    cubeEnemy.position.z = THREE.MathUtils.clamp(cubeEnemy.position.z, -49, 49); // Adjust bounds as necessary
+    cubeEnemy.position.x = THREE.MathUtils.clamp(cubeEnemy.position.x, -45, 45); // Adjust bounds as necessary
+    cubeEnemy.position.z = THREE.MathUtils.clamp(cubeEnemy.position.z, -45, 45); // Adjust bounds as necessary
 }
 
 // Ground
