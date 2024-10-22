@@ -431,36 +431,7 @@ bottomCap.rotation.x = -Math.PI / 2;
 bottomCap.position.y = -roomHeight / 2 + 30;
 scene.add(bottomCap);
 
-const restartButton = document.getElementById("restartButton");
-
-function restartGame() {
-    gameOverScreen.style.display = "none";
-
-    // Reset character position and camera
-    character.position.set(0, 0.5, 0);
-    camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
-    character.rotation.y = Math.PI;
-
-    // Reset health
-    health = 100;
-    healthNumberElement.textContent = health; // Reset health number in the HTML
-
-    // Reload textures
-    textures.forEach(texture => {
-        texture.needsUpdate = true; // Mark texture for update
-    });  
-
-    // Use the toggleLightIntensity function to turn on all lights at intensity 5
-    points.forEach(light => toggleLightIntensity(light));
-    lampLights.forEach(lampLight => {
-        lampLight.intensity = 0.5; // Reset to original intensity
-    });
-
-    updateCharacterLight();
-}
-restartButton.addEventListener("click", restartGame);
-
-// LIGHTING
+//LIGHTING
 
 // const centerLight = new THREE.PointLight(0xffffff, 1, 100);
 // centerLight.position.set(0, roomHeight / 2, 0); // Position the light in the center of the room
@@ -542,11 +513,13 @@ function animate(time) {
             });
         });
 
-        // Check if the character has fallen to the bottom of the cylinder
-        if (character.position.y <= -roomHeight / 2 + 30) {
-            health = 0; // Set health to 0
-            healthNumberElement.textContent = health; // Update health number in the HTML
-            restartButton.style.display = "block"; // Show the restart button
+        // Check for collision with the bottom of the big cylinder
+        const roomBottomY = -roomHeight / 2 + 30;
+        if (character.position.y < roomBottomY) {
+            character.position.y = roomBottomY + 0.5; // Adjust the offset as needed
+            velocityY = 0; // Reset vertical velocity
+            isJumping = false; // Stop jumping
+            jumpCount = 0; // Reset jump count
         }
 
         requestAnimationFrame(animate);
@@ -569,24 +542,48 @@ function animate(time) {
 
                 switch (type) {
                     case 'updown':
-                        group.position.y = originalPosition.y + Math.sin(Date.now() * speed) * range;
+                        // Reset the group position to the original position
+                        if (group.position.y !== originalPosition.y) {
+                            group.position.y = originalPosition.y; // Set to original position
+                        }
+                        group.position.y = Math.sin(Date.now() * speed) * range;
                         break;
                     case 'downup':
-                        group.position.y = originalPosition.y - Math.sin(Date.now() * speed) * range;
+                        // Reset the group position to the original position
+                        if (group.position.y !== originalPosition.y) {
+                            group.position.y = originalPosition.y; // Set to original position
+                        }
+                        group.position.y = -Math.sin(Date.now() * speed) * range;
                         break;
                     case 'leftright':
-                        group.position.x = originalPosition.x + Math.sin(Date.now() * speed) * range;
+                        // Reset the group position to the original position
+                        if (group.position.x !== originalPosition.x) {
+                            group.position.x = originalPosition.x; // Set to original position
+                        }
+                        group.position.x = Math.sin(Date.now() * speed) * range;
                         break;
                     case 'rightleft':
-                        group.position.x = originalPosition.x - Math.sin(Date.now() * speed) * range;
+                        // Reset the group position to the original position
+                        if (group.position.x !== originalPosition.x) {
+                            group.position.x = originalPosition.x; // Set to original position
+                        }
+                        group.position.x = -Math.sin(Date.now() * speed) * range;
                         break;
                     case 'leftrightupdown':
-                        group.position.x = originalPosition.x + Math.sin(Date.now() * speed) * range;
-                        group.position.y = originalPosition.y + Math.cos(Date.now() * speed) * range;
+                        // Reset the group position to the original position
+                        if (group.position.x !== originalPosition.x || group.position.y !== originalPosition.y) {
+                            group.position.set(originalPosition.x, originalPosition.y, originalPosition.z); // Set to original position
+                        }
+                        group.position.x = Math.sin(Date.now() * speed) * range;
+                        group.position.y = Math.cos(Date.now() * speed) * range;
                         break;
                     case 'rightleftdownup':
-                        group.position.x = originalPosition.x + Math.sin(Date.now() * speed) * range;
-                        group.position.y = originalPosition.y - Math.cos(Date.now() * speed) * range;
+                        // Reset the group position to the original position
+                        if (group.position.x !== originalPosition.x || group.position.y !== originalPosition.y) {
+                            group.position.set(originalPosition.x, originalPosition.y, originalPosition.z); // Set to original position
+                        }
+                        group.position.x = Math.sin(Date.now() * speed) * range;
+                        group.position.y = -Math.cos(Date.now() * speed) * range;
                         break;
                 }
             }
