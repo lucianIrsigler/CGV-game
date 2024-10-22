@@ -20,32 +20,32 @@
         canvas {
             display: block;
         }
-        #health-bar-container {
-    width: 200px;
-    height: 20px;
-    background-color: #555;
-    border: 1px solid #000;
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    display: flex;
-    align-items: center;
-}
+        #health-container {
+			position: fixed;
+			top: 50%;
+			left: 20px;
+			transform: translateY(-50%) rotate(-90deg); /* Rotates the container to make it vertical */
+			width: 200px;
+			height: 20px;
+			background-color: #ffffff4d;
+			border: 2px solid #000000;
+			border-radius: 5px;
+			overflow: hidden;
+		}
 
-
-#health-container {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: #fff;
-    font-weight: bold;
-}
+		#health-number {
+			height: 100%;
+			background-color: #ffffff; /* Different color for user's health bar */
+			width: 100%;
+			transition: width 0.3s ease;
+		}
     </style>
 </head>
 <body>
-    <div id="health-container">
-        Health: <span id="health-number">100</span>
-    </div>
+    <!-- User health bar -->
+	<div id="health-container">
+		<div id="health-number"></div>
+	</div>
     <div id="doorPrompt" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px;">
         Press 'E' to open the door
     </div>
