@@ -30,7 +30,7 @@ const characterMaterial = new THREE.MeshStandardMaterial({
 // Create a simple character (a cube)
 const character = new THREE.Mesh(characterGeometry, characterMaterial);
 character.position.set(55,0.5, 2.5);
-character.position.set(-50, 62, -15)//testing gun position
+// character.position.set(-50, 62, -15)//testing gun position
 scene.add(character);
 let moveSpeed = 0.1;
 let rotateSpeed = 0.1;
@@ -480,20 +480,20 @@ scene.add(bottomCap);
 // scene.add(pointLight);
 
 // Directional light for testing
-const directionalLight1 = new THREE.DirectionalLight(0x101010, 0.75);
+const directionalLight1 = new THREE.DirectionalLight(0x101010, 5);
 directionalLight1.position.set(0, -50, 0); // Position the light
 directionalLight1.target.position.set(0, -100, 0); // Make the light face downwards
 scene.add(directionalLight1);
 scene.add(directionalLight1.target); // Add the target to the scene
 
 // Add a second directional light opposite to the first
-const directionalLight2 = new THREE.DirectionalLight(0x101010, 0.75);
+const directionalLight2 = new THREE.DirectionalLight(0x101010, 5);
 directionalLight2.position.set(0, 50, 0); // Position the light
 directionalLight2.target.position.set(0, 100, 0); // Make the light face upwards
 scene.add(directionalLight2);
 scene.add(directionalLight2.target); // Add the target to the scene
 
-const ambientLight = new THREE.AmbientLight(0x000022, 0.4); // Soft white light
+const ambientLight = new THREE.AmbientLight(0x000022, 0.6); // Soft white light
 scene.add(ambientLight);
 
 // Animation loop
