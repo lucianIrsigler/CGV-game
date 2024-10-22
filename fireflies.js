@@ -17,4 +17,4 @@ function createFireflies(num) {
 }
 
 // Create 50 fireflies
-createFireflies(50);
+// createFireflies(50);
