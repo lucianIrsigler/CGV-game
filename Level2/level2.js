@@ -30,7 +30,7 @@ const characterMaterial = new THREE.MeshStandardMaterial({
 // Create a simple character (a cube)
 const character = new THREE.Mesh(characterGeometry, characterMaterial);
 character.position.set(55,0.5, 2.5);
-// character.position.set(-50, 62, -15)//testing gun position
+// character.position.set(-54, 62, -18)//testing gun position
 scene.add(character);
 let moveSpeed = 0.1;
 let rotateSpeed = 0.1;
@@ -170,6 +170,21 @@ const baseMaterial = new THREE.MeshStandardMaterial({
     map: baseTexture
 });
 
+const cylinderTexture = loadTextures('PavingStones');
+applyTextureSettings(cylinderTexture, 20, 10); 
+
+const cylinderMaterial = new THREE.MeshStandardMaterial({
+    map: cylinderTexture.colorMap,
+    aoMap: cylinderTexture.aoMap,
+    displacementMap: cylinderTexture.displacementMap,
+    metalnessMap: cylinderTexture.metalnessMap,
+    normalMap: cylinderTexture.normalMapDX, 
+    roughnessMap: cylinderTexture.roughnessMap,
+    displacementScale: 0,
+    metalness: 0.1,
+    roughness: 0.5
+});
+
 //Gun Stuff
 let currentGun = gun.gunOne; 
 Object.values(gun).forEach((currentGun) => {
@@ -211,17 +226,16 @@ Object.values(gun).forEach((currentGun) => {
 
                 // Attach the gun to the character
                 character.add(model);
-                model.position.set(0.3, 0.3, -0.2); // Adjust the position relative to the character
+                // model.position.set(0.3, 0.3, 0.5); // Adjust the position relative to the character
                 model.rotation.set(0, Math.PI / 2, 0); // Adjust the rotation if needed
                 model.scale.set(currentGun.scaleX * 0.2, currentGun.scaleY * 0.2, currentGun.scaleZ * 0.2); // Make the gun smaller
-                model.rotateY(THREE.MathUtils.degToRad(90)); // Rotate the gun to face forward
+                model.rotateY(THREE.MathUtils.degToRad(270)); // Change the direction of the gun by 180 degrees
                 isGunAttached = true; // Stop the gun from spinning
-
+                
                 // Update the gun's position and rotation with the camera
                 function updateGunPosition() {
                     if (isGunAttached) {
-                        model.position.set(0.3, 0.3, -0.2); // Adjust the position relative to the character
-                        model.rotation.copy(camera.rotation); // Copy the camera's rotation
+                        model.position.set(0.3, 0.3, 0.5); // Adjust the position relative to the character
                     }
                     requestAnimationFrame(updateGunPosition);
                 }
@@ -283,7 +297,7 @@ const radiusBottom = 50;
 const height = 2;
 const radialSegments = 32;
 const circularBaseGeometry = new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radialSegments);
-const circularBase = new THREE.Mesh(circularBaseGeometry, baseMaterial);
+const circularBase = new THREE.Mesh(circularBaseGeometry, cylinderMaterial);
 scene.add(circularBase);
 
 // Define the number of platforms
@@ -445,6 +459,18 @@ const roomMaterial = new THREE.MeshStandardMaterial({
     map: baseTexture,
     side: THREE.DoubleSide // Render both sides of the cylinder
 });
+
+// const roomMaterial = new THREE.MeshStandardMaterial({
+//     map: cylinderTexture.colorMap,
+//     aoMap: cylinderTexture.aoMap,
+//     displacementMap: cylinderTexture.displacementMap,
+//     metalnessMap: cylinderTexture.metalnessMap,
+//     normalMap: cylinderTexture.normalMapDX, 
+//     roughnessMap: cylinderTexture.roughnessMap,
+//     displacementScale: 0,
+//     metalness: 0.1,
+//     roughness: 0.5
+// });
 const room = new THREE.Mesh(roomGeometry, roomMaterial);
 room.position.y = roomHeight / 2 - 20; // Adjust position to match the base height
 scene.add(room);
@@ -531,6 +557,9 @@ function animate(time) {
         if (movement.right) {
             character.position.add(rightDirection.multiplyScalar(moveSpeed * movement.right));
         }
+
+        // Update character rotation to face the same direction as the camera
+        character.rotation.y = Math.atan2(cameraDirection.x, cameraDirection.z);
 
         // Check for collisions with platforms
         platformArray.forEach((group) => {
