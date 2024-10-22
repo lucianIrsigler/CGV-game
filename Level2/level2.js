@@ -31,8 +31,8 @@ const characterMaterial = new THREE.MeshStandardMaterial({
 let maxHealth = 100;
 let health = 100;
 const healthNumberElement = document.getElementById('health-number');
-const damageRate = 20; // Define the damage rate
-const healingRate = 10; // Define the healing rate
+const damageRate = 2; // Define the damage rate
+const healingRate = 20; // Define the healing rate
 // Create a simple character (a cube)
 const character = new THREE.Mesh(characterGeometry, characterMaterial);
 character.position.set(55,0.5, 2.5);
@@ -553,6 +553,7 @@ function startDamageTimer() {
                 if (calcEuclid(character.position.x, lampPos.x, character.position.y,lampPos.y, character.position.z, lampPos.z)) {
                     console.log('Character is within the light');
                     valid = true;
+                    heal(healingRate); // Heal the character
                 }
             });
 
@@ -562,6 +563,12 @@ function startDamageTimer() {
         }
     }, 1000); // Call this function every second
 }
+
+function heal(amount) {
+    health += amount;
+    health = Math.min(100, health); // Cap health at 100
+    //updateCharacterLight(); // Update light when health changes
+}
 function takeDamage(amount) {
     health -= amount;
     health = Math.max(0, health); // Ensure health doesn't go below 0
@@ -569,7 +576,11 @@ function takeDamage(amount) {
     if (health <= 0) {
         console.log('Game over!'); // Game over logic
         updatePlayerHealthBar();
+        handleCharacterDeath();
     }
+}
+function handleCharacterDeath() {
+    gameOverScreen.style.display = "block";
 }
 function updatePlayerHealthBar() {
     const healthBar = document.getElementById('health-number');
