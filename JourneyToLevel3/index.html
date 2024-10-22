@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>My first three.js app</title>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <script type="module" src="js/main.js"></script>
+
+    <header class="game-header">
+        <div class="header-left">
+            <span class="level-display">Level: <span id="currentLevel">1</span></span>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" id="menuButton">Menu</button>
+            <button class="header-btn" id="helpButton">Help</button>
+        </div>
+    </header>
+
+    <footer class="footer">
+
+        <!-- Power Level Progress Bar -->
+        <div class="progress-container">
+            <progress id="powerLevel" value="100" max="100"></progress>
+            <div class="progress-text" id="powerText">100%</div>
+        </div>
+
+    </footer>
+
+</html>
+
+<!-- 
+
+    TO RUN:
+    parcel ./src/index.html
+ -->
