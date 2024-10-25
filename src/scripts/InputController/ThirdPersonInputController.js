@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Physics } from '../Physics/physics';
 
 const KEYS = {
     w: 87,  // W key
@@ -12,6 +13,7 @@ function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
+
 export class ThirdPersonInputController {
     constructor(target,scene,gravity,jumpSpeed) {
         this.scene=scene;
@@ -20,6 +22,8 @@ export class ThirdPersonInputController {
         this.speed_ = 0.2;
         this.phi_ = 0;
         this.theta_ = 0;
+        this.physics = new Physics();
+
 
 
         //Jump stuff
@@ -145,12 +149,7 @@ export class ThirdPersonInputController {
         } else {
           this.grounded = false;  // If no intersections found, we are in the air
         }
-      }
-
-
-      
-
-
+    }
 
     updatePositon_(timeElapsedS){
         const moveDirection = new THREE.Vector3();
@@ -186,7 +185,8 @@ export class ThirdPersonInputController {
         this.target_.position.add(moveDirection);
         this.target_.position.y += this.verticalVelocity_ * timeElapsedS;
 
-        this.checkIfGround()
+
+        // this.checkIfGround()
     }
 
 
@@ -259,11 +259,11 @@ export class ThirdPersonInputController {
   }
 
 
-
-
     update(timeElapsedS) {
         this.updatePositon_(timeElapsedS);
-        this.updateRotation_(timeElapsedS); 
+        this.updateRotation_(timeElapsedS);
+        this.physics.update(timeElapsedS,this.target_,this.scene)
+
         // console.log("target:",this.target_.position);
         this.previous_ = { ...this.current_ };
     }

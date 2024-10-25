@@ -65,6 +65,9 @@ export class Level1 extends SceneBaseClass {
         this.healingRate = 10; // Define the healing rate
     }
 
+    /**
+     * Initilizes the scene with all the objects+lights
+     */
     initScene(){
         this.init_eventHandlers_();
         this.init_lighting_();
@@ -77,11 +80,13 @@ export class Level1 extends SceneBaseClass {
         this.startDamageTimer();
 
         window.addEventListener('load', this.initAudio);
-    }
+    }   
 
+
+    /**
+     * Inits scene's document's event handlers
+     */
     init_eventHandlers_(){
-
-        
         document.addEventListener("keydown", (e) => {
             switch (e.code) {
               case "KeyR":
@@ -163,6 +168,9 @@ export class Level1 extends SceneBaseClass {
         };
     }
 
+    /**
+     * Inits the objects in the scene
+     */
     init_objects_() {
         //load object
         this.initialize();
@@ -282,11 +290,17 @@ export class Level1 extends SceneBaseClass {
 
     }
 
+    /**
+     * Inits the camera in the scene
+     */
     init_camera_() {
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.set(0,12,20);
     }
 
+    /**
+     * Inits all the lighting required
+     */
     init_lighting_() {
 
         let temp = new THREE.AmbientLight(0x000000,1000);
@@ -379,7 +393,9 @@ export class Level1 extends SceneBaseClass {
         this.loadDoorCreakSound();
     }
     
-    // Load door creak sound
+    /**
+     * Plays the door creak noise
+     */
     loadDoorCreakSound() {
         const self = this;
         fetch('../audio/wooden-door-creaking.mp3')
@@ -395,7 +411,9 @@ export class Level1 extends SceneBaseClass {
     }
     
 
-
+    /**
+     * Loads the player model
+     */
     async initialize() {
         try {
             await this.loader.loadModel('./public/assets/hollow_knight/scene.glb', 'player', (gltf) => {
@@ -423,6 +441,9 @@ export class Level1 extends SceneBaseClass {
         }
     }
 
+    /**
+     * Animation for opening the door
+     */
     openDoor() {
         if (!this.isDoorOpen && this.doorAnimationAction) {
             this.doorAnimationAction.reset();
@@ -433,6 +454,10 @@ export class Level1 extends SceneBaseClass {
             this.gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>";
         }
     }
+
+    /**
+     * Play the door creak noise
+     */
 
     playDoorCreakSound() {
         console.log(this.doorCreakBuffer);
@@ -445,13 +470,18 @@ export class Level1 extends SceneBaseClass {
     }
 
 
+    /**
+     * Sets up the lighting around the player
+     */
     setupCharacterLight() {
         this.characterLight = new THREE.PointLight(0xffffff, 1, 10);
         this.characterLight.position.set(0, 2, 0); // Slightly above the character
         this.target.add(this.characterLight); // Attach the light to the character
     }
 
-    // Function to load lamps
+    /**
+     * Loads all the lamps from the JSON file
+     */
     async loadLamps() {
         let i=0;
         
@@ -476,6 +506,11 @@ export class Level1 extends SceneBaseClass {
     }
 
 
+    /**
+     * Handles the functionality of flicking lights
+     * @param {THREE.Light} light 
+     * @param {int} index 
+     */
     flickerLight(light, index) {
         let flickerDuration = 2; // Flicker for 2 seconds
         let flickerInterval = 100; // Flicker every 200ms
@@ -503,6 +538,9 @@ export class Level1 extends SceneBaseClass {
         }, flickerInterval);
     }
 
+    /**
+     * Checks how close the player is relative to the door
+     */
     checkDoorProximity() {
         if (this.Door==undefined){
             return;
@@ -522,6 +560,9 @@ export class Level1 extends SceneBaseClass {
         document.body.style.cursor = "pointer"
     }
 
+    /**
+     * Restarts the level
+     */
     restart() {
         this.gameOverScreen.style.display = "none";
 

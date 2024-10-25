@@ -76,8 +76,6 @@ export class FirstPersonCamera {
 
       this.camera_.quaternion.copy(this.rotation_);
       this.camera_.position.copy(this.translation_);
-
-
       this.target_.position.copy(this.translation_);
 
       this.camera_.position.y +=1.2;

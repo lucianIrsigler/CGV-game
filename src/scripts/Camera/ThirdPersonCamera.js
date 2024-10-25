@@ -41,12 +41,11 @@ export class ThirdPersonCamera{
         return idealLookAt;
     }
 
-    
-
 
     update(timeElapsedS){
         this.input_.target_.visible=true;
         this.input_.update(timeElapsedS);
+
 
         const idealOffset = this.calculateIdealOffset_();
 
@@ -62,9 +61,6 @@ export class ThirdPersonCamera{
 
         this.camera_.position.copy(this.currentPositon_);
         this.camera_.lookAt(this.currentLookat_);
-
         // console.log("camera:",this.currentPositon_);
-
-
     }
 }
