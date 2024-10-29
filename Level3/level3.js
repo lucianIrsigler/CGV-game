@@ -234,7 +234,7 @@ enemyLight.position.set(10, 2, 5);  // Set the light position to the cube's posi
 scene.add(enemyLight);
 
 // Create a point light to simulate the player emitting light
-const playerLight = new THREE.PointLight(0xffffff, 1, 100); // Color, intensity, distance
+const playerLight = new THREE.PointLight(0xffffff, 1, 50); // Color, intensity, distance
 playerLight.position.set(0, 1.5, 0);  // Set the light position to the cube's position
 scene.add(playerLight);
 
@@ -359,7 +359,7 @@ function loadLamps() {
             model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
             model.castShadow = true;
 
-            const lampLight = new THREE.PointLight(0xA96CC3, 30, 10); // Purple light - (color, intensity, distance)
+            const lampLight = new THREE.PointLight(0xA96CC3, 30, 50); // Purple light - (color, intensity, distance)
             lampLight.position.set(lamp.positionX, lamp.positionY + 2, lamp.positionZ); 
             model.add(lampLight);
             scene.add(lampLight);
@@ -812,7 +812,7 @@ let maxHealth = 100; // Define the maximum health
 let health = maxHealth;
 let loaded = false;
 const damageRate = 1; // Define the damage rate
-const healingRate = 100; // Define the healing rate
+const healingRate = 5; // Define the healing rate
 let points = lampsArray.map(lamp => new THREE.Vector3(lamp.positionX, lamp.positionY, lamp.positionZ)); // Convert lamp positions to Vector3 objects
 
 //Update Player Health
@@ -849,7 +849,7 @@ function startDamageTimer() {
                 // Check distance to each light
                 if (calcEuclid(cube.position.x, cube.position.z, light.x, light.z)) {
                     valid = true;
-                    heal(healingRate);
+                    heal(healingRate);  
                 }
             });
 
