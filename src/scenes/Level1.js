@@ -74,7 +74,7 @@ export class Level1 extends SceneBaseClass {
 
 
         //sound
-        this.nextSoundTime = 0;
+        this.nextSoundTime = 1000;
         this.playingAlready = false;
     }
 
@@ -404,7 +404,8 @@ export class Level1 extends SceneBaseClass {
         this.lastTime = currentTime;
 
         if (currentTime >= this.nextSoundTime) {
-            this.nextSoundTime = currentTime + getRandomInterval(1000, 10000); // Set the next sound time (1-5 seconds)
+            soundEffectsManager.playSound("growl",0.5)
+            this.nextSoundTime = currentTime + getRandomInterval(7000, 20000); // Set the next sound time (1-5 seconds)
         }
 
 

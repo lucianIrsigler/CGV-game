@@ -31,7 +31,7 @@ export class ThirdPersonInputController {
         this.target_ = target
         this.playerBody = playerBody;
 
-        this.speed_ = 0.2 ;
+        this.speed_ = 0.14 ;
         this.phi_ = 0;
         this.theta_ = 0;
 
@@ -159,7 +159,7 @@ export class ThirdPersonInputController {
       // Jump logic
       if (this.keys_[KEYS.space]) {
         if (this.isGrounded() && !this.alreadyJumped) { // Check if the player is on the ground
-            this.playerBody.velocity.y = 10; // Set the upward velocity for jumping
+            this.playerBody.velocity.y = 9; // Set the upward velocity for jumping
             this.alreadyJumped=true;
             soundEffectsManager.playSound("jump");
         }else if (this.isGrounded()){
