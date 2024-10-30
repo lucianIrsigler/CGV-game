@@ -1,8 +1,29 @@
 import * as THREE from 'three';
 import { World,Body, Box, Sphere, Vec3 } from 'cannon-es';
 
+
 /**
- * Manager that handles objects
+ * Steps to using this class
+ * 1. add geometry using addGeometry
+ * 2. add material using addMaterial
+ * 3. link the objects
+ * 
+Example:
+this.objManager.addGeometry("ground",new THREE.PlaneGeometry(20, 20));
+this.objManager.addMaterial("ground",new THREE.MeshStandardMaterial({ color: 0x808080 }));
+
+
+//now to create the object
+onst groundMesh = this.objManager.createVisualObject("ground", "platform", "platform", {x:0,y:-0.5,z:20});
+const groundBody = this.objManager.createPhysicsObject("ground", "platform", {x:0,y:-0.5,z:20}, null, 0);
+this.objManager.linkObject("ground", groundMesh, groundBody);
+*/
+
+
+
+
+/**
+ * Manager that handles object creation and deletion
  */
 export class ObjectManager {
     /**
