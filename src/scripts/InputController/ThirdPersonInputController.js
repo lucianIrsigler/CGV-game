@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Physics } from '../Physics/physics';
+import { Body,Vec3,Box } from 'cannon-es';
 
 const KEYS = {
     w: 87,  // W key
@@ -13,45 +13,35 @@ function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
 }
 
-
+/**
+ * Class to handle third person movement
+ */
 export class ThirdPersonInputController {
-    constructor(target,scene,gravity,jumpSpeed) {
+  /**
+   * @param {THREE.Scene} scene scene 
+   * @param {THREE.Object3D} target three.js mesh
+   * @param {Body} playerBody cannon.js player body for the target
+   */
+    constructor(scene,target,playerBody) {
         this.scene=scene;
-        this.target_ = target;
+        this.target_ = target
+        this.playerBody = playerBody;
 
         this.speed_ = 0.2;
         this.phi_ = 0;
         this.theta_ = 0;
-        this.physics = new Physics();
-
 
 
         //Jump stuff
-        this.gravity = gravity;
-        this.jumpSpeed = jumpSpeed;
-        this.groundCheckDistance_=0.5;
-        this.hasJumped = false;
-        this.jumping = false;
-        this.grounded = true;
-        this.verticalVelocity_=0;
-        this.rayCaster = new THREE.Raycaster();
+        this.canJump = true;
+        this.alreadyJumped = false;
 
         this.initialize_();
     }
 
-    reset(){
-      this.speed_ = 0.2;
-      this.phi_ = 0;
-      this.theta_ = 0;
-
-      this.groundCheckDistance_=0.5;
-      this.hasJumped = false;
-      this.jumping = false;
-      this.grounded = true;
-      this.verticalVelocity_=0;
-      this.rayCaster = new THREE.Raycaster();
-    }
-  
+    /**
+     * Initilizes some variables and adds event listeners
+     */
     initialize_() {
         this.current_ = {
             leftButton: false,
@@ -63,6 +53,7 @@ export class ThirdPersonInputController {
         this.keys_ = {};
         this.previous_ = null;
         this.keys_ = {};
+
     
         document.addEventListener("keydown", (e) => this.onKeyDown_(e), false);
         document.addEventListener("keyup", (e) => this.onKeyUp_(e), false);
@@ -114,82 +105,74 @@ export class ThirdPersonInputController {
         this.keys_[e.keyCode] = false;
     }
     
+    /**
+     * Casts a raycast downwards, and checks if the intersected object has a distance less than 2.25,
+     * If it does, then the ground is grounded, else its not
+     * @returns if the object is grounded
+     */
+    isGrounded() {
+      const raycaster = new THREE.Raycaster();
+      const origin = new THREE.Vector3(this.playerBody.position.x, this.playerBody.position.y + 1, this.playerBody.position.z); // Slightly above player
+      const direction = new THREE.Vector3(0, -1, 0); // Downward direction
+      raycaster.set(origin, direction);
+      
+      // Check for intersections against all objects in the scene except the player mesh
+      const intersects = raycaster.intersectObjects(this.scene.children.filter(child => child !== this.target_), true);
+      return intersects.length > 0 && intersects[0].distance < 2.25; // Check if we hit something within 1 unit below
+    }
 
-    checkIfGround() {
-        // Only perform raycast if the player is not grounded or if jumping/falling
-        if (!this.jumping) {
-          return;  // Skip raycast if grounded and not jumping
-        }
-      
-        // Create a ray starting from the player position, pointing downwards
-        let start = this.target_.position.clone();
-        let direction = new THREE.Vector3(0, -1, 0);  // Cast directly down
-        this.rayCaster.set(start, direction);
-        
-        // Limit raycast to specific objects in the scene (e.g., ground only)
-        const groundObjects = this.scene.children.filter(child => child.isGround);  // Tag or mark ground objects
-        const intersects = this.rayCaster.intersectObjects(groundObjects, true);
-      
-        if (intersects.length > 0) {
-          // If the intersection is within a certain distance, mark as grounded
-          if (intersects[0].distance < this.groundCheckDistance_ && this.hasJumped) {
-            console.log("Ground detected, resetting position.");
-            this.target_.position.y = intersects[0].point.y;
-            this.verticalVelocity_ = 0;  // Stop falling when we hit the ground
-            this.grounded = true;        // Set grounded to true
-            this.jumping = false;        // Reset jumping state
-            this.hasJumped=false;
-          } else {
-            this.grounded = false;
-          }
   
-          if (intersects[0].distance>this.groundCheckDistance_ && !this.hasJumped){
-            this.hasJumped=true;
-          }
-        } else {
-          this.grounded = false;  // If no intersections found, we are in the air
+    updatePosition_() {
+      // Clear any existing forces on the player body
+      this.playerBody.velocity.set(0, this.playerBody.velocity.y, 0); // Keep vertical velocity to allow gravity and jumping
+    
+      // Get the player's forward direction
+      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(this.target_.quaternion); // Forward vector
+      const right = new THREE.Vector3(1, 0, 0).applyQuaternion(this.target_.quaternion); // Right vector
+    
+      // Normalize the direction vectors
+      forward.normalize();
+      right.normalize();
+    
+      // Apply movement based on keys pressed
+      if (this.keys_[KEYS.w]) {
+          this.playerBody.position.x -= forward.x * this.speed_; // Move forward
+          this.playerBody.position.z -= forward.z * this.speed_;
+      }
+      if (this.keys_[KEYS.s]) {
+          this.playerBody.position.x += forward.x * this.speed_; // Move backward
+          this.playerBody.position.z += forward.z * this.speed_;
+      }
+      if (this.keys_[KEYS.a]) {
+          this.playerBody.position.x += right.x * this.speed_; // Move left
+          this.playerBody.position.z += right.z * this.speed_;
+      }
+      if (this.keys_[KEYS.d]) {
+          this.playerBody.position.x -= right.x * this.speed_; // Move right
+          this.playerBody.position.z -= right.z * this.speed_;
+      }
+    
+      // Jump logic
+      if (this.keys_[KEYS.space]) {
+        console.log("Jump initiated");
+        if (this.isGrounded() && !this.alreadyJumped) { // Check if the player is on the ground
+            this.playerBody.velocity.y = 10; // Set the upward velocity for jumping
+            this.alreadyJumped=true;
+        }else if (this.isGrounded()){
+          this.alreadyJumped=false;
         }
+      }
+
     }
-
-    updatePositon_(timeElapsedS){
-        const moveDirection = new THREE.Vector3();
-
-        if (!this.grounded) {
-            this.verticalVelocity_ -= this.gravity * timeElapsedS;  // Apply gravity if not grounded
-        } else {
-            this.verticalVelocity_ = 0;  // Reset vertical velocity when grounded
-        }
-
-        if (this.keys_[KEYS.space] && this.grounded) {
-            console.log("Jump initiated");
-            this.verticalVelocity_ = this.jumpSpeed; // Set vertical velocity for jumping
-            this.jumping = true;                      // Set jumping state
-            this.grounded = false;                    // Player is now in the air
-        }
-        
-
-        if (this.keys_[KEYS.w]) {
-            moveDirection.z += this.speed_;
-        }
-        if (this.keys_[KEYS.s]) {
-            moveDirection.z -= this.speed_;
-        }
-        if (this.keys_[KEYS.a]) {
-            moveDirection.x += this.speed_;
-        }
-        if (this.keys_[KEYS.d]) {
-            moveDirection.x -= this.speed_;
-        }
-
-        moveDirection.applyQuaternion(this.target_.quaternion);
-        this.target_.position.add(moveDirection);
-        this.target_.position.y += this.verticalVelocity_ * timeElapsedS;
-
-
-        // this.checkIfGround()
-    }
-
-
+  
+    /**
+     * Calculates if mouse is near the edge, and if so, updates phi and theta accordindly
+     * @param {float} mouseX x position of the mouse
+     * @param {float} mouseY y position of the mouse
+     * @param {int} edgeThreshold When to start rotating the screen
+     * @param {int} halfViewPortW half the width of the viewport - used for calculations
+     * @param {int} halfViewPortH half the height of the viewport - used for calculations
+     */
     calculateEdge_(mouseX,mouseY,edgeThreshold,halfViewPortW,halfViewPortH){
         if (mouseX < -1*halfViewPortW + edgeThreshold) { // Mouse is near the left edge
           this.phi_ += 0.05 // Rotate left
@@ -198,8 +181,10 @@ export class ThirdPersonInputController {
       }
     }
 
-   
-
+    /**
+     * Updates the rotation of the object
+     * @param {int} timeElapsedS 
+     */
     updateRotation_(timeElapsedS) {  
       let rotate = true;
       let edge = false;
@@ -255,14 +240,20 @@ export class ThirdPersonInputController {
         q.multiplyQuaternions(qx, qz);
 
         this.target_.quaternion.copy(q);
+        this.playerBody.quaternion.copy(q);
     }
   }
 
-
+    /**
+     * Updates the position and rotation of the object
+     * @param {int} timeElapsedS 
+     */
     update(timeElapsedS) {
-        this.updatePositon_(timeElapsedS);
+        this.updatePosition_(timeElapsedS);
         this.updateRotation_(timeElapsedS);
-        this.physics.update(timeElapsedS,this.target_,this.scene)
+
+        this.target_.position.copy(this.playerBody.position);
+        this.target_.quaternion.copy(this.playerBody.quaternion);
 
         // console.log("target:",this.target_.position);
         this.previous_ = { ...this.current_ };

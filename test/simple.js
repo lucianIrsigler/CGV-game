@@ -34,27 +34,6 @@ groundMesh.position.y = -0.5; // Position the ground mesh below the player
 scene.add(groundMesh);
 
 // Create a Cannon.js body for the ground
-const groundBody = new Body({
-  mass: 0, // Static body
-  position: new Vec3(0, -0.5, 0), // Position it below the player
-});
-groundBody.addShape(new Box(new Vec3(5, 0.5, 5))); // Add shape for collision
-world.addBody(groundBody);
-
-// Create a platform
-const platformGeometry = new THREE.BoxGeometry(2, 0.5, 2);
-const platformMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-const platformMesh = new THREE.Mesh(platformGeometry, platformMaterial);
-platformMesh.position.set(0, 2, 0); // Position the platform above the ground
-scene.add(platformMesh);
-
-// Create a Cannon.js body for the platform
-const platformBody = new Body({
-  mass: 0, // Static body
-  position: new Vec3(0, 2, 0), // Position it above the ground
-});
-platformBody.addShape(new Box(new Vec3(1, 0.25, 1))); // Add shape for collision
-world.addBody(platformBody);
 
 // Set camera position
 camera.position.z = 5;
@@ -86,6 +65,13 @@ function animate() {
     playerBody.position.x += speed; // Move right
   }
 
+  if (keyboard['ArrowUp']) {
+    playerBody.position.z += speed; // Move right
+  }
+  if (keyboard['ArrowDown']) {
+    playerBody.position.z -= speed; // Move right
+  } 
+
   // Handle jumping
   if (keyboard[' ']) { // Space bar for jump
     if (canJump) {
@@ -93,7 +79,6 @@ function animate() {
       canJump = false; // Prevent multiple jumps until landing
     }
   }
-
   // Check if player is on the ground to allow jumping again
   if (playerBody.position.y <= 1) {
     canJump = true; // Reset jumping ability

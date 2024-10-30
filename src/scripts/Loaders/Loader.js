@@ -3,13 +3,14 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 
 //https://www.youtube.com/watch?v=zMzuPIiznQ4&ab_channel=WaelYasmina
-export class LoadingManager{
+export class LoadingManagerCustom{
     constructor(){
         this.loadingManager= new THREE.LoadingManager();
         this.gltfLoader = new GLTFLoader(this.loadingManager);
         this.models = {}; // Object to store loaded models
         this.onProgressCallback = null; // Optional callback for progress updates
         this.onLoadCallback = null; // Optional callback when loading is complete
+        this.progressText = document.getElementById("progress-label");
         this.progressBar = document.getElementById("progress-bar");
         this.progressBarContainer = document.querySelector(".progress-bar-container");
         this.loaded = false;
@@ -18,7 +19,6 @@ export class LoadingManager{
 
     init_(){
         this.loadingManager.onStart = (url, itemsLoaded, itemsTotal) => {
-            // console.log(`Started loading: ${url}.`);
             this.progressBarContainer.style.display = 'flex';
             this.loaded = false;
 
@@ -26,8 +26,8 @@ export class LoadingManager{
 
 
         this.loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
-            // console.log(`Loading: ${url}. Loaded ${itemsLoaded} of ${itemsTotal} items.`);
             this.progressBar.value=(itemsLoaded/itemsTotal)*100;
+            this.progressText.textContent = `Loading: ${url}. Loaded ${itemsLoaded} of ${itemsTotal} items.`
 
             if (this.onProgressCallback) {
                 this.onProgressCallback(itemsLoaded, itemsTotal);
@@ -49,7 +49,7 @@ export class LoadingManager{
     }
 
 
-    getLoaded(){
+    isLoaded(){
         return this.loaded;
     }
     

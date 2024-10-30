@@ -5,10 +5,10 @@ import { lamps } from "../data/lampPos1";
 import { ObjectManager } from "../scripts/Scene/ObjectManager";
 import { LightManager } from "../scripts/Scene/LightManager";
 import { lightsConfigLevel1 } from "../data/lightPos1";
-import { LoadingManager } from "../scripts/Loaders/Loader";
-import { CameraManager } from "../scripts/Camera/CameraManager";
-import { Character } from "../scripts/Characters/Character";
+import { LoadingManagerCustom } from "../scripts/Loaders/Loader";
+import { CameraManager } from "../scripts/Scene/CameraManager";
 import { calcEuclid } from '../scripts/util/calcEuclid';
+import { World, Body, Box,Vec3 } from 'cannon-es';
 import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil';
 
 
@@ -18,11 +18,17 @@ export class Level1 extends SceneBaseClass {
         this.lampsArray=Object.values(lamps);
         this.gameOverScreen = document.getElementById("gameOverScreen");
         this.restartButton = document.getElementById("restartButton");
-        this.objManager = new ObjectManager(this.scene);
-        this.lightManager = new LightManager(this.scene);
-        this.loader = new LoadingManager();
+        
         this.cameraManager;
         this.target;
+
+        this.world = new World();
+        this.world.gravity.set(0, -9.82, 0);
+
+        //MANAGERS
+        this.objManager = new ObjectManager(this.scene,this.world);
+        this.lightManager = new LightManager(this.scene);
+        this.loader = new LoadingManagerCustom();
 
         this.platforms = [
             { position: new THREE.Vector3(3, 2, 15), size: new THREE.Vector3(5, 0.5, 5) },
@@ -47,7 +53,6 @@ export class Level1 extends SceneBaseClass {
         this.doorAnimationAction;
 
 
-
         //minimap
         this.lightTimers = {}; // Track time spent near lights
         this.lastMiniMapRenderTime = 0; // To track the last time the mini-map was rendered
@@ -63,6 +68,11 @@ export class Level1 extends SceneBaseClass {
         this.healthNumberElement =document.getElementById('health-number');
         this.damageRate = 20; // Define the damage rate
         this.healingRate = 10; // Define the healing rate
+
+
+        this.playerLoaded = false;
+        this.objectsLoaded = false;
+        this.playerBody;
     }
 
     /**
@@ -75,10 +85,8 @@ export class Level1 extends SceneBaseClass {
         this.init_objects_();
         this.init_miniMap_();
         this.init_door_();
-
-        //Start functions
+        // //Start functions
         this.startDamageTimer();
-
         window.addEventListener('load', this.initAudio);
     }   
 
@@ -101,8 +109,6 @@ export class Level1 extends SceneBaseClass {
                 break;
             }
           })
-
-        
 
         this.restartButton.addEventListener("click", this.restart.bind(this));
     }
@@ -130,84 +136,112 @@ export class Level1 extends SceneBaseClass {
     }
 
     //TODO use managers
-    init_door_(){
+    async init_door_() {
         // Door variables
-        let Door;
         let doorMixer;
         const currentDoor = door.doorOne;
-
-
+    
         // Load the door model
-        try{
-            this.loader.loadModel(currentDoor.scene,"Door",(gltf) =>{
-
-                console.log(this.scene.children);
-
-                Door = gltf.scene;
-                this.Door = Door;
-
-                Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
-                Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
-                Door.castShadow = true;
-
-                doorMixer = new THREE.AnimationMixer(this.Door);
-
-                const animations = gltf.animations;
-                if (animations && animations.length > 0) {
-                    this.doorAnimationAction = doorMixer.clipAction(animations[0]);
-                }
-                this.doorMixer = doorMixer;
-                this.Door = Door;
-                this.addObject(Door);
-
-            });
-            
-            console.log("Door loaded");
-        }catch(error){
-            console.error('An error happened', error);
-        };
+        try {
+            // Await the model loading
+            const gltf = await this.loader.loadModel(currentDoor.scene, "Door");
+    
+            // Assign the loaded door model
+            const Door = gltf.scene;
+            this.Door = Door;
+    
+            // Set door properties
+            Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
+            Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
+            Door.castShadow = true;
+    
+            // Create the animation mixer for the door
+            doorMixer = new THREE.AnimationMixer(Door);
+    
+            const animations = gltf.animations;
+            if (animations && animations.length > 0) {
+                this.doorAnimationAction = doorMixer.clipAction(animations[0]);
+            }
+            this.doorMixer = doorMixer;
+    
+            // Add the door object to the scene
+            this.addObject(Door);
+    
+        } catch (error) {
+            console.error('An error occurred while loading the door model:', error);
+        }
     }
-
-    /**
-     * Inits the objects in the scene
-     */
-    init_objects_() {
-        //load object
-        this.initialize();
-
-        const groundTextures = loadTextures('src/textures/',this.loader);
+    
+    async _init_textures(){
+        const groundTextures = loadTextures("PavingStones")
         applyTextureSettings(groundTextures, 1, 5);
 
         //Texture for walls
-        const wallTextures = loadTextures('src/textures/',this.loader);
+        const wallTextures = loadTextures("PavingStones")
         applyTextureSettings(wallTextures, 4, 1); 
 
         //Texture for platforms 
-        const platformTextures = loadTextures('src/textures/',this.loader);
-        applyTextureSettings(platformTextures, 3, 2); 
-            
-        
-        //add geometries
+        const platformTextures = loadTextures("PavingStones")
+        applyTextureSettings(platformTextures, 3, 2);
+
+        return {groundTextures,wallTextures,platformTextures}
+    }
+
+    async _init_player(){
+        const gltf = await this.loader.loadModel('src/models/cute_alien_character/scene.gltf', 'player');
+        const model = gltf.scene; // Get the loaded model
+        this.addObject(model); // Add the model to the scene
+        model.rotation.set(0, 0, 0); // Rotate the model
+        model.scale.set(1,1,1); // Scale the model if necessary
+        model.position.set(0, 0.5, 0);
+        model.name = "player"; // Name the model
+        this.target = model;
+        this.target.visible=false;
+
+        //create cannon.js body for model
+        this.playerBody = new Body({
+            mass: 1, // Dynamic body
+            position: new Vec3(0, 2, 0), // Start position
+        });
+        const boxShape = new Box(new Vec3(0.5, 1, 0.5)); // Box shape for the player
+        this.playerBody.addShape(boxShape);
+        this.world.addBody(this.playerBody);
+
+
+        this.cameraManager = new CameraManager(
+            this.camera,
+            this.target,
+            this.playerBody,
+            this.scene
+        );
+
+        this.setupCharacterLight();
+        this.playerLoaded = true;
+    }
+
+
+    async _initGeometries(){
         this.objManager.addGeometry("sideWall",new THREE.BoxGeometry(50, 1, 20));
         this.objManager.addGeometry("platform",new THREE.BoxGeometry(10, 1, 50));
         this.objManager.addGeometry("character",new THREE.BoxGeometry(1, 1, 1));
         this.objManager.addGeometry("ground",new THREE.PlaneGeometry(20, 20));
         this.objManager.addGeometry("redCube",new THREE.BoxGeometry(3, 1, 3));
+    }
 
+    async _initMaterials(){
+        const {groundTextures,wallTextures,platformTextures} = await this._init_textures()
 
-
-        //add materials
         this.objManager.addMaterial("sideWall",new THREE.MeshStandardMaterial({
-                map: wallTextures.colorMap,
-                aoMap: wallTextures.aoMap,
-                displacementMap: wallTextures.displacementMap,
-                metalnessMap: wallTextures.metalnessMap,
-                normalMap: wallTextures.normalMapDX, 
-                roughnessMap: wallTextures.roughnessMap,
-                displacementScale: 0,
-                metalness: 0.1,
-                roughness: 0.5
-            })
+            map: wallTextures.colorMap,
+            aoMap: wallTextures.aoMap,
+            displacementMap: wallTextures.displacementMap,
+            metalnessMap: wallTextures.metalnessMap,
+            normalMap: wallTextures.normalMapDX, 
+            roughnessMap: wallTextures.roughnessMap,
+            displacementScale: 0,
+            metalness: 0.1,
+            roughness: 0.5
+        })
         );
 
         this.objManager.addMaterial("platform", new THREE.MeshStandardMaterial({
@@ -243,51 +277,101 @@ export class Level1 extends SceneBaseClass {
         this.objManager.addMaterial("ground",new THREE.MeshStandardMaterial({ color: 0x808080 }));
         this.objManager.addMaterial("redCube",new THREE.MeshBasicMaterial({ color: 0x0000ff }));
         this.objManager.addMaterial("greenCube",new THREE.MeshBasicMaterial({ color: 0x008000 }));
+    }
 
-        
-        // mesh = this.objManager.createObject("ground","ground","ground",{x:0,y:0,z:0},{x:Math.PI/2,y:0,z:0});
-        //scene.add(mesh);
 
-        let res = this.loadLamps();
+    async createObjects(){
+        await this._initGeometries();
+        await this._initMaterials();
 
-        // Walls
-        this.objManager.createObject("bottom","platform","platform",{x:0,y:-0.5,z:20},null);
-        this.objManager.getObject("bottom").isGround=true;
-
+        const groundMesh = this.objManager.createVisualObject("ground", "platform", "platform", {x:0,y:-0.5,z:20});
+        const groundBody = this.objManager.createPhysicsObject("ground", "platform", {x:0,y:-0.5,z:20}, null, 0);
+        this.objManager.linkObject("ground", groundMesh, groundBody);
 
 
         let topPos = {x:0,y:10,z:20};
-        this.objManager.createObject("top","platform","platform",topPos,null);
+
+        const topMesh = this.objManager.createVisualObject("top", "platform", "platform", topPos);
+        const topBody = this.objManager.createPhysicsObject("top", "platform", topPos, null, 0);
+        this.objManager.linkObject("top", topMesh, topBody);
 
         topPos.y+=2;
-        this.objManager.createObject("redCube","redCube","redCube",topPos,null);
-        this.objManager.createObject("greenBlock","redCube","greenCube",{x:-3,y:topPos.y,z:39},null);
 
+        const redCubeMesh = this.objManager.createVisualObject("redCube", "redCube", "redCube", topPos);
+        const redCubeBody = this.objManager.createPhysicsObject("redCube", "redCube", topPos, null, 0);
+        this.objManager.linkObject("redCube", redCubeMesh, redCubeBody);
+
+
+        const greenCubeMesh = this.objManager.createVisualObject("greenBlock", "redCube", "greenCube", {x:-3,y:topPos.y,z:39});
+        const greenCubeBody = this.objManager.createPhysicsObject("redCube", "redCube", {x:-3,y:topPos.y,z:39}, null, 0);
+        this.objManager.linkObject("greenCube", greenCubeMesh, greenCubeBody);
+
+
+        const wallConfigurations = [
+            {
+                name: "backWall",
+                geometry: "sideWall",
+                material: "sideWall",
+                position: { x: 0, y: 2, z: -5 },
+                rotation: { x: Math.PI / 2, y: 0, z: 0 }
+            },
+            {
+                name: "left",
+                geometry: "sideWall",
+                material: "sideWall",
+                position: { x: -5, y: 0.8, z: 15 },
+                rotation: { x: Math.PI / 2, y: 0, z: Math.PI / 2 }
+            },
+            {
+                name: "right",
+                geometry: "sideWall",
+                material: "sideWall",
+                position: { x: 5, y: 0.8, z: 15 },
+                rotation: { x: Math.PI / 2, y: 0, z: Math.PI / 2 }
+            },
+            {
+                name: "end",
+                geometry: "sideWall",
+                material: "sideWall",
+                position: { x: 0, y: 2, z: 40 },
+                rotation: { x: Math.PI / 2, y: 0, z: 0 }
+            }
+        ];
         
-        this.objManager.createObject("backWall","sideWall","sideWall",{x:0,y:2,z:-5},{x:Math.PI/2,y:0,z:0});
-        this.objManager.createObject("left","sideWall","sideWall",{x:-5,y:0.8,z:15},{x:Math.PI/2,y:0,z:Math.PI/2});
-        this.objManager.createObject("right","sideWall","sideWall",{x:5,y:0.8,z:15},{x:Math.PI/2,y:0,z:Math.PI/2});
-        this.objManager.createObject("end","sideWall","sideWall",{x:0,y:2,z:40},{x:Math.PI/2,y:0,z:0});
+
+        wallConfigurations.forEach((wall)=>{
+            const tempMesh = this.objManager.createVisualObject(wall.name,wall.geometry,wall.material,wall.position,wall.rotation);
+            const tempBody = this.objManager.createPhysicsObject(wall.name, wall.geometry, wall.position, wall.rotation, 0);
+            this.objManager.linkObject(wall.name,tempMesh, tempBody);
+        })
+
 
         this.scene.background = new THREE.Color(0x333333);
 
-        //Platforms 
-
         let i = 0;
-        this.platforms.forEach(platform => {
+        this.platforms.forEach((platform)=>{
             this.objManager.addGeometry("temp",new THREE.BoxGeometry(platform.size.x, platform.size.y, platform.size.z));
-            this.objManager.createObject("platform"+i,"temp","platforms",platform.position);
-            this.objManager.getObject("platform"+i).isGround=true;
+            
+            this.objManager.createVisualObject("platform"+i,"temp","platforms",platform.position);
+            this.objManager.createPhysicsObject("platform"+i,"temp",platform.position);
+
             this.objManager.removeGeometry("temp");
             i+=1;
-        });
+        })
 
+    }
 
-        //TODO I GOT UP TO HERE        
-        //charcter light 
-        // Position camera initially at the same place as the character
-        // this.camera.position.set(this.character.position.x, this.character.position.y + 0.5, this.character.position.z);
+    /**
+     * Inits the objects in the scene
+     */
+    async init_objects_() {
+        const player = this._init_player()
 
+        //--------------------ADDING OBJECTS----------------------------------------
+
+        //TODO UNCOMMENT
+        let res = this.loadLamps();
+        let out = this.createObjects()
     }
 
     /**
@@ -303,7 +387,7 @@ export class Level1 extends SceneBaseClass {
      */
     init_lighting_() {
 
-        let temp = new THREE.AmbientLight(0x000000,1000);
+        let temp = new THREE.AmbientLight(0x101010, 0.75);
         this.lightManager.addLight("ambient", temp, null);
 
 
@@ -340,11 +424,15 @@ export class Level1 extends SceneBaseClass {
     }
 
     animate=(currentTime)=> {
-        if (!this.loader.getLoaded()){
-            //wait till loaded
-            requestAnimationFrame(this.animate);
+        this.animationId = requestAnimationFrame(this.animate);
+
+        if (this.cameraManager==undefined||!this.loader.isLoaded() || !this.playerLoaded){
             return;
         }
+
+        this.world.step(1 / 60);
+        this.objManager.update();
+
         const timeElapsedS = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
@@ -379,7 +467,6 @@ export class Level1 extends SceneBaseClass {
             this.lastMiniMapRenderTime = currentTimeMiniMap; // Update the time of last render
         }
 
-        this.animationId = requestAnimationFrame(this.animate);
     }
 
     stopAnimate=()=> {
@@ -388,9 +475,8 @@ export class Level1 extends SceneBaseClass {
     }
 
     initAudio() {
-        console.log("hello");
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        this.loadDoorCreakSound();
+        // this.loadDoorCreakSound();
     }
     
     /**
@@ -398,7 +484,7 @@ export class Level1 extends SceneBaseClass {
      */
     loadDoorCreakSound() {
         const self = this;
-        fetch('../audio/wooden-door-creaking.mp3')
+        fetch('src/audio/wooden-door-creaking.mp3')
             .then((response) => {
                 return response.arrayBuffer(); // Return the promise
             })
@@ -408,37 +494,6 @@ export class Level1 extends SceneBaseClass {
                 console.log('Audio buffer loaded:', audioBuffer); // Log the loaded buffer
             })
             .catch(error => console.error('Error loading door creak sound:', error));
-    }
-    
-
-    /**
-     * Loads the player model
-     */
-    async initialize() {
-        try {
-            await this.loader.loadModel('./public/assets/hollow_knight/scene.glb', 'player', (gltf) => {
-                const model = gltf.scene; // Get the loaded model
-                this.addObject(model); // Add the model to the scene
-                model.rotation.set(0, 0, 0); // Rotate the model
-                model.scale.set(0.5, 0.5, 0.5); // Scale the model if necessary
-                model.position.set(0, 0.5, 0);
-                model.name = "player"; // Name the model
-                this.target = model;
-                this.target.visible=false;
-                this.cameraManager = new CameraManager(
-                    this.camera,
-                    this.target,
-                    new Character(3.0,0.3),
-                    this.scene
-                )
-
-                this.setupCharacterLight();
-
-            });
-            console.log('Model loaded and added to the scene.');
-        } catch (error) {
-            console.error('Failed to load model:', error);
-        }
     }
 
     /**
@@ -458,7 +513,6 @@ export class Level1 extends SceneBaseClass {
     /**
      * Play the door creak noise
      */
-
     playDoorCreakSound() {
         console.log(this.doorCreakBuffer);
         if (this.doorCreakBuffer) {
@@ -479,30 +533,54 @@ export class Level1 extends SceneBaseClass {
         this.target.add(this.characterLight); // Attach the light to the character
     }
 
+
+
     /**
      * Loads all the lamps from the JSON file
      */
     async loadLamps() {
-        let i=0;
+
+        const gltf = await this.loader.loadModel(this.lampsArray[0].scene,"lamp");
+        const model = gltf.scene;
+
+        this.lampsArray.forEach((lamp)=>{
+            const position = {x:lamp.positionX,y:lamp.positionY,z:lamp.positionZ};
+            const scale = {x:lamp.scaleX,y:lamp.scaleY,z:lamp.scaleZ};
+            const clone = model.clone();
+            clone.position.set(position.x,position.y,position.z);
+            clone.scale.set(scale.x,scale.y,scale.z);
+            clone.castShadow = true;
+
+            const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
+            const positionLight = { x: position.x, y: position.y + 2, z: position.z }; 
+            this.lightManager.addLight(null, lampLight, positionLight);
+        })
         
-        this.lampsArray.forEach(lamp => {
-            i+=1;
-            try{
-            this.loader.loadModel(lamp.scene,"lamp"+Math.random(),(gltf) => {  // Use an arrow function here
-                let model = gltf.scene;
-                this.addObject(model);
-                model.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
-                model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
-                model.castShadow = true;
+
+        // const loadPromises = this.lampsArray.map(async (lamp) => {
+        //     try {
+        //         const name = "lamp" + randomIntFromInterval(0, 10000);
+        //         const gltf = await this.loader.loadModel(lamp.scene, name); // Assuming loadModel returns a Promise
+        //         const model = gltf.scene;
+                
+        //         this.addObject(model);
+        //         model.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
+        //         model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
+        //         model.castShadow = true;
     
-                const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
-                let position={x:lamp.positionX, y:lamp.positionY + 2, z:lamp.positionZ}; 
-                this.lightManager.addLight(null,lampLight,position)
-            });
-            console.log('Lamp loaded and added to the scene.');
-        }catch(error){
-            console.error('An error happened while loading the lamp model:', error);
-        }});
+        //         const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
+        //         const position = { x: lamp.positionX, y: lamp.positionY + 2, z: lamp.positionZ }; 
+        //         this.lightManager.addLight(null, lampLight, position);
+    
+        //         return `Lamp loaded and added to the scene: ${name}`; // Return a message
+        //     } catch (error) {
+        //         console.error('An error occurred while loading the lamp model:', error);
+        //         return `Failed to load lamp: ${lamp.scene}`; // Return error message
+        //     }
+        // });
+    
+        // // Wait for all Promises to resolve
+        // const results = await Promise.all(loadPromises);
     }
 
 
@@ -588,7 +666,7 @@ export class Level1 extends SceneBaseClass {
         });
         this.updateCharacterLight();
         document.body.style.cursor = "none"
-        this.cameraManager.resetStates();
+        // this.cameraManager.resetStates();
     }
 
     //TODO PUT INTO CLASS OF ITS OWN
@@ -631,7 +709,7 @@ export class Level1 extends SceneBaseClass {
     
     startDamageTimer() {
         setInterval(() => {
-            if (this.loader.getLoaded()) {
+            if (this.loader.isLoaded()) {
                 let valid = false;
 
                 this.points.forEach((light, index) => {

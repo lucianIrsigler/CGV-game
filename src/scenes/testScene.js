@@ -2,12 +2,17 @@ import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass";
 import * as THREE from 'three';
 import { LightManager } from "../scripts/Scene/LightManager";
 import { ObjectManager } from "../scripts/Scene/ObjectManager";
+import { World } from "cannon-es";
 
 export class CustomScene extends SceneBaseClass {
     constructor() {
         super(); // Call the base class constructor
+        this.world = new World();
+        this.world.gravity.set(0, -9.82, 0);
+        this.animationId = null;
+
         this.lightManager = new LightManager(this.scene);
-        this.objectManager = new ObjectManager(this.scene);
+        this.objectManager = new ObjectManager(this.scene,this.world);
     }
 
     initScene(){
@@ -65,7 +70,9 @@ export class CustomScene extends SceneBaseClass {
     }
 
     animate=()=> {
-        console.log("HERE");
+        this.animationId = requestAnimationFrame(this.animate);
+
+        console.log("animation");
         this.scene.rotation.y += 0.01;
         this.renderer.render(this.scene, this.camera);
     }

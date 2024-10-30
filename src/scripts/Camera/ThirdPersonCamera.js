@@ -1,21 +1,28 @@
 import * as THREE from 'three';
 import { ThirdPersonInputController } from "../InputController/ThirdPersonInputController";
+import { Body,Vec3,Box } from 'cannon-es';
+
 
 //https://www.youtube.com/watch?v=UuNPHOJ_V5o&ab_channel=SimonDev
 export class ThirdPersonCamera{
-    constructor(camera,target,character,scene) {
-        this.scene = scene;
-        this.character = character;
+    /**
+     * 
+     * @param {THREE.Camera} camera 
+     * @param {THREE.Object3D} target
+     * @param {Body} playerBody 
+     * @param {THREE.Scene} scene 
+     */
+    constructor(camera,target,playerBody,scene) {
         this.camera_ = camera;
+        this.scene = scene;
+        this.target_ = target
+        this.playerBody = playerBody;
+        this.input_ = new ThirdPersonInputController(scene,target,playerBody);
 
         this.currentPositon_ = new THREE.Vector3();
         this.currentLookat_ = new THREE.Vector3();
-        this.input_ = new ThirdPersonInputController(target,scene,character.calcGravity(),character.calcJumpSpeed());
     }
 
-    reset(){
-        this.input_.reset();
-    }
 
     calculateIdealOffset_(){
         const idealOffset =  new THREE.Vector3(-1,3,-3);
@@ -45,7 +52,6 @@ export class ThirdPersonCamera{
     update(timeElapsedS){
         this.input_.target_.visible=true;
         this.input_.update(timeElapsedS);
-
 
         const idealOffset = this.calculateIdealOffset_();
 

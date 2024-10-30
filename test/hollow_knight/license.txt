@@ -1,0 +1,8 @@
+Model Information:
+* title:	Hollow Knight Model
+* source:	https://sketchfab.com/3d-models/hollow-knight-model-65cbf4db24b0431d8992b4807d10a609
+* author:	pharloom_ (https://sketchfab.com/pharloom_)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
