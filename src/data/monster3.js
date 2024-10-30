@@ -1,0 +1,40 @@
+export const monsters3 = {
+    "tall_monster":{
+        height_diff:150,
+        scene:"src/models/tall_monster/scene.gltf",
+        scaleX:3,
+        scaleY:3,
+        scaleZ:3,
+        positionX:2,
+        positionY:2,
+        positionZ:3
+    },
+    "monster_ignan":{
+        height_diff:270,
+        scene:"src/models/monster_ignan/scene.gltf",
+        scaleX:1,
+        scaleY:1,
+        scaleZ:1,
+        positionX:2,
+        positionY:2,
+        positionZ:3
+    },
+    "toon_spike":{
+        height_diff:150,
+       scene:"src/models/toon_spike/scene.gltf",
+       scaleX:1,
+       scaleY:1,
+       scaleZ:1,
+       positionX:2,
+       positionY:2,
+       positionZ:3
+    },
+    "anya":{
+        height_diff:350,
+        scene:"src/models/anya/scene.gltf",
+        scaleX:2,
+        scaleY:2,
+        scaleZ:2,
+    }
+
+};

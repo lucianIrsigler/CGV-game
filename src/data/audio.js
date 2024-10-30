@@ -27,5 +27,21 @@ export const audioFiles = [
     {
         name: "doorCreak",
         file: "wooden-door-creaking.mp3"
-    }
+    },
+    {
+        name: "ambienceLevel3",
+        file: "ambience.mp3"
+    },
+    {
+        name: "dark_bullet_sound",
+        file: "dark_bullet_sound.mp3"
+    },
+    {
+        name: "light_bullet_sound",
+        file: "light_bullet_sound.mp3"
+    },
+    {
+        name: "monster_moan",
+        file: "monster_moan.mp3"
+    },
 ];
