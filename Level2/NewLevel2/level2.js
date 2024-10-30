@@ -29,29 +29,47 @@ scene.add(ambientLight, directionalLight);
 //----------------------------------------------------------------------
 
 //ADDING OBJECTS TO SCENE-------------------------------------------
-const innerRadius = 18;
-const outerRadius = 25;
+
+const circlePlatformInnerRadius = 0;
+const circlePlatformOuterRadius = 18;
+const circlePlatformDepth = 1;
+const curvedPlatformInnerRadius = 18;
+const curvedPlatformOuterRadius = 25;
+const curvedPlatformDepth = 1;
 const height = 3;
 const numberOfPlatforms = 16;
 const rotation = Math.PI / 4;
+const roomRadius = 30;
+const floorDepth = 1;
+const ceilingDepth = 1;
+const roomHeight = floorDepth + numberOfPlatforms * height + ceilingDepth + 2 * height;
 for (let i = 0; i <= numberOfPlatforms; i++) 
     {
     if (i % 4 === 0) {
-        const cpBoxLamp = new CPBoxLamp(innerRadius, outerRadius);
+        const cpBoxLamp = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
         cpBoxLamp.position.y = i * height;
         cpBoxLamp.rotation.y = i * rotation;
         scene.add(cpBoxLamp);
     } 
     else 
     {
-        const curvedPlatform = new CurvedPlatform(innerRadius, outerRadius);
+        const curvedPlatform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
         curvedPlatform.position.y = i * height;
         curvedPlatform.rotation.y = i * rotation;
         scene.add(curvedPlatform);
     }
 }
-const circPlatform = new CircularPlatform(innerRadius);
-scene.add(circPlatform);
+const circularPlatform = new CircularPlatform(circlePlatformInnerRadius, circlePlatformOuterRadius, circlePlatformDepth);
+scene.add(circularPlatform);
+const floor = new CircularPlatform(0, roomRadius, floorDepth);
+floor.position.y = -1;
+scene.add(floor);
+const ceiling = new CircularPlatform(0, roomRadius, ceilingDepth);
+ceiling.position.y = roomHeight;
+scene.add(ceiling);
+const wall = new CircularPlatform(curvedPlatformOuterRadius + curvedPlatformOuterRadius-curvedPlatformInnerRadius, roomRadius, roomHeight);
+wall.position.y = roomHeight - 1;
+scene.add(wall);
 //----------------------------------------------------------------------
 
 // Handle Window Resizing
