@@ -9,9 +9,12 @@ import { FirstPersonControls } from 'three/examples/jsm/controls/FirstPersonCont
 
 // Set up the scene, camera, and renderer
 const scene = new THREE.Scene();
+// //Adding fog to the scene 
+const fogColor = new THREE.Color(0xFF4B4B4B); //Colour 
+scene.fog = new THREE.Fog(fogColor, 10, 100); // Adjust fog for distance-based depth
+scene.background = fogColor;
+
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -50,11 +53,34 @@ let velocityY = 0; // Vertical velocity for jumping
 camera.position.set(character.position.x, character.position.y + 0.5, character.position.z);
 character.rotation.y += Math.PI;
 //inputs
+
+//Adding background noise 
+const backgroundSound = document.getElementById("background-sound");
+backgroundSound.loop = true; 
+
+function playSound() {
+    if (backgroundSound.paused) {
+        backgroundSound.play();
+    }
+}
+
+function animateFog() {
+    // Example oscillation effect for fog density or color shift
+    scene.fog.near = 10 + Math.sin(Date.now() * 0.001) * 2; // Change near point slightly
+    scene.fog.far = 100 + Math.sin(Date.now() * 0.001) * 10; // Change far point slightly
+    requestAnimationFrame(animateFog);
+  }
+  
+  // Call this function in your animation loop
+  animateFog();
+  
+
 // Event listeners for movement
 document.addEventListener('keydown', (e) => {
     switch (e.key) {
         case 'w':
             movement.forward = 1;
+            playSound();
             break; // Move forward
         case 's':
             movement.forward = -1; break; // Move backward
@@ -536,7 +562,7 @@ scene.add(directionalLight2.target); // Add the target to the scene
 const ambientLight = new THREE.AmbientLight(0x000022, 0.6); // Soft white light
 scene.add(ambientLight);
 //add ambient light
-const ambientLight4 = new THREE.AmbientLight(0x506886, 0.1);
+const ambientLight4 = new THREE.AmbientLight(0x000022, 0.1);
 scene.add(ambientLight4);
 // Animation loop
 let lastUpdate = 0; // Track the last update time
@@ -606,6 +632,9 @@ function animate(time) {
             character.position.y += velocityY;
             velocityY += gravity;
         }
+
+        //fog
+        animateFog(); 
 
         // Calculate camera direction
         const cameraDirection = new THREE.Vector3();
