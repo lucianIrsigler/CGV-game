@@ -17,23 +17,35 @@ import { MiniMap } from '../scripts/Objects/Minimap';
 export class Level1 extends SceneBaseClass {
     constructor() {
         super(); // Call the base class constructor
-        this.lampsArray=Object.values(lamps);
+
+        //DOM stuff
         this.gameOverScreen = document.getElementById("gameOverScreen");
         this.restartButton = document.getElementById("restartButton");
         
-        this.cameraManager;
-        this.target;
 
+        //cannon.js world
         this.world = new World();
         this.world.gravity.set(0, -9.82, 0);
+        this.playerBody; //cannon.js model
+        this.target; //player model
+
+
+
+        //light stuff
+        this.points = [];
+        this.lampsArray=Object.values(lamps);
+        this.characterLight;
+
 
         //MANAGERS
+        this.cameraManager;
         this.objManager = new ObjectManager(this.scene,this.world);
         this.lightManager = new LightManager(this.scene);
         this.loader = new LoadingManagerCustom();
         this.lightMechanicManager = new LightMechanicManager(this.characterLight,100,20,10);
 
-
+        
+        //platform positions
         this.platforms = [
             { position: new THREE.Vector3(3, 2, 15), size: new THREE.Vector3(5, 0.5, 5) },
             { position: new THREE.Vector3(-3, 4, 20), size: new THREE.Vector3(5, 0.5, 5) },
@@ -41,24 +53,17 @@ export class Level1 extends SceneBaseClass {
             { position: new THREE.Vector3(-3, 4, 35), size: new THREE.Vector3(3, 0.3, 10) }
         ];
 
-        this.points = [];
-        this.characterLight;
-
         //DOOR
         this.door = new Door(this.loader);
-
-        //minimap
         this.miniMap = new MiniMap(this.scene);
 
         //for animation
         this.lastTime = 0;
-        this.points = [];
         this.animationId = null;
 
-
+        // flags
         this.playerLoaded = false;
         this.objectsLoaded = false;
-        this.playerBody;
     }
 
     /**
@@ -100,6 +105,10 @@ export class Level1 extends SceneBaseClass {
         this.restartButton.addEventListener("click", this.restart.bind(this));
     }
     
+    /**
+     * Loads and applies textures
+     * @returns groundTexture,wallTexture,platformTexture
+     */
     async _init_textures(){
         const groundTextures = loadTextures("PavingStones")
         applyTextureSettings(groundTextures, 1, 5);
@@ -115,6 +124,9 @@ export class Level1 extends SceneBaseClass {
         return {groundTextures,wallTextures,platformTextures}
     }
 
+    /**
+     * Loads player model
+     */
     async _init_player(){
         const gltf = await this.loader.loadModel('src/models/cute_alien_character/scene.gltf', 'player');
         const model = gltf.scene; // Get the loaded model
@@ -147,6 +159,9 @@ export class Level1 extends SceneBaseClass {
         this.playerLoaded = true;
     }
 
+    /**
+     * Inits the geometries used in the scene
+     */
     async _initGeometries(){
         this.objManager.addGeometry("sideWall",new THREE.BoxGeometry(50, 1, 20));
         this.objManager.addGeometry("platform",new THREE.BoxGeometry(10, 1, 50));
@@ -154,6 +169,9 @@ export class Level1 extends SceneBaseClass {
         this.objManager.addGeometry("ground",new THREE.PlaneGeometry(20, 20));
     }
 
+    /**
+     * Inits the materials used in the scene
+     */
     async _initMaterials(){
         const {groundTextures,wallTextures,platformTextures} = await this._init_textures()
 
@@ -203,6 +221,9 @@ export class Level1 extends SceneBaseClass {
         this.objManager.addMaterial("ground",new THREE.MeshStandardMaterial({ color: 0x808080 }));
     }
 
+    /**
+     * Creates the objects for the scene
+     */
     async createObjects(){
         await this._initGeometries();
         await this._initMaterials();
@@ -337,6 +358,11 @@ export class Level1 extends SceneBaseClass {
 
     }
 
+    /**
+     * Animation function
+     * @param {} currentTime 
+     * @returns 
+     */
     animate=(currentTime)=> {
         this.animationId = requestAnimationFrame(this.animate);
 
@@ -371,12 +397,14 @@ export class Level1 extends SceneBaseClass {
         // Render the scene
         this.renderer.render(this.scene, this.cameraManager.getCamera());
 
-        //TODO MINI MAP RENDER
-
+        //update minimap
         this.miniMap.update(this.scene,this.target)
 
     }
 
+    /**
+     * Stops the animation
+     */
     stopAnimate=()=> {
         cancelAnimationFrame(this.animationId)
         this.animationId=null;
@@ -389,6 +417,8 @@ export class Level1 extends SceneBaseClass {
         this.characterLight = new THREE.PointLight(0xffffff, 1, 10);
         this.characterLight.position.set(0, 2, 0); // Slightly above the character
         this.target.add(this.characterLight); // Attach the light to the character
+
+        this.lightMechanicManager.characterLight = this.characterLight;
     }
 
     /**
@@ -411,32 +441,6 @@ export class Level1 extends SceneBaseClass {
             const positionLight = { x: position.x, y: position.y + 2, z: position.z }; 
             this.lightManager.addLight(null, lampLight, positionLight);
         })
-        
-
-        // const loadPromises = this.lampsArray.map(async (lamp) => {
-        //     try {
-        //         const name = "lamp" + randomIntFromInterval(0, 10000);
-        //         const gltf = await this.loader.loadModel(lamp.scene, name); // Assuming loadModel returns a Promise
-        //         const model = gltf.scene;
-                
-        //         this.addObject(model);
-        //         model.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
-        //         model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
-        //         model.castShadow = true;
-    
-        //         const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
-        //         const position = { x: lamp.positionX, y: lamp.positionY + 2, z: lamp.positionZ }; 
-        //         this.lightManager.addLight(null, lampLight, position);
-    
-        //         return `Lamp loaded and added to the scene: ${name}`; // Return a message
-        //     } catch (error) {
-        //         console.error('An error occurred while loading the lamp model:', error);
-        //         return `Failed to load lamp: ${lamp.scene}`; // Return error message
-        //     }
-        // });
-    
-        // // Wait for all Promises to resolve
-        // const results = await Promise.all(loadPromises);
     }
     
     /**
@@ -466,11 +470,17 @@ export class Level1 extends SceneBaseClass {
         document.body.style.cursor = "none"
     }
 
-    
+    /**
+     * Light to toggle the intensity to 5 for
+     * @param {THREE.Light} light 
+     */
     toggleLightIntensity(light) {
         light.intensity = 5;
     }
 
+    /**
+     * Starts the health mechanic
+     */
     startDamageTimer(){
         setInterval(()=>{
             if (this.loader.isLoaded()){
@@ -484,6 +494,9 @@ export class Level1 extends SceneBaseClass {
         },1000);
     }
 
+    /**
+     * Disposes of assets in the level
+     */
     disposeLevel(){
         if (!this.scene) return;
 

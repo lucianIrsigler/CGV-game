@@ -126,6 +126,9 @@ export class Door{
         }
     }
 
+    /**
+     * Checks if the door prompt is a block, and if so then calls openDoor
+     */
     checkIfOpen(){
         if (this.doorPrompt.style.display === 'block') {
             this.openDoor();
