@@ -2,7 +2,13 @@ import * as THREE from 'three';
 
 
 export class MiniMap{
-    constructor(scene){
+    /**
+     * Class to hold the minimap object. yAboveScene is how far in the sky the objects to represent the
+     * players,endgoal, and any other thing should be. Default is 20
+     * @param {THREE.Scene} scene 
+     * @param {int} yAboveScene 
+     */
+    constructor(scene,yAboveScene=20){
         this.scene = scene;
 
         this.miniMapCamera = null;
@@ -19,8 +25,15 @@ export class MiniMap{
         this.player;
         this.endGoal;
 
+        this.yAboveTheScene = yAboveScene
+
     }
 
+    /**
+     * Sets up the minimap camera and appends to DOM
+     * @param {window} window 
+     * @param {document} document 
+     */
     init_miniMap_(window,document){
         this.miniMapCamera = new THREE.OrthographicCamera(
             window.innerWidth / -2, window.innerWidth / 2,
@@ -40,32 +53,37 @@ export class MiniMap{
         this.miniMapRenderer.domElement.style.top = '10px';
         this.miniMapRenderer.domElement.style.right = '10px';
         document.body.appendChild(this.miniMapRenderer.domElement);
-
     }
 
-
+    /**
+     * Adds a mesh above the scene to represent the end goal
+     * @param {} position JSON in the form {x:num,y:num,z:num}
+     * @param {string} colour colour of the block
+     */
     addEndGoal(position,colour){
         let cubeGeometry = new THREE.BoxGeometry(3, 1, 3);
         let cubeMaterial = new THREE.MeshBasicMaterial({ color: colour })
         this.endGoal = new THREE.Mesh(cubeGeometry,cubeMaterial);
-        this.endGoal.position.set(position.x,position.y,position.z);
+        this.endGoal.position.set(position.x,this.yAboveTheScene,position.z);
 
         this.scene.add(this.endGoal);
     }
 
-
+    /**
+     * Adds a mesh above the scene to represent the player
+     * @param {string} colour 
+     */
     addPlayer(colour){
         let cubeGeometry = new THREE.BoxGeometry(3, 1, 3);
         let cubeMaterial = new THREE.MeshBasicMaterial({ color: colour })
         this.player = new THREE.Mesh(cubeGeometry,cubeMaterial);
-
         this.scene.add(this.player);
     }
 
 
     update(scene,target){
         const currentTimeMiniMap = Date.now();
-        this.player.position.set(target.position.x,20,target.position.z);
+        this.player.position.set(target.position.x,this.yAboveTheScene,target.position.z);
 
         if (currentTimeMiniMap - this.lastMiniMapRenderTime >= this.miniMapRenderInterval) {
             this.miniMapRenderer.render(scene, this.miniMapCamera);

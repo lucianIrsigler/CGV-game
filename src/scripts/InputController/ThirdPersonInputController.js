@@ -1,5 +1,9 @@
 import * as THREE from 'three';
 import { Body,Vec3,Box } from 'cannon-es';
+import { SoundEffectsManager } from '../Scene/SoundEffectManger';
+
+
+const soundEffectsManager = new SoundEffectsManager();
 
 const KEYS = {
     w: 87,  // W key
@@ -27,7 +31,7 @@ export class ThirdPersonInputController {
         this.target_ = target
         this.playerBody = playerBody;
 
-        this.speed_ = 0.2;
+        this.speed_ = 0.15;
         this.phi_ = 0;
         this.theta_ = 0;
 
@@ -154,10 +158,10 @@ export class ThirdPersonInputController {
     
       // Jump logic
       if (this.keys_[KEYS.space]) {
-        console.log("Jump initiated");
         if (this.isGrounded() && !this.alreadyJumped) { // Check if the player is on the ground
             this.playerBody.velocity.y = 10; // Set the upward velocity for jumping
             this.alreadyJumped=true;
+            soundEffectsManager.playSound("jump");
         }else if (this.isGrounded()){
           this.alreadyJumped=false;
         }

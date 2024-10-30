@@ -6,7 +6,7 @@ import { ThirdPersonCamera } from "../Camera/ThirdPersonCamera"
  */
 export class CameraManager{
     /**
-     * 
+     * Class to manage the 3rd person and 1st person cameras
      * @param {THREE.Camera} camera camera for the scene
      * @param {THREE.Object3D} target target mesh to follow with camera
      * @param {Body} playerBody cannon.js player model
