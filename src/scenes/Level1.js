@@ -146,7 +146,7 @@ export class Level1 extends SceneBaseClass {
 
         //Texture for platforms 
         const platformTextures = loadTextures("PavingStones")
-        applyTextureSettings(platformTextures, 3, 2);
+        applyTextureSettings(platformTextures, 1, 1);
 
         return {groundTextures,wallTextures,platformTextures}
     }
