@@ -12,6 +12,13 @@ import { LightMechanicManager } from '../scripts/Scene/LightMechanicManager';
 import { Door } from '../scripts/Objects/Door';
 import { door } from '../data/doorPos1';
 import { MiniMap } from '../scripts/Objects/Minimap';
+import { getRandomInterval } from '../scripts/util/randomInterval';
+import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger';
+
+
+const soundEffectsManager = new SoundEffectsManager();
+
+soundEffectsManager.toggleLoop("creep2",true);
 
 
 export class Level1 extends SceneBaseClass {
@@ -64,12 +71,18 @@ export class Level1 extends SceneBaseClass {
         // flags
         this.playerLoaded = false;
         this.objectsLoaded = false;
+
+
+        //sound
+        this.nextSoundTime = 0;
+        this.playingAlready = false;
     }
 
     /**
      * Initilizes the scene with all the objects+lights
      */
     initScene(){
+
         this.init_eventHandlers_();
         this.init_lighting_();
         this.init_camera_();
@@ -81,6 +94,7 @@ export class Level1 extends SceneBaseClass {
 
         this.startDamageTimer();
         window.addEventListener('load', this.initAudio);
+       
     }   
 
     /**
@@ -101,6 +115,19 @@ export class Level1 extends SceneBaseClass {
                 break;
             }
           })
+
+        window.addEventListener("click", () => {
+            if (!this.playingAlready){
+                soundEffectsManager.playSound("creep2", 0.1);
+                this.playingAlready=true;
+            }
+        });
+        window.addEventListener("keydown", () => {
+            if (!this.playingAlready){
+                soundEffectsManager.playSound("creep2", 0.1);
+                this.playingAlready=true;
+            }
+        });
 
         this.restartButton.addEventListener("click", this.restart.bind(this));
     }
@@ -375,6 +402,11 @@ export class Level1 extends SceneBaseClass {
 
         const timeElapsedS = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
+
+        if (currentTime >= this.nextSoundTime) {
+            this.nextSoundTime = currentTime + getRandomInterval(1000, 10000); // Set the next sound time (1-5 seconds)
+        }
+
 
 
         // // Update the door animation mixer if it exists

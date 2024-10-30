@@ -32,7 +32,6 @@ export class SoundEffectsManager {
         try {
             const sound = new Audio(url);
             this.soundBuffers[name] = sound;
-            console.log(`Loaded sound: ${name}`);
         } catch (error) {
             console.error(`Error loading sound ${name} from ${url}:`, error);
         }
@@ -41,13 +40,33 @@ export class SoundEffectsManager {
     
 
     /**
-     * Play a loaded sound by name
+     * Play a loaded sound by name with optional volume
      * @param {string} name - The name of the sound effect to play (e.g., "doorCreak")
+     * @param {number} [volume=1.0] - The volume level (between 0.0 and 1.0)
      */
-    playSound(name) {
+    playSound(name, volume = 1.0) {
         const soundBuffer = this.soundBuffers[name];
         if (soundBuffer) {
-            soundBuffer.play()
+            soundBuffer.volume = volume; // Set the volume level
+            soundBuffer.play();
+        } else {
+            console.warn(`Sound ${name} has not been loaded.`);
+        }
+    }
+
+    /**
+     * Toggle or set looping for a specific sound
+     * @param {string} name - The name of the sound effect to toggle looping for
+     * @param {boolean} [shouldLoop] - Optional parameter to explicitly set looping to true or false
+     */
+    toggleLoop(name, shouldLoop = null) {
+        const soundBuffer = this.soundBuffers[name];
+        if (soundBuffer) {
+            if (shouldLoop !== null) {
+                soundBuffer.loop = shouldLoop; // Set looping to the specified value
+            } else {
+                soundBuffer.loop = !soundBuffer.loop; // Toggle looping if no specific value provided
+            }
         } else {
             console.warn(`Sound ${name} has not been loaded.`);
         }

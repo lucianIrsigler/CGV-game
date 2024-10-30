@@ -4,6 +4,10 @@ export const audioFiles = [
         file: "creep1.mp3"
     },
     {
+        name: "creep2",
+        file: "creep2.mp3"
+    },
+    {
         name: "growl",
         file: "growl2.mp3"
     },
