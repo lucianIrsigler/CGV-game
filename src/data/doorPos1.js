@@ -6,7 +6,7 @@ export const door = {
         scaleY:0.003,
         scaleZ:0.003,
         positionX:-3, 
-        positionY:4,
+        positionY:5,
         positionZ:39,
     },
     "doorTwo":{

@@ -47,10 +47,10 @@ export class Level1 extends SceneBaseClass {
         
         //platform positions
         this.platforms = [
-            { position: new THREE.Vector3(3, 2, 15), size: new THREE.Vector3(5, 0.5, 5) },
-            { position: new THREE.Vector3(-3, 4, 20), size: new THREE.Vector3(5, 0.5, 5) },
-            { position: new THREE.Vector3(3, 2, 30), size: new THREE.Vector3(3, 0.3, 3) },
-            { position: new THREE.Vector3(-3, 4, 35), size: new THREE.Vector3(3, 0.3, 10) }
+            { position: new THREE.Vector3(3, 3, 15), size: new THREE.Vector3(5, 0.5, 5) },
+            { position: new THREE.Vector3(-3, 5, 20), size: new THREE.Vector3(5, 0.5, 5) },
+            { position: new THREE.Vector3(3, 3, 30), size: new THREE.Vector3(3, 0.3, 3) },
+            { position: new THREE.Vector3(-3, 6, 35), size: new THREE.Vector3(3, 0.3, 10) }
         ];
 
         //DOOR
@@ -163,7 +163,7 @@ export class Level1 extends SceneBaseClass {
      * Inits the geometries used in the scene
      */
     async _initGeometries(){
-        this.objManager.addGeometry("sideWall",new THREE.BoxGeometry(50, 1, 20));
+        this.objManager.addGeometry("sideWall",new THREE.BoxGeometry(50, 1, 30));
         this.objManager.addGeometry("platform",new THREE.BoxGeometry(10, 1, 50));
         this.objManager.addGeometry("character",new THREE.BoxGeometry(1, 1, 1));
         this.objManager.addGeometry("ground",new THREE.PlaneGeometry(20, 20));
@@ -233,7 +233,7 @@ export class Level1 extends SceneBaseClass {
         this.objManager.linkObject("ground", groundMesh, groundBody);
 
 
-        let topPos = {x:0,y:10,z:20};
+        let topPos = {x:0,y:15,z:20};
 
         const topMesh = this.objManager.createVisualObject("top", "platform", "platform", topPos);
         const topBody = this.objManager.createPhysicsObject("top", "platform", topPos, null, 0);
@@ -436,6 +436,7 @@ export class Level1 extends SceneBaseClass {
             clone.position.set(position.x,position.y,position.z);
             clone.scale.set(scale.x,scale.y,scale.z);
             clone.castShadow = true;
+            //this.addObject(clone);
 
             const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
             const positionLight = { x: position.x, y: position.y + 2, z: position.z }; 
