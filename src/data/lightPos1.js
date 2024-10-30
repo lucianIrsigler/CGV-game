@@ -109,8 +109,8 @@ export const lightsConfigLevel1 = [
         angle: Math.PI / 6,
         penumbra: 0.5,
         decay: 2,
-        position: { x: -3, y: 7, z: 35 },
-        target: { position: { x: -3, y: 4, z: 35 } },
+        position: { x: -3, y: 8, z: 35 },
+        target: { position: { x: -3, y: 6, z: 35 } },
         helper: true
     },
     {
