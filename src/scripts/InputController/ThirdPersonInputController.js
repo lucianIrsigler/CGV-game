@@ -31,7 +31,7 @@ export class ThirdPersonInputController {
         this.target_ = target
         this.playerBody = playerBody;
 
-        this.speed_ = 0.15;
+        this.speed_ = 0.2 ;
         this.phi_ = 0;
         this.theta_ = 0;
 

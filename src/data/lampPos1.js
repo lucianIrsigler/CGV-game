@@ -1,9 +1,9 @@
 const baseLamp = {
   height_diff: 150,
-  scene: "src/models/victorian_street_lamp/scene.gltf",
-  scaleX: 0.003,
-  scaleY: 0.003,
-  scaleZ: 0.003,
+  scene: "src/models/old_english_street_lamp/scene.gltf",
+  scaleX: 0.5,
+  scaleY: 0.5,
+  scaleZ: 0.5,
   positionX: 0, 
   positionY: 0, 
   positionZ: 0  

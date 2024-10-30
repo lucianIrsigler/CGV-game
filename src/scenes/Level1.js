@@ -425,24 +425,38 @@ export class Level1 extends SceneBaseClass {
      * Loads all the lamps from the JSON file
      */
     async loadLamps() {
-
-        const gltf = await this.loader.loadModel(this.lampsArray[0].scene,"lamp");
+        // Load the model once
+        const gltf = await this.loader.loadModel(this.lampsArray[0].scene, "lamp");
         const model = gltf.scene;
-
-        this.lampsArray.forEach((lamp)=>{
-            const position = {x:lamp.positionX,y:lamp.positionY,z:lamp.positionZ};
-            const scale = {x:lamp.scaleX,y:lamp.scaleY,z:lamp.scaleZ};
+    
+        // Predefine light properties
+        const lightColor = 0xA96CC3;
+        const lightIntensity = 0.5;
+        const lightDistance = 2;
+    
+        // Iterate through each lamp in the lampsArray
+        this.lampsArray.forEach(lamp => {
+            // Clone the model for each lamp
             const clone = model.clone();
-            clone.position.set(position.x,position.y,position.z);
-            clone.scale.set(scale.x,scale.y,scale.z);
+            
+            // Set position and scale
+            clone.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
+            clone.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
             clone.castShadow = true;
-            //this.addObject(clone);
-
-            const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
-            const positionLight = { x: position.x, y: position.y + 2, z: position.z }; 
-            this.lightManager.addLight(null, lampLight, positionLight);
-        })
+    
+            // Add the cloned lamp object to the scene
+            this.addObject(clone);
+    
+            // Create and position the light for the lamp
+            const lampLight = new THREE.PointLight(lightColor, lightIntensity, lightDistance);
+            lampLight.position.set(lamp.positionX, lamp.positionY + 2, lamp.positionZ);
+            
+            // Optionally, add to a group or manage lights differently if needed
+            let position = {x:lampLight.position.x,y:lampLight.position.y+2,z:lampLight.position.z};
+            this.lightManager.addLight(null, lampLight, position);
+        });
     }
+    
     
     /**
      * Handles character death
