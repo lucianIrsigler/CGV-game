@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 
 export class SceneBaseClass {
+    /**
+     * Class to represent the base class of a scene
+     */
     constructor() {
         if (new.target === SceneBaseClass) {
             throw new Error("Cannot instantiate SceneBaseClass directly");
@@ -75,10 +78,18 @@ export class SceneBaseClass {
         throw new Error("animate method must be implemented in subclasses");
     }
 
+    /**
+     * Adds a three js object to the scene
+     * @param {THREE.Object3D} object 
+     */
     addObject(object) {
         this.scene.add(object);
     }
 
+    /**
+     * Removes a three js object to the scene
+     * @param {THREE.Object3D} object 
+     */
     removeObject(object) {
         this.scene.remove(object);
     }

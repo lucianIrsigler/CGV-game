@@ -81,7 +81,11 @@ export class LightMechanicManager{
         }, flickerInterval);
     }
 
-
+    /**
+     * Starts the process of checking if player is close enough to any lights, if so then heal, otherwise damage.
+     * @param {*} points 
+     * @param {*} target 
+     */
     damageTimer(points,target) {
         let valid = false;
 
@@ -121,11 +125,17 @@ export class LightMechanicManager{
         }
     }
 
-
+    /**
+     * Resets health to starting value
+     */
     resetHealth(){
         this.health = this.initialHealth;
     }
 
+    /**
+     * 
+     * @returns health value
+     */
     getHealth(){
         return this.health;
     }

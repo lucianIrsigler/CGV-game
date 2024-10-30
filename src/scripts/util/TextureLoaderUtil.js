@@ -1,7 +1,11 @@
 import * as THREE from 'three';
 
 
-
+/**
+ * Loads the textures from a specific folder
+ * @param {string} textureFolder 
+ * @returns 
+ */
 export function loadTextures(textureFolder) {
     const textureLoader = new THREE.TextureLoader();
 
