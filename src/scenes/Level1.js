@@ -9,8 +9,10 @@ import { CameraManager } from "../scripts/Scene/CameraManager";
 import { World, Body, Box,Vec3 } from 'cannon-es';
 import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil';
 import { LightMechanicManager } from '../scripts/Scene/LightMechanicManager';
-import { Door } from '../scripts/Objects/door';
+import { Door } from '../scripts/Objects/Door';
 import { door } from '../data/doorPos1';
+import { MiniMap } from '../scripts/Objects/Minimap';
+
 
 export class Level1 extends SceneBaseClass {
     constructor() {
@@ -39,18 +41,14 @@ export class Level1 extends SceneBaseClass {
             { position: new THREE.Vector3(-3, 4, 35), size: new THREE.Vector3(3, 0.3, 10) }
         ];
 
-        this.miniMapCamera = null;
-        this.miniMapRender = null;
         this.points = [];
         this.characterLight;
-
 
         //DOOR
         this.door = new Door(this.loader);
 
         //minimap
-        this.lastMiniMapRenderTime = 0; // To track the last time the mini-map was rendered
-        this.miniMapRenderInterval = 100; // 100ms interval for mini-map rendering
+        this.miniMap = new MiniMap(this.scene);
 
         //for animation
         this.lastTime = 0;
@@ -71,11 +69,11 @@ export class Level1 extends SceneBaseClass {
         this.init_lighting_();
         this.init_camera_();
         this.init_objects_();
-        this.init_miniMap_();
+        this.miniMap.init_miniMap_(window,document,this.scene);
 
         const currentDoor = door.doorOne;
         this.door.init_door_(this.scene,currentDoor);
-        
+
         this.startDamageTimer();
         window.addEventListener('load', this.initAudio);
     }   
@@ -101,29 +99,6 @@ export class Level1 extends SceneBaseClass {
 
         this.restartButton.addEventListener("click", this.restart.bind(this));
     }
-
-    //TODO make into class
-    init_miniMap_(){
-        this.miniMapCamera = new THREE.OrthographicCamera(
-            window.innerWidth / -2, window.innerWidth / 2,
-            window.innerHeight / 2, window.innerHeight / -2,
-            0.1, 1000
-        );
-        this.miniMapCamera.position.set(0, 100, 0); // Position the mini-map camera above the scene
-        this.miniMapCamera.lookAt(0,0,15); // Look at the center of the scene
-
-        // Set the zoom factor
-        this.miniMapCamera.zoom = 12.5; // Increase this value to zoom in
-        this.miniMapCamera.updateProjectionMatrix(); // Update the projection matrix after changing the zoom
-
-        this.miniMapRenderer = new THREE.WebGLRenderer({ alpha: true });
-        this.miniMapRenderer.setSize(200, 200); // Set the size of the mini-map
-        this.miniMapRenderer.domElement.style.position = 'absolute';
-        this.miniMapRenderer.domElement.style.top = '10px';
-        this.miniMapRenderer.domElement.style.right = '10px';
-        document.body.appendChild(this.miniMapRenderer.domElement);
-    }
-
     
     async _init_textures(){
         const groundTextures = loadTextures("PavingStones")
@@ -177,7 +152,6 @@ export class Level1 extends SceneBaseClass {
         this.objManager.addGeometry("platform",new THREE.BoxGeometry(10, 1, 50));
         this.objManager.addGeometry("character",new THREE.BoxGeometry(1, 1, 1));
         this.objManager.addGeometry("ground",new THREE.PlaneGeometry(20, 20));
-        this.objManager.addGeometry("redCube",new THREE.BoxGeometry(3, 1, 3));
     }
 
     async _initMaterials(){
@@ -227,8 +201,6 @@ export class Level1 extends SceneBaseClass {
         )
         
         this.objManager.addMaterial("ground",new THREE.MeshStandardMaterial({ color: 0x808080 }));
-        this.objManager.addMaterial("redCube",new THREE.MeshBasicMaterial({ color: 0x0000ff }));
-        this.objManager.addMaterial("greenCube",new THREE.MeshBasicMaterial({ color: 0x008000 }));
     }
 
     async createObjects(){
@@ -247,16 +219,6 @@ export class Level1 extends SceneBaseClass {
         this.objManager.linkObject("top", topMesh, topBody);
 
         topPos.y+=2;
-
-        const redCubeMesh = this.objManager.createVisualObject("redCube", "redCube", "redCube", topPos);
-        const redCubeBody = this.objManager.createPhysicsObject("redCube", "redCube", topPos, null, 0);
-        this.objManager.linkObject("redCube", redCubeMesh, redCubeBody);
-
-
-        const greenCubeMesh = this.objManager.createVisualObject("greenBlock", "redCube", "greenCube", {x:-3,y:topPos.y,z:39});
-        const greenCubeBody = this.objManager.createPhysicsObject("redCube", "redCube", {x:-3,y:topPos.y,z:39}, null, 0);
-        this.objManager.linkObject("greenCube", greenCubeMesh, greenCubeBody);
-
 
         const wallConfigurations = [
             {
@@ -317,12 +279,13 @@ export class Level1 extends SceneBaseClass {
      */
     async init_objects_() {
         const player = this._init_player()
-
-        //--------------------ADDING OBJECTS----------------------------------------
-
-        //TODO UNCOMMENT
         let res = this.loadLamps();
         let out = this.createObjects()
+
+        //add stuff for minimap
+        this.miniMap.addPlayer("#FF0000");
+        this.miniMap.addEndGoal({x:-3,y:20,z:39},"#00FF00")
+
     }
 
     /**
@@ -408,13 +371,9 @@ export class Level1 extends SceneBaseClass {
         // Render the scene
         this.renderer.render(this.scene, this.cameraManager.getCamera());
 
-        //update minimap at defined time interval
-        const currentTimeMiniMap = Date.now();
+        //TODO MINI MAP RENDER
 
-        if (currentTimeMiniMap - this.lastMiniMapRenderTime >= this.miniMapRenderInterval) {
-            this.miniMapRenderer.render(this.scene, this.miniMapCamera);
-            this.lastMiniMapRenderTime = currentTimeMiniMap; // Update the time of last render
-        }
+        this.miniMap.update(this.scene,this.target)
 
     }
 
@@ -518,7 +477,7 @@ export class Level1 extends SceneBaseClass {
                 this.lightMechanicManager.damageTimer(this.points,this.target)
             }
 
-            console.log(this.lightMechanicManager.getHealth())
+            // console.log(this.lightMechanicManager.getHealth())
             if (this.lightMechanicManager.getHealth()<=0){
                 this.handleCharacterDeath();
             }
