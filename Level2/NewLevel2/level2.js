@@ -21,13 +21,12 @@ controls.screenSpacePanning = false;
 //----------------------------------------------------------------------
 
 //LIGHTING--------------------------------------------------------------
-const ambientLight = new THREE.AmbientLight(0x404040);
+const ambientLight = new THREE.AmbientLight(0x0f0f0f);
+ambientLight.intensity = 10;
+scene.add(ambientLight);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(0, 10, 10).normalize();
-scene.add(ambientLight, directionalLight);
-const pointLight = new THREE.PointLight(0xffffff, 1, 100);
-pointLight.position.set(0, 40, 0);
-scene.add(pointLight);
+// scene.add(directionalLight);
 //----------------------------------------------------------------------
 
 //ADDING OBJECTS TO SCENE-------------------------------------------
@@ -51,6 +50,10 @@ for (let i = 0; i <= numberOfPlatforms; i++) {
         const cpBoxLamp = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
         cpBoxLamp.position.y = i * curvedPlatformHeight;
         cpBoxLamp.rotation.y = i * rotation;
+        // cpBoxLamp.updateMatrixWorld();
+        // const lampWorldPos = new THREE.Vector3();
+        // cpBoxLamp.lamp.getWorldPosition(lampWorldPos);
+        // console.log(lampWorldPos);
         scene.add(cpBoxLamp);
     } else {
         const curvedPlatform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);

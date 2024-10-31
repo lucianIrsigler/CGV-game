@@ -24,7 +24,7 @@ export class CurvedPlatform extends THREE.Object3D {
 
         const extrudeSettings = { depth: this.depth, bevelEnabled: false };
         const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-
+        //GET TEXTURES FROM "PavingStones"
         const textureLoader = new THREE.TextureLoader();
         const colorMap = textureLoader.load('PavingStones/Color.jpg');
         const aoMap = textureLoader.load('PavingStones/AmbientOcclusion.jpg');

@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { loadTextures, applyTextureSettings } from '../../src/scripts/util/TextureLoaderUtil';
 
-
 export class Box extends THREE.Object3D {
     constructor(x, y, z) {
         super();
@@ -14,9 +13,9 @@ export class Box extends THREE.Object3D {
 
     createMesh() {
         const geometry = new THREE.BoxGeometry(this.x, this.y, this.z);
-
+        //GET TEXTURES FROM "Planks"
         const textureLoader = new THREE.TextureLoader();
-        const colorMap = textureLoader.load('Planks/PlanksColor.jpg');
+        const colorMap = textureLoader.load('/Planks/PlanksColor.jpg');
         const aoMap = textureLoader.load('Planks/PlanksAmbientOcclusion.jpg');
         const displacementMap = textureLoader.load('Planks/PlanksDisplacement.jpg');
         const metalnessMap = textureLoader.load('Planks/PlanksMetalness.jpg');
