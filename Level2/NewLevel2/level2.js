@@ -22,9 +22,11 @@ controls.screenSpacePanning = false;
 
 //LIGHTING--------------------------------------------------------------
 const ambientLight = new THREE.AmbientLight(0x0f0f0f);
+ambientLight.intensity = 10;
+scene.add(ambientLight);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(0, 10, 10).normalize();
-scene.add(ambientLight, directionalLight);
+// scene.add(directionalLight);
 //----------------------------------------------------------------------
 
 //ADDING OBJECTS TO SCENE-------------------------------------------

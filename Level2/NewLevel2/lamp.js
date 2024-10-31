@@ -35,7 +35,7 @@ export class Lamp extends THREE.Object3D {
             
             //LIGHTING
             const lampPos = new THREE.Vector3(baseLamp.positionX, baseLamp.positionY, baseLamp.positionZ);
-            const coneLight = new THREE.SpotLight(0xA96CC3, 20, 10, Math.PI / 4, 0.5, 2);
+            const coneLight = new THREE.SpotLight(0xA96CC3, 40, 10, Math.PI / 4, 0.5, 2);
             coneLight.position.copy(lampPos).add(new THREE.Vector3(0, 5, 0));
             lampGroup.add(coneLight);
             lampGroup.add(coneLight.target);

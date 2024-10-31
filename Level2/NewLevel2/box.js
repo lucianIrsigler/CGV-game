@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { loadTextures, applyTextureSettings } from '../../src/scripts/util/TextureLoaderUtil';
 
-
 export class Box extends THREE.Object3D {
     constructor(x, y, z) {
         super();
