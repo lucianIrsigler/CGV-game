@@ -41,7 +41,9 @@ const roomRadius = 30;
 const floorDepth = 1;
 const ceilingDepth = 1;
 const roomHeight = floorDepth + numberOfPlatforms * curvedPlatformHeight + ceilingDepth + 2 * curvedPlatformHeight;
+//CURVED PLATFORMS
 for (let i = 0; i <= numberOfPlatforms; i++) {
+    //Add box and lamp platform where every 4th platform would be
     if (i % 4 === 0) {
         const cpBoxLamp = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
         cpBoxLamp.position.y = i * curvedPlatformHeight;
@@ -54,14 +56,18 @@ for (let i = 0; i <= numberOfPlatforms; i++) {
         scene.add(curvedPlatform);
     }
 }
+//MOSTERS PLATFORM
 const circularPlatform = new CircularPlatform(circlePlatformInnerRadius, circlePlatformOuterRadius, circlePlatformDepth);
 scene.add(circularPlatform);
+//ROOM FLOOR
 const floor = new CircularPlatform(0, roomRadius, floorDepth);
 floor.position.y = -1;
 scene.add(floor);
+//ROOM CEILING
 const ceiling = new CircularPlatform(0, roomRadius, ceilingDepth);
 ceiling.position.y = roomHeight;
 scene.add(ceiling);
+//ROOM WALL
 const wall = new CircularPlatform(curvedPlatformOuterRadius + curvedPlatformOuterRadius-curvedPlatformInnerRadius, roomRadius, roomHeight);
 wall.position.y = roomHeight - 1;
 scene.add(wall);
