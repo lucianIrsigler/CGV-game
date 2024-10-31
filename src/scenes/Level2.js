@@ -90,13 +90,13 @@ export class Level2 extends SceneBaseClass {
         this.init_lighting_();
         this.init_camera_();
         this.init_objects_();
-        this.miniMap.init_miniMap_(window,document,this.scene);
+        // this.miniMap.init_miniMap_(window,document,this.scene);
 
-        const currentDoor = door.doorOne;
-        this.door.init_door_(this.scene,currentDoor);
+        // const currentDoor = door.doorOne;
+        // this.door.init_door_(this.scene,currentDoor);
 
-        this.startDamageTimer();
-        window.addEventListener('load', this.initAudio);
+        // this.startDamageTimer();
+        // window.addEventListener('load', this.initAudio);
        
     }   
 
@@ -171,7 +171,7 @@ export class Level2 extends SceneBaseClass {
         //create cannon.js body for model
         this.playerBody = new Body({
             mass: 1, // Dynamic body
-            position: new Vec3(0, 2, 0), // Start position
+            position: new Vec3(0, 15, 0), // Start position
         });
         const boxShape = new Box(new Vec3(0.5, 1, 0.5)); // Box shape for the player
         this.playerBody.addShape(boxShape);
@@ -212,33 +212,34 @@ export class Level2 extends SceneBaseClass {
         await this._initGeometries();
         await this._initMaterials();
         // Platform and lamp parameters
-    const circlePlatformInnerRadius = 0;
-    const circlePlatformOuterRadius = 18;
-    const circlePlatformDepth = 1;
-    const curvedPlatformInnerRadius = 18;
-    const curvedPlatformOuterRadius = 25;
-    const curvedPlatformDepth = 1;
-    const curvedPlatformHeight = 3;
-    const numberOfPlatforms = 16;
-    const rotation = Math.PI / 4;
+        const circlePlatformInnerRadius = 0;
+        const circlePlatformOuterRadius = 18;
+        const circlePlatformDepth = 1;
+        const curvedPlatformInnerRadius = 18;
+        const curvedPlatformOuterRadius = 25;
+        const curvedPlatformDepth = 1;
+        const curvedPlatformHeight = 3;
+        const numberOfPlatforms = 16;
+        const rotation = Math.PI / 4;
 
-    // Adding curved platforms and box lamps
-    for (let i = 0; i <= numberOfPlatforms; i++) {
-        if (i % 4 === 0) {
-            // Add CPBoxLamp every 4th platform
-            const cpBoxLamp = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
-            cpBoxLamp.position.y = i * curvedPlatformHeight;
-            cpBoxLamp.rotation.y = i * rotation;
-            this.scene.add(cpBoxLamp);  // Add to the scene
-        } else {
-            // Add a standard curved platform
-            const curvedPlatform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
-            curvedPlatform.position.y = i * curvedPlatformHeight;
-            curvedPlatform.rotation.y = i * rotation;
-            this.scene.add(curvedPlatform);  // Add to the scene
+        // Adding curved platforms and box lamps
+        for (let i = 0; i <= numberOfPlatforms; i++) {
+            if (i % 4 === 0) {
+                // Add CPBoxLamp every 4th platform
+                const cpBoxLamp = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+                cpBoxLamp.position.y = i * curvedPlatformHeight;
+                cpBoxLamp.rotation.y = i * rotation;
+                this.scene.add(cpBoxLamp);  // Add to the scene
+            } else {
+                // Add a standard curved platform
+                const curvedPlatform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+                curvedPlatform.position.y = i * curvedPlatformHeight;
+                curvedPlatform.rotation.y = i * rotation;
+                console.log(curvedPlatform);
+
+                this.scene.add(curvedPlatform);  // Add to the scene
+            }
         }
-    }
-        
 
     }
 
@@ -246,13 +247,17 @@ export class Level2 extends SceneBaseClass {
      * Inits the objects in the scene
      */
     async init_objects_() {
-        const player = this._init_player()
-        let res = this.loadLamps();
-        let out = this.createObjects()
+        let res = await this.loadLamps();
+        let out = await this.createObjects();
 
-        //add stuff for minimap
-        this.miniMap.addPlayer("#FF0000");
-        this.miniMap.addEndGoal({x:-3,y:20,z:39},"#00FF00")
+        await Promise.all([res, out]);
+
+        const player = await this._init_player()
+
+
+        // //add stuff for minimap
+        // this.miniMap.addPlayer("#FF0000");
+        // this.miniMap.addEndGoal({x:-3,y:20,z:39},"#00FF00")
 
     }
 
@@ -269,7 +274,7 @@ export class Level2 extends SceneBaseClass {
      */
     init_lighting_() {
 
-        let temp = new THREE.AmbientLight(0x101010, 0.75);
+        let temp = new THREE.AmbientLight(0xFFFFFF, 100); //0.75 //0x101010
         this.lightManager.addLight("ambient", temp, null);
 
         lightsConfigLevel1.forEach(config => {
@@ -312,7 +317,7 @@ export class Level2 extends SceneBaseClass {
     animate=(currentTime)=> {
         this.animationId = requestAnimationFrame(this.animate);
 
-        if (this.cameraManager==undefined||!this.loader.isLoaded() || !this.playerLoaded){
+        if (this.cameraManager==undefined||!this.loader.isLoaded()){
             return;
         }
 
@@ -322,27 +327,27 @@ export class Level2 extends SceneBaseClass {
         const timeElapsedS = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
 
-        if (currentTime >= this.nextSoundTime) {
-            soundEffectsManager.playSound("growl",0.5)
-            this.nextSoundTime = currentTime + getRandomInterval(7000, 20000); // Set the next sound time (1-5 seconds)
-        }
+        // if (currentTime >= this.nextSoundTime) {
+        //     soundEffectsManager.playSound("growl",0.5)
+        //     this.nextSoundTime = currentTime + getRandomInterval(7000, 20000); // Set the next sound time (1-5 seconds)
+        // }
 
 
 
-        // // Update the door animation mixer if it exists
-        if (this.doorMixer) {
-            this.doorMixer.update(0.01); // Update the animation mixer
-        }
+        // // // Update the door animation mixer if it exists
+        // if (this.doorMixer) {
+        //     this.doorMixer.update(0.01); // Update the animation mixer
+        // }
     
-        // Check proximity to the door
-        this.door.checkDoorProximity(this.target);
+        // // Check proximity to the door
+        // this.door.checkDoorProximity(this.target);
     
-        //Handle the 'E' key press to open the door
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'e') {
-                this.door.checkIfOpen()
-            }
-        });
+        // //Handle the 'E' key press to open the door
+        // document.addEventListener('keydown', (e) => {
+        //     if (e.key === 'e') {
+        //         this.door.checkIfOpen()
+        //     }
+        // });
         
         this.cameraManager.update(timeElapsedS)
 
@@ -350,7 +355,7 @@ export class Level2 extends SceneBaseClass {
         this.renderer.render(this.scene, this.cameraManager.getCamera());
 
         //update minimap
-        this.miniMap.update(this.scene,this.target)
+        // this.miniMap.update(this.scene,this.target)
 
     }
 
