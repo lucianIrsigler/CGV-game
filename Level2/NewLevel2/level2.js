@@ -3,7 +3,6 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { CurvedPlatform } from './curvedPlatform.js';
 import { CPBoxLamp } from './CPBoxLamp.js';
 import { CircularPlatform } from './circularPlatform.js';
-
 //SCENE AND RENDERER---------------------------------------------------
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer();
@@ -26,7 +25,7 @@ ambientLight.intensity = 10;
 scene.add(ambientLight);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(0, 10, 10).normalize();
-// scene.add(directionalLight);
+scene.add(directionalLight);
 //----------------------------------------------------------------------
 
 //ADDING OBJECTS TO SCENE-------------------------------------------
@@ -39,7 +38,8 @@ const curvedPlatformDepth = 1;
 const curvedPlatformHeight = 3;
 const numberOfPlatforms = 16;
 const rotation = Math.PI / 4;
-const roomRadius = 30;
+// const roomRadius = 30;
+const roomRadius = curvedPlatformOuterRadius;
 const floorDepth = 1;
 const ceilingDepth = 1;
 const roomHeight = floorDepth + numberOfPlatforms * curvedPlatformHeight + ceilingDepth + 2 * curvedPlatformHeight;

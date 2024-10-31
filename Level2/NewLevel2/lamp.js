@@ -16,7 +16,7 @@ export class Lamp extends THREE.Object3D {
         const lampGroup = new THREE.Group();
 
         const baseLamp = {
-            scene: "street_lamp/scene.gltf",
+            scene: "/street_lamp/scene.gltf",
             scaleX: 0.1,
             scaleY: 0.1,
             scaleZ: 0.1,
