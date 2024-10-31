@@ -53,4 +53,5 @@ export class Box extends THREE.Object3D {
         otherBox.updateBoundingBox();
         return this.boundingBox.intersectsBox(otherBox.boundingBox);
     }
+    
 }
