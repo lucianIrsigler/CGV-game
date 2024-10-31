@@ -24,6 +24,8 @@ export class Bullet {
         });
         this.body.velocity.set(0, 0, -10); // Set initial velocity (adjust speed as needed)
 
+        this.id = this.body.id;
+
         // Add the bullet's physics body to the Cannon.js world
         world.addBody(this.body);
 

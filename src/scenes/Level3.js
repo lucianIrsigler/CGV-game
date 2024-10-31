@@ -110,7 +110,7 @@ export class Level3 extends SceneBaseClass{
           document.addEventListener('mousedown', (event) => {
             //TODO add setting thing back
             if (event.button === 0) { // Only shoot if menu is not open
-                this.gunManager.addBullet(this.cameraManager.getCamera(),0xffffff);
+                this.gunManager.addBulletPlayer(this.cameraManager.getCamera(),0xffffff,this.world);
                 // handlePlayerHit(5); // Handle player hit logic
             }
         });
@@ -149,7 +149,7 @@ export class Level3 extends SceneBaseClass{
         this.lightManager.addLight("playerLight",playerLight,{x:0,y:1.5,z:0})
 
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.01); // Soft white light, 0.01 is the intensity
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1); // Soft white light, 0.01 is the intensity
         this.lightManager.addLight("ambient",ambientLight);
 
 
@@ -192,6 +192,7 @@ export class Level3 extends SceneBaseClass{
         });
         const boxShape = new Box(new Vec3(0.5, 1, 0.5)); // Box shape for the player
         this.playerBody.addShape(boxShape);
+
         this.world.addBody(this.playerBody);
 
 
@@ -201,6 +202,13 @@ export class Level3 extends SceneBaseClass{
             this.playerBody,
             this.scene
         );
+
+        // this.playerBody.addEventListener('collide', (event) => {
+        //     console.log(event);
+        //     const { bodyA, bodyB } = event; 
+        //     console.log(bodyA,bodyB)
+        //     // this.handleCollision(event);
+        // });
 
     }
 
@@ -221,18 +229,40 @@ export class Level3 extends SceneBaseClass{
         this.enemyBody = new Body({
             mass: 1, // Dynamic body
             position: new Vec3(currentMonster.positionX, currentMonster.positionY, currentMonster.positionZ-2), // Start position
+            shape: new Box(new Vec3(2, 2, 2)) // Box shape for the player
         });
-        const boxShape = new Box(new Vec3(2, 2, 2)); // Box shape for the player
+
+        const boxShape = new Box(new Vec3(0.5, 1, 0.5)); // Box shape for the player
         this.enemyBody.addShape(boxShape);
+
         this.world.addBody(this.enemyBody);
+
+
+
+        const wireframeGeometry = new THREE.BoxGeometry(2, 2, 2);
+        const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+        const wireframe = new THREE.Mesh(wireframeGeometry, wireframeMaterial);
+
+        // Position the wireframe box at the center of the bounding box
+        wireframe.position.copy(this.enemyBody.position);
+
+        this.addObject(wireframe);
 
         this.enemy = new Enemy(currentMonster.health,{x:currentMonster.positionX,y:currentMonster.positionY,z:currentMonster.positionZ},this.enemyModel,this.enemyBody,this.enemyLight);
 
-
         
-        this.gunManager = new GunManager(this.scene,100,this.enemy,this.playerBody,this.world);
+        this.gunManager = new GunManager(this.scene,100,this.enemy,this.playerBody);
 
+        this.enemyBody.addEventListener('collide', (event) => {
+            let obj = this.world.getBodyById(event.body.id);
+            if (this.gunManager.isPlayerBullet(obj)){
+                this.gunManager.enemy.handleEnemyHit();
+                this.gunManager.removeBulletPlayer(obj)
+            }
+        });
     }
+
+
 
 
 
@@ -414,7 +444,7 @@ export class Level3 extends SceneBaseClass{
     animate=(currentTime)=> {
         this.animationId = requestAnimationFrame(this.animate);
 
-        if (this.cameraManager==undefined||!this.loader.isLoaded()){
+        if (this.cameraManager==undefined||!this.loader.isLoaded() || this.gunManager==undefined){
             return;
         }
 

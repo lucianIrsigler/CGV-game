@@ -1,9 +1,10 @@
 import * as THREE from 'three';
-
+import * as CANNON from "cannon-es";
 import { SoundEffectsManager } from "./SoundEffectManger";
 import { Bullet } from "../Objects/bullet";
 import { Enemy } from "../Objects/Enemy";
 import { cos } from 'three/webgpu';
+import { compressSync } from 'three/examples/jsm/libs/fflate.module.js';
 
 const soundEffectsManager = new SoundEffectsManager();
 
@@ -12,21 +13,26 @@ export class GunManager{
     /**
      * 
      * @param {*} scene 
-     * @param {int} playerHealth 
+     * @param {*} playerHealth 
      * @param {Enemy} enemy 
+     * @param {CANNON.Body} player 
+     * @param {CANNON.World} world 
      */
-    constructor(scene,playerHealth,enemy,player,world){
+    constructor(scene, playerHealth, enemy, player) {
         this.scene = scene;
-        this.playerHealth =playerHealth;
-        this.player = player
+        this.playerHealth = playerHealth;
+        this.player = player;
         this.enemy = enemy;
-        this.world = world;
-
-
+    
         this.bullets = [];
         this.enemyBullets = [];
     }
 
+
+    isPlayerBullet(checkBullet){
+        const isBulletPlayerBullet = this.bullets.some(bullet => bullet.id === checkBullet.id);
+        return isBulletPlayerBullet;
+    }
 
     updateAllBullets(){
         this.bullets.forEach((bullet)=>{
@@ -38,30 +44,75 @@ export class GunManager{
         })
     }
 
+    removeBulletPlayer(obj){
+        let id = obj.id;
+        const index = this.bullets.findIndex(bullet=>bullet.id==id);
+        // console.log("removing bullet:",index);
 
-    addBullet(camera,colour){
+        this.scene.remove(this.bullets[index].mesh); // Remove bullet from the scene
+        this.scene.remove(this.bullets[index].light); // Remove bullet light from the scene
+        this.bullets.splice(index, 1); // Remove bullet from array
+    }
+
+
+    /**
+     * 
+     * @param {THREE.Camera} camera 
+     * @param {*} colour 
+     */
+    addBulletPlayer(camera, colour,world) {
+        const position = camera.position.clone();
+        // console.log(position);
+    
+        // Offset the position slightly in front of the camera to avoid collision with the player
+        const bulletOffset = new THREE.Vector3(0, 0, -1.5); // Adjust the distance as needed
+        bulletOffset.applyQuaternion(camera.quaternion); // Apply the camera's rotation
+        position.add(bulletOffset); // Move the bullet position in front of the camera
+    
+        soundEffectsManager.playSound("light_bullet_sound", 0.5);
+    
+        const bullet = new Bullet(position, colour, world, this.scene); // Create bullet at the adjusted position
+    
+        // Use camera's direction for bullet velocity
+        const direction = new THREE.Vector3(0, 0, -1); // Forward direction
+        direction.applyQuaternion(camera.quaternion); // Apply the camera's rotation to get the forward direction
+        direction.normalize(); // Normalize to ensure it's a unit vector
+    
+        const bulletSpeed = 30; // Set your desired bullet speed here
+        direction.multiplyScalar(bulletSpeed); // Scale the direction by bullet speed
+    
+        bullet.velocity.copy(direction); // Set bullet velocity to the scaled direction
+        bullet.body.velocity.copy(direction); // Also copy to the bullet body
+    
+        this.bullets.push(bullet); // Add bullet to the array
+        this.scene.add(bullet.mesh);
+        this.scene.add(bullet.light);
+
+        console.log("BULLET ADDED:",bullet.id);
+    }
+    
+    
+
+
+    /**
+     * 
+     * @param {THREE.Camera} camera 
+     * @param {*} colour 
+     */
+    addBulletEnemy(camera,colour,world){
         const position = camera.position.clone();
         console.log(position);
         // position.x -= 1.3;
         soundEffectsManager.playSound("light_bullet_sound",0.5)
 
-        const bullet = new Bullet(position, colour,this.world,this.scene); // Create bullet at the cube's position
+        const bullet = new Bullet(position, colour,world,this.scene); // Create bullet at the cube's position
         
-        // Calculate the bullet direction based on the camera's forward direction
-        const direction = new CANNON.Vec3(); // Create a new vector for direction
-        camera.getWorldDirection(direction); // Get the direction the camera is facing
-
-        console.log(direction);
-        
-        direction.normalize(); // Normalize the direction vector
-
+        const direction = this.player.position.clone().sub(this.enemy.enemyBody.position).normalize();
+        bullet.velocity.copy(direction); // Set bullet velocity to point at the player
         bullet.body.velocity.copy(direction);
-        // bullet.velocity.copy(direction); // Set bullet velocity to point in the camera's direction
-        this.bullets.push(bullet); // Add bullet to the array
-
+        this.enemyBullets.push(bullet); // Add bullet to the array
         this.scene.add(bullet.mesh);
         this.scene.add(bullet.light);
-
     }
 
 
@@ -69,16 +120,6 @@ export class GunManager{
         let i =0;
         this.bullets.forEach((bullet)=>{
             const isActive = bullet.update(this.scene);
-
-            if (this.detectCollision(bullet.body,target)){
-                this.enemy.handleEnemyHit();
-                this.scene.remove(bullet.mesh)
-                this.scene.remove(bullet.light)
-                this.bullets.splice(i, 1)
-            }else if (!isActive) {
-                this.bullets.splice(i, 1); 
-            }
-            i+=1;
         })
     }
 
@@ -120,7 +161,7 @@ export class GunManager{
 
     checkAndShoot(player,camera){
          if(!this.enemy.isAsleep() && this.enemy.getHealth()>0){
-            this.enemy.updateEnemyMovement();
+            // this.enemy.updateEnemyMovement();
             // this.enemyShoot(player,camera);
 
         //     //TODO UNCOMMENT
@@ -141,12 +182,15 @@ export class GunManager{
 
 
     detectCollision(bullet,object){
-        const r1 =bullet.shapes[0].boundingSphereRadius
-        const r2 =object.shapes[0].boundingSphereRadius
+        return false;
+        // const r1 =bullet.shapes[0].boundingSphereRadius
+        // const r2 =object.shapes[0].boundingSphereRadius
 
-        const distance = bullet.position.distanceTo(object.position);
+        // const distance = bullet.position.distanceTo(object.position);
 
-        return distance <= (r1 + r2);
+        // // console.log(distance <= (r1 + r2))
+
+        // return distance <= (r1 + r2);
     }
 
 

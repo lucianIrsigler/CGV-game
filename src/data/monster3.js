@@ -31,9 +31,9 @@ export const monsters3 = {
     },
     "anya":{
         scene:"src/models/anya/scene.gltf",
-        scaleX:2,
-        scaleY:2,
-        scaleZ:2,
+        scaleX:5,
+        scaleY:5,
+        scaleZ:5,
         positionX:10,
         positionY:1,
         positionZ:5,
