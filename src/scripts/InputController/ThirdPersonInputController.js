@@ -31,7 +31,7 @@ export class ThirdPersonInputController {
         this.target_ = target
         this.playerBody = playerBody;
 
-        this.speed_ = 0.14 ;
+        this.speed_ = 0.5 ;
         this.phi_ = 0;
         this.theta_ = 0;
         this.rotation = new THREE.Vector3(0,0,0);

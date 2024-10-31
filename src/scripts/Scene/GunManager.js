@@ -3,10 +3,8 @@ import * as CANNON from "cannon-es";
 import { SoundEffectsManager } from "./SoundEffectManger";
 import { Bullet } from "../Objects/bullet";
 import { Enemy } from "../Objects/Enemy";
-import { cos } from 'three/webgpu';
 // import * as CANNON from 'cannon-es'; // Import Cannon.js for physics
 
-import { compressSync } from 'three/examples/jsm/libs/fflate.module.js';
 
 const soundEffectsManager = new SoundEffectsManager();
 
@@ -34,6 +32,11 @@ export class GunManager{
     isPlayerBullet(checkBullet){
         const isBulletPlayerBullet = this.bullets.some(bullet => bullet.id === checkBullet.id);
         return isBulletPlayerBullet;
+    }
+
+    isEnemyBullet(checkBullet){
+        const isBulletEnemyBullet = this.enemyBullets.some(bullet => bullet.id === checkBullet.id);
+        return isBulletEnemyBullet;
     }
 
     updateAllBullets(){
@@ -89,8 +92,6 @@ export class GunManager{
         this.bullets.push(bullet); // Add bullet to the array
         this.scene.add(bullet.mesh);
         this.scene.add(bullet.light);
-
-        console.log("BULLET ADDED:",bullet.id);
     }
     
     
@@ -101,17 +102,16 @@ export class GunManager{
      * @param {THREE.Camera} camera 
      * @param {*} colour 
      */
-    addBulletEnemy(camera,colour,world){
-        const position = camera.position.clone();
-        console.log(position);
-        // position.x -= 1.3;
-        soundEffectsManager.playSound("light_bullet_sound",0.5)
+    addBulletEnemy(current,target,colour,world){
+        const position = current.position.clone();
 
-        const bullet = new Bullet(position, colour,world,this.scene); // Create bullet at the cube's position
+        soundEffectsManager.playSound("dark_bullet_sound",0.5)
+
+        const bullet = new Bullet(position, colour,world); // Create bullet at the cube's position
         
         // Calculate the bullet direction based on the camera's forward direction
         const direction = new THREE.Vector3(); // Create a new vector for direction
-        camera.getWorldDirection(direction); // Get the direction the camera is facing
+        target.getWorldDirection(direction); // Get the direction the camera is facing
 
         console.log(direction);
         
@@ -119,7 +119,7 @@ export class GunManager{
 
         // bullet.body.velocity.copy(direction);
         bullet.velocity.copy(direction); // Set bullet velocity to point in the camera's direction
-        this.bullets.push(bullet); // Add bullet to the array
+        this.enemyBullets.push(bullet); // Add bullet to the array
 
         this.scene.add(bullet.mesh);
         this.scene.add(bullet.light);
@@ -156,13 +156,10 @@ export class GunManager{
     }
     
 
-    enemyShoot(target,camera){
+    enemyShoot(enemy,target,world){
         if (!this.enemy.enemyShootCooldown){
-            const position = target.position.clone();
             soundEffectsManager.playSound("dark_bullet_sound",0.3);
-
-            this.addBullet(camera,0xff0000);
-
+            this.addBulletEnemy(enemy,target,0xff0000,world);
 
             let randomTime = Math.random() * 1000 + 500; // Random time between 0.5 to 1.5 seconds
             this.enemy.enemyShootCooldown = true; // Set cooldown flag
@@ -173,16 +170,15 @@ export class GunManager{
         }
     }
 
-    checkAndShoot(player,camera){
+    checkAndShoot(player,target,world){
          if(!this.enemy.isAsleep() && this.enemy.getHealth()>0){
-            // this.enemy.updateEnemyMovement();
-            // this.enemyShoot(player,camera);
+            this.enemy.updateEnemyMovement();
+            this.enemyShoot(player,target,world);
 
         //     //TODO UNCOMMENT
         //     // document.getElementById('health-bar-container').style.display = 'block';
 
         //     //TODO rotate or smth
-        //     // this.model.lookAt(player.position);
 
         }
     }

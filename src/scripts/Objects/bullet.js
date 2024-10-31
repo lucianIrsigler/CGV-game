@@ -3,31 +3,34 @@ import * as CANNON from 'cannon-es'; // Import Cannon.js for physics
 
 // Bullet class
 export class Bullet {
-    constructor(position, color) {
-        // Create a sound effect for bullet shot (if needed)
-        // const bulletSound = new Audio('bullet_sound.mp3'); // Load gunshot sound
-        // bulletSound.volume = 0.5; // Adjust the volume
-        // bulletSound.play(); // Play gunshot sound when bullet is created
+    constructor(position, color, world) {
 
         // Bullet geometry and material
         this.geometry = new THREE.SphereGeometry(0.05, 10, 10); // Small sphere as bullet
         this.material = new THREE.MeshBasicMaterial({ color: color }); // Use the provided color
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.position.copy(position); // Set initial position
+        this.world = world;
         
 
         // Cannon.js body for physics
         this.body = new CANNON.Body({
-            mass: 1, // Set mass for the bullet
+            mass: 0.1, // Set mass for the bullet
             position: new CANNON.Vec3(position.x, position.y, position.z), // Set initial position
             shape: new CANNON.Sphere(0.05) // Create a sphere shape
         });
         this.body.velocity.set(0, 0, -10); // Set initial velocity (adjust speed as needed)
+        this.body.collisionFilterGroup=1;
 
         this.id = this.body.id;
+        this.world.addBody(this.body);
 
-        // Add the bullet's physics body to the Cannon.js world
-        world.addBody(this.body);
+
+
+
+
+
+
 
         // Create ambient light for the bullet
         this.light = new THREE.PointLight(color, 0, 10); // Use the provided color
@@ -36,15 +39,23 @@ export class Bullet {
         this.intensityGrowthRate = 0.1; // Control how quickly the light intensity grows
         this.maxDistance = 50; // Set maximum travel distance for the bullet
         this.initialPosition = position.clone(); // Store the bullet's initial position
+        this.distanceTraveled = 0; // Track distance traveled
 
+        this.velocity = new CANNON.Vec3(0, 0, -1); // Direction of bullet movement
 
     }
 
+    updateForce(){
+        // const force = new CANNON.Vec3(0, 10, 10); // Apply force in the x direction
+
+        // Apply the force
+        this.body.applyForce(this.velocity, this.body.position);
+    }
     
     update(scene) {
-        // Move the bullet
-        this.mesh.position.add(this.velocity.clone().multiplyScalar(0.9)); // Speed of the bullet
-        this.light.position.copy(this.mesh.position); // Keep light following the bullet
+        // Update the bullet's mesh position based on the physics body
+        this.mesh.position.copy(this.body.position);
+        this.mesh.quaternion.copy(this.body.quaternion); // Update rotation if needed
 
 
         // console.log(this.body.position,this.mesh.position)
