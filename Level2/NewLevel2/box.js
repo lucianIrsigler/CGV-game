@@ -9,6 +9,7 @@ export class Box extends THREE.Object3D {
         this.z = z;
         this.mesh = this.createMesh();
         this.add(this.mesh);
+        this.boundingBox = new THREE.Box3().setFromObject(this.mesh);
     }
 
     createMesh() {
@@ -41,5 +42,15 @@ export class Box extends THREE.Object3D {
         });
 
         return new THREE.Mesh(geometry, material);
+    }
+
+    updateBoundingBox() {
+        this.boundingBox.setFromObject(this.mesh);
+    }
+
+    checkCollision(otherBox) {
+        this.updateBoundingBox();
+        otherBox.updateBoundingBox();
+        return this.boundingBox.intersectsBox(otherBox.boundingBox);
     }
 }

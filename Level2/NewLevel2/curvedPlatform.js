@@ -12,6 +12,7 @@ export class CurvedPlatform extends THREE.Object3D {
         this.depth = depth;
         this.mesh = this.createMesh();
         this.add(this.mesh);
+        this.boundingBox = new THREE.Box3().setFromObject(this.mesh);
     }
 
     createMesh() {
@@ -54,5 +55,10 @@ export class CurvedPlatform extends THREE.Object3D {
         mesh.rotateX(Math.PI / 2);
         mesh.rotateZ(angle/2);
         return mesh;
+    }
+
+    checkCollision(object) {
+        const objectBoundingBox = new THREE.Box3().setFromObject(object);
+        return this.boundingBox.intersectsBox(objectBoundingBox);
     }
 }

@@ -1,23 +1,32 @@
-
 import { calcEuclid } from "../util/calcEuclid";
 
-export class LightMechanicManager{
-    constructor(characterLight,health=100,damageRate=20,healingRate=10){
+export class LightMechanicManager {
+    constructor(characterLight, health = 100, damageRate = 20, healingRate = 10) {
         this.characterLight = characterLight;
         this.health = health;
+        this.maxHealth = 100;
         this.damageRate = damageRate;
         this.healingRate = healingRate;
 
-        this.healthNumberElement =document.getElementById('health-number');
-
         this.lightTimers = {}; // Track time spent near lights
+        this.initialHealth = health; // Used for resetting
 
-        this.initialHealth = health; //used for reseting
- 
-
+        // Initialize the health bar display
+        this.updateHealthBar();
     }
 
+    /**
+     * Update the health bar based on current health and maximum health
+     */
+    updateHealthBar() {
+        const healthPercentage = (this.health / this.maxHealth) * 100; // Calculate percentage
+        const healthBar = document.getElementById('user-health-bar');
+        healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
+    }
 
+    /**
+     * Update the character's light intensity and distance based on current health
+     */
     updateCharacterLight() {
         if (this.characterLight) {
             // Calculate light intensity and distance based on health
@@ -34,7 +43,7 @@ export class LightMechanicManager{
     takeDamage(amount) {
         this.health -= amount;
         this.health = Math.max(0, this.health); // Ensure health doesn't go below 0
-        this.healthNumberElement.textContent = this.health;
+        this.updateHealthBar(); // Update the health bar when health changes
         this.updateCharacterLight(); // Update light when health changes
 
         if (this.health <= 0) {
@@ -44,17 +53,17 @@ export class LightMechanicManager{
 
     heal(amount) {
         this.health += amount;
-        this.health = Math.min(100, this.health); // Cap health at 100
-        this.healthNumberElement.textContent = this.health;
+        this.health = Math.min(this.maxHealth, this.health); // Cap health at maxHealth
+        this.updateHealthBar(); // Update the health bar when health changes
         this.updateCharacterLight(); // Update light when health changes
     }
-    
+
     /**
-     * Handles the functionality of flicking lights
+     * Handles the functionality of flickering lights
      * @param {THREE.Light} light 
      * @param {int} index 
      */
-    flickerLight(light, index,target) {
+    flickerLight(light, index, target) {
         let flickerDuration = 2; // Flicker for 2 seconds
         let flickerInterval = 100; // Flicker every 200ms
         let flickerCount = flickerDuration * 1000 / flickerInterval; // Total flickers
@@ -86,7 +95,7 @@ export class LightMechanicManager{
      * @param {*} points 
      * @param {*} target 
      */
-    damageTimer(points,target) {
+    damageTimer(points, target) {
         let valid = false;
 
         points.forEach((light, index) => {
@@ -109,7 +118,7 @@ export class LightMechanicManager{
                 // Check if time exceeds 3 seconds
                 if (this.lightTimers[index].time >= 3 && !this.lightTimers[index].flickering) {
                     this.lightTimers[index].flickering = true;
-                    this.flickerLight(light, index,target); // Pass index for reset after flickering
+                    this.flickerLight(light, index, target); // Pass index for reset after flickering
                 }
             } else {
                 // Reset the timer if not in light
@@ -128,15 +137,16 @@ export class LightMechanicManager{
     /**
      * Resets health to starting value
      */
-    resetHealth(){
+    resetHealth() {
         this.health = this.initialHealth;
+        this.updateHealthBar(); // Reset the health bar
     }
 
     /**
      * 
      * @returns health value
      */
-    getHealth(){
+    getHealth() {
         return this.health;
     }
 }
