@@ -27,14 +27,5 @@ export class ButtonPlatform extends CPBoxLamp {
         return group;
     }
 
-    isClicked(raycaster, mouse) {
-        const intersects = raycaster.intersectObject(this, true);
-        for (let i = 0; i < intersects.length; i++) {
-            if (intersects[i].object === this.children[1].children[0]) {
-                return true;
-            }
-        }
-        return false;
-    }
+    
 }
-
