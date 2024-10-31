@@ -1,11 +1,27 @@
+import * as THREE from 'three';
+
+import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass";
 import { ObjectManager } from "../scripts/Scene/ObjectManager";
 import { LightManager } from "../scripts/Scene/LightManager";
 import { LoadingManagerCustom } from "../scripts/Loaders/Loader";
 import { LightMechanicManager } from "../scripts/Scene/LightMechanicManager";
+import { CameraManager } from "../scripts/Scene/CameraManager";
+import { GunManager } from '../scripts/Scene/GunManager';
+
 import { getRandomMonster } from "../scripts/util/getRandomMonster";
+import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil';
+import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger';
+import { World, Body, Box,Vec3 } from 'cannon-es';
+import { Enemy } from '../scripts/Objects/Enemy';
+import { Bullet } from '../scripts/Objects/bullet';
+import {Crosshair} from "../scripts/Objects/Crosshair";
 import { monsters3 } from "../data/monster3";
 import { lamps3 } from "../data/lampPos3";
-import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil';
+
+
+const soundEffectsManager = new SoundEffectsManager();
+
+soundEffectsManager.toggleLoop("ambienceLevel3",true);
 
 
 export class Level3 extends SceneBaseClass{
@@ -17,9 +33,13 @@ export class Level3 extends SceneBaseClass{
         this.playerBody; //cannon.js model
         this.target; //player model
 
+        this.enemyBody;
+        this.enemyModel;
+
 
         this.gameOverScreen = document.getElementById("gameOverScreen");
         this.restartButton = document.getElementById("restartButton");
+
 
 
         //MANAGERS
@@ -30,13 +50,23 @@ export class Level3 extends SceneBaseClass{
         this.lightMechanicManager = new LightMechanicManager(this.characterLight,100,20,10);
 
         //flags
-        this.isEnemyAsleep = true 
         this.playingAlready = false
 
         //lights
         this.lampsArray = Object.values(lamps3);
         this.playerLight;
         this.enemyLight;
+
+
+        //animation
+        this.lastTime = 0;
+        this.animationId = null;
+
+        this.enemy=null;
+
+        //pew pew stuff
+        this.gunManager;
+        this.crosshair = new Crosshair(5, 'white');
 
     }
 
@@ -54,6 +84,44 @@ export class Level3 extends SceneBaseClass{
 
 
     init_eventHandlers_(){
+        document.addEventListener("keydown", (e) => {
+            switch (e.code) {
+              case "KeyR":
+                if (this.cameraManager==undefined){
+                  return;
+                }
+                if (this.cameraManager.getFirstPerson()){
+                  this.cameraManager.toggleThirdPerson()
+                  this.target.visible=true;
+
+                }else{
+                    this.cameraManager.toggleFirstPerson()
+                    this.target.visible=false;
+
+                }
+                break;
+
+
+            
+            }
+
+          })
+
+          document.addEventListener('mousedown', (event) => {
+            //TODO add setting thing back
+            if (event.button === 0) { // Only shoot if menu is not open
+                this.gunManager.addBullet(this.cameraManager.getCamera(),0xffffff);
+                // handlePlayerHit(5); // Handle player hit logic
+            }
+        });
+
+        // document.addEventListener('click', () => {
+        //     this.lockPointer(); // Attempt to lock pointer on click
+        // });
+
+
+
+
         window.addEventListener("click", () => {
             if (!this.playingAlready){
                 soundEffectsManager.playSound("ambienceLevel3", 0.3);
@@ -68,7 +136,7 @@ export class Level3 extends SceneBaseClass{
             }
         });
 
-        this.restartButton.addEventListener("click", restartGame);
+        this.restartButton.addEventListener("click", this.restartGame);
 
     };
 
@@ -100,6 +168,10 @@ export class Level3 extends SceneBaseClass{
     async init_objects_(){
         await this.init_player();
         await this.init_monster_();
+
+        let res = this.loadLamps();
+        let out = this.createObjects();
+
     };
 
     async init_player(){
@@ -116,7 +188,7 @@ export class Level3 extends SceneBaseClass{
         //create cannon.js body for model
         this.playerBody = new Body({
             mass: 1, // Dynamic body
-            position: new Vec3(0, 2, 0), // Start position
+            position: new Vec3(-1, 2.5, -10), // Start position
         });
         const boxShape = new Box(new Vec3(0.5, 1, 0.5)); // Box shape for the player
         this.playerBody.addShape(boxShape);
@@ -130,36 +202,41 @@ export class Level3 extends SceneBaseClass{
             this.scene
         );
 
-        this.setupCharacterLight();
-        this.playerLoaded = true;
     }
 
     async init_monster_(){
         let currentMonster = getRandomMonster(monsters3);
 
+        const gltf = await this.loader.loadModel(currentMonster.scene,"monster");
+        const model = gltf.scene;
+        this.addObject(model);
 
-        const model = await this.loader.loadModel(currentMonster.scene,"monster");
-
+        
         model.position.set(currentMonster.positionX, currentMonster.positionY, currentMonster.positionZ-2);
         model.scale.set(currentMonster.scaleX, currentMonster.scaleY, currentMonster.scaleZ);
         model.castShadow = true;
 
-        // model.traverse((node) => {
-        //     if (node.isMesh) {
-        //         node.material = new THREE.MeshStandardMaterial({
-        //             color: node.material.color,
-        //             map: node.material.map,
-        //             normalMap: node.material.normalMap,
-        //             roughness: 0.5, // Adjust as needed
-        //             metalness: 0.5  // Adjust as needed
-        //         });
-        //     }
-        // });
+        this.enemyModel = model;
+
+        this.enemyBody = new Body({
+            mass: 1, // Dynamic body
+            position: new Vec3(currentMonster.positionX, currentMonster.positionY, currentMonster.positionZ-2), // Start position
+        });
+        const boxShape = new Box(new Vec3(2, 2, 2)); // Box shape for the player
+        this.enemyBody.addShape(boxShape);
+        this.world.addBody(this.enemyBody);
+
+        this.enemy = new Enemy(currentMonster.health,{x:currentMonster.positionX,y:currentMonster.positionY,z:currentMonster.positionZ},this.enemyModel,this.enemyBody,this.enemyLight);
+
+
         
+        this.gunManager = new GunManager(this.scene,100,this.enemy,this.playerBody,this.world);
+
     }
 
+
+
     async _initGeometries(){
-        this.objManager.addGeometry("player",new THREE.BoxGeometry(0.5, 2, 0.5));
         this.objManager.addGeometry("platform",new THREE.BoxGeometry(100, 1, 100));
         this.objManager.addGeometry("sidewall",new THREE.BoxGeometry(1, 100, 100));
 
@@ -181,7 +258,6 @@ export class Level3 extends SceneBaseClass{
 
     async _initMaterials(){
         const {textureLoader,textureLoaderWall} = await this._init_textures()
-        this.objManager.addMaterial("player",new THREE.MeshStandardMaterial({ color: 0x00a6ff }));
 
         this.objManager.addMaterial("platform",new THREE.MeshStandardMaterial({
             map: textureLoader.colorMap,
@@ -214,10 +290,6 @@ export class Level3 extends SceneBaseClass{
         await this._initMaterials();
 
 
-        const cubeMesh = this.objManager.createVisualObject("playerCube","player","player",{x:0,y:1.5,z:0});
-        const cubeBody = this.objManager.createPhysicsObject("playerCube","player",{x:0,y:1.5,z:0},null,0);
-        this.objManager.linkObject("playerCube",cubeMesh,cubeBody);
-
 
         const platformMesh = this.objManager.createVisualObject("platform","platform","platform",null,null);
         const platformBody = this.objManager.createPhysicsObject("platform","platform",null,null,0);
@@ -237,7 +309,7 @@ export class Level3 extends SceneBaseClass{
                 geometry:"sidewall",
                 material:"sidewall",
                 position: { x: 50, y: 50, z: 0 },
-                rotation: { y: 0 } // No rotation
+                rotation: { x:0,y: 0,z:0 } // No rotation
             },
             {
                 name:"wall3",
@@ -299,137 +371,122 @@ export class Level3 extends SceneBaseClass{
         });
     }
 
-    
-
     restartGame() {
-        this.isEnemyAsleep = true;
-        this.enemyAlive = true;
-        this.gameOverScreen.style.display = "none";
+    }
+
+     youWin() {
+        document.getElementById('header-end').innerText = "You Win!\nYou have slain the beast aka your MOM!!! *GASP*\nShe turned into a monster because you didn't do the dishes!";
+        isEnemyAsleep = true;
+        isGamePaused = true; // Pause the game
+        console.log("You win!"); // Display win message if health reaches zero
+        enemyCurrentHealth = 0; // Prevent negative health
+        gameOverScreen.style.display = "block"; // Show game over screen
+        document.exitPointerLock(); // Exit mouse lock
+        document.getElementById('health-bar-container').style.display = 'none';
+        crosshair.hideCrosshair();
+        // cubeEnemy.visible = false;
+        enemyLight.visible = false;
+        //stop ambient sound
+        ambientSound.pause();
+    }
     
-        // Reset character and enemy positions
-        // cube.position.set(0, 1.5, 0); // Reset player position
-        // switch(currentMonster){
-        //     case monster.tall_monster:
-        //         cubeEnemy.position.set(10, 2, 5); // Reset enemy position
-        //         break;
-        //     case monster.monster_ignan:
-        //         cubeEnemy.position.set(10, 3, 5); // Reset enemy position
-        //         break;
-        //     case monster.toon_spike:
-        //         cubeEnemy.position.set(10, 4.5, 5); // Reset enemy position
-        //         break;
-        //     case monster.anya:
-        //         cubeEnemy.position.set(10, 1, 5); // Reset enemy position
-        //         break;
-        //     default:
-        //         cubeEnemy.position.set(10, 3, 5); // Reset enemy position
-        //         break;
-        // }
-        // cubeEnemy.material.color.set(0x040405); // Reset enemy color to original'
-        // enemyLight.position.copy(cubeEnemy.position); // Reset light position to enemy position
-    
-        // // Reset health
-        // enemyCurrentHealth = enemyMaxHealth; // Reset current health to max
-        // enemyHits = 0; // Reset hit counter
+    // Function to handle loss condition
+     youLose() {
+        document.getElementById('header-end').innerText = "You Died!\nYou ran out of light and the darkness consumed you!";
+        this.enemy.asleep = true;
+
+        console.log("You lose!"); // Display lose message if health reaches zero
+        this.gameOverScreen.style.display = "block"; // Show game over screen
+
+        //TODO ADD THIS
+        // document.exitPointerLock(); // Exit mouse lock
+        // crosshair.hideCrosshair();
         // document.getElementById('health-bar-container').style.display = 'none';
-        // updateEnemyHealthBar(); // Update health bar to full width
-        // updatePlayerHealthBar(); // Update player health bar
-    
-        // // Reset health
-        // health = maxHealth; // Reset current health to max
-        // enemyCurrentHealth = enemyMaxHealth;
-    
-        // // make enemy visible again
-        // // cubeEnemy.visible = true;
-        // enemyLight.visible = true;
-        // enemyLight.intensity = 1; // Reset light intensity
-    
-        // // crosshair
-        // crosshair.showCrosshair();
-    
-        // ambientSound.play(); // Restart ambient sound
+        // cubeEnemy.visible = false;
+        this.enemyLight.visible = false;
+
+        soundEffectsManager.toggleLoop("ambienceLevel3")
     }
 
+    
 
-    animate() {
-        updatePlayerHealthBar();
-        // Ensure playerModel and cube are loaded before accessing their properties
-        if (playerModel && cube) {
-            playerModel.position.copy(cube.position);
-            playerModel.rotation.copy(cube.rotation);
+
+    animate=(currentTime)=> {
+        this.animationId = requestAnimationFrame(this.animate);
+
+        if (this.cameraManager==undefined||!this.loader.isLoaded()){
+            return;
         }
-    
-        // Ensure monsterModel and cubeEnemy are loaded before accessing their properties
-        if (monsterModel && cubeEnemy) {
-            monsterModel.position.copy(cubeEnemy.position);
-            // let temp = cube.rotation*-1; 
-            monsterModel.rotation.copy(cubeEnemy.rotation);
-            // monsterModel.rotation.copy(temp);
-            // monsterModel.lookAt(cube.position);
-            switch(currentMonster){
-                case monster.tall_monster:
-                    monsterModel.position.y = cubeEnemy.position.y - 0;
-                    break;
-                case monster.monster_ignan:
-                    monsterModel.position.y = cubeEnemy.position.y - 2.5;
-                    break;
-                case monster.toon_spike:
-                    monsterModel.position.y = cubeEnemy.position.y - 4;
-                    break;
-                case monster.anya:
-                    monsterModel.position.y = cubeEnemy.position.y - 0.5;
-                    break;
-                default:
-                    monsterModel.position.y = cubeEnemy.position.y + 1.5;
-                    break;
-            }
-        }
-    
-        playerLight.position.set(cube.position.x, cube.position.y + 1.5, cube.position.z);
-        if (isGamePaused) return; // Skip updates if the game is paused
-        movePlayer();  // Update player movement
-        updateCamera();  // Update camera to follow the player
-        if(!isEnemyAsleep && enemyCurrentHealth > 0){
-            updateEnemyMovement(); // Update enemy's random movement
-            enemyShoot(); // Enemy shooting logic
-            document.getElementById('health-bar-container').style.display = 'block';
-            rotateMonster();
-        }
+
+        this.world.step(1 / 60);
+
+        this.gunManager.updateAllBullets();
+        this.objManager.update();
+
+        const timeElapsedS = (currentTime - this.lastTime) / 1000;
+        // this.lastTime = currentTime;
+
         
+        this.updatePlayerHealthBar();
+
+        this.gunManager.updateBulletsPlayer(this.enemyBody);
     
-        // Update bullets
-        for (let i = bullets.length - 1; i >= 0; i--) {
-            const isActive = bullets[i].update(scene); // Pass scene to update the bullet
-    
-            // Check for collision with the enemy cube
-            if (detectCollision(bullets[i], cubeEnemy)) {
-                handleEnemyHit(); // Handle enemy hit logic
-                scene.remove(bullets[i].mesh); // Remove bullet from the scene
-                scene.remove(bullets[i].light); // Remove bullet light from the scene
-                bullets.splice(i, 1); // Remove bullet from array
-            } else if (!isActive) {
-                bullets.splice(i, 1); // Remove bullet if it traveled max distance
-            }
-        }
-    
-        // Update enemy bullets
-        for (let i = enemyBullets.length - 1; i >= 0; i--) {
-            const isActive = enemyBullets[i].update(scene); // Pass scene to update the bullet
-    
-            // Check for collision with the player cube
-            if (detectCollision(enemyBullets[i], cube)) {
-                console.log("Player has been hit!");
-                handlePlayerHit(30); // Handle player hit logic - take 30 damage
-                scene.remove(enemyBullets[i].mesh); // Remove bullet from the scene
-                scene.remove(enemyBullets[i].light); // Remove bullet light from the scene
-                enemyBullets.splice(i, 1); // Remove bullet from array
-            } else if (!isActive) {
-                enemyBullets.splice(i, 1); // Remove bullet if it traveled max distance
-            }
-        }
-    
-        renderer.render(scene, camera);  // Render the scene
+        this.playerLight.position.set(this.playerBody.position.x, this.playerBody.position.y + 1.5, this.playerBody.position.z);
+
+        this.gunManager.checkAndShoot(this.target,this.cameraManager.getCamera());
+        this.cameraManager.update(timeElapsedS);
+
+
+        this.renderer.render(this.scene, this.cameraManager.getCamera());
+
     }
+
+    /**
+     * Stops the animation
+     */
+    stopAnimate=()=> {
+        cancelAnimationFrame(this.animationId)
+        this.animationId=null;
+    }
+
+
+    updatePlayerHealthBar(){
+        //TODO MOVE TO this variables
+        // const healthBar = document.getElementById('user-health-bar');
+        // const healthPercentage = (health / maxHealth) * 100; // Calculate percentage
+        // healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
+    }
+
+
+    lockPointer() {
+        // if (!isSettingsMenuOpen) { // Only lock pointer if settings menu is not open
+            this.renderer.domElement.requestPointerLock();
+        // }
+    }
+
+
+    
+    /**
+     * Disposes of assets in the level
+     */
+    disposeLevel(){
+        if (!this.scene) return;
+
+        this.objManager.removeAllObjects();
+        this.lightManager.removeAllLights();
+    
+        
+        if (this.renderer) {
+            this.renderer.dispose();
+            // Ensure that the renderer's DOM element is removed safely
+            try {
+                document.body.removeChild(this.renderer.domElement);
+            } catch (e) {
+                console.warn("Renderer's DOM element could not be removed:", e);
+            }
+        }
+    }
+
     
 
 }

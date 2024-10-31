@@ -1,33 +1,36 @@
 import * as THREE from 'three';
-import { Body} from 'cannon-es';
+import { Body } from 'cannon-es';
 import { FirstPersonInputController } from '../InputController/FirstPersonInputController';
 
-//https://medium.com/@brazmogu/physics-for-game-dev-a-platformer-physics-cheatsheet-f34b09064558
 /**
  * Class that controls the camera for first person
  */
-export class FirstPersonCamera{
-  /**
-   * @param {THREE.Camera} camera Camera of the scene
-   * @param {THREE.Object3D} target Target mesh to attach the camera to
-   * @param {Body} playerBody cannon.js body for the attached mesh
-   * @param {THREE.scene} scene scene the object is in
-   */
-    constructor(camera,target,playerBody,scene) {
-      this.camera_ = camera;
-      this.scene = scene;
-      this.target_ = target
-      this.playerBody = playerBody;
-      this.input_ = new FirstPersonInputController(scene,target,playerBody);
+export class FirstPersonCamera {
+    /**
+     * @param {THREE.Camera} camera Camera of the scene
+     * @param {THREE.Object3D} target Target mesh to attach the camera to
+     * @param {Body} playerBody cannon.js body for the attached mesh
+     * @param {THREE.Scene} scene scene the object is in
+     */
+    constructor(camera, target, playerBody, scene) {
+        this.camera_ = camera;
+        this.scene = scene;
+        this.target_ = target;
+        this.playerBody = playerBody;
+        this.input_ = new FirstPersonInputController(scene, target, playerBody);
     }
     
     /**
      * Updates the camera to match the input controller's rotation and position
-     * @param {*} _ 
+     * @param {*} _
      */
     updateCamera_(_) {
-      this.camera_.quaternion.copy(this.input_.playerBody.quaternion);
-      this.camera_.position.copy(this.input_.playerBody.position);
+        // Copy quaternion from playerBody
+        this.camera_.quaternion.copy(this.playerBody.quaternion);
+        
+        // Optional: Offset the camera position to align with first-person view
+        const cameraOffset = new THREE.Vector3(0, 1, 0); // Adjust height as needed
+        this.camera_.position.copy(this.playerBody.position).add(cameraOffset);
     }
     
     /**
@@ -35,8 +38,12 @@ export class FirstPersonCamera{
      * @param {*} timeElapsedS 
      */
     update(timeElapsedS) {
-      this.input_.target_.visible=true;
-      this.input_.update(timeElapsedS);
-      this.updateCamera_(timeElapsedS)
+        // Manage visibility of target and player body
+        this.input_.target_.visible = false; // Hide target when in first person
+        this.input_.playerBody.visible = false; // Hide player body when in first person
+        
+        // Update input controls and camera
+        this.input_.update(timeElapsedS);
+        this.updateCamera_(timeElapsedS);
     }
 }

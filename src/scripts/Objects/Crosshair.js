@@ -1,5 +1,5 @@
 // Crosshair.js
-export default class Crosshair {
+export class Crosshair {
     constructor(size = 10, color = 'red') {
         this.size = size;
         this.color = color;

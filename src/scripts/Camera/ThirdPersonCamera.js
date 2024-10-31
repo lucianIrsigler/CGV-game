@@ -21,6 +21,8 @@ export class ThirdPersonCamera{
 
         this.currentPositon_ = new THREE.Vector3();
         this.currentLookat_ = new THREE.Vector3();
+        
+        this.idealOffsetValue = new THREE.Vector3(-1,2,-2);
     }
 
 
@@ -51,6 +53,8 @@ export class ThirdPersonCamera{
 
     update(timeElapsedS){
         this.input_.target_.visible=true;
+      this.input_.playerBody.visible=true;
+
         this.input_.update(timeElapsedS);
 
         const idealOffset = this.calculateIdealOffset_();

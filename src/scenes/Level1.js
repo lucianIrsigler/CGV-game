@@ -54,10 +54,10 @@ export class Level1 extends SceneBaseClass {
         
         //platform positions
         this.platforms = [
-            { position: new THREE.Vector3(3, 1.5, 15), size: new THREE.Vector3(5, 3, 5) },
-            { position: new THREE.Vector3(-3, 1.5, 20), size: new THREE.Vector3(5, 6.9, 5) },
-            { position: new THREE.Vector3(3, 1.5, 30), size: new THREE.Vector3(3, 3, 3) },
-            { position: new THREE.Vector3(-3, 1.5, 35), size: new THREE.Vector3(3, 9, 10) }
+            { position: new THREE.Vector3(3, 3, 15), size: new THREE.Vector3(5, 0.5, 5) },
+            { position: new THREE.Vector3(-3, 5, 20), size: new THREE.Vector3(5, 0.5, 5) },
+            { position: new THREE.Vector3(3, 3, 30), size: new THREE.Vector3(3, 0.3, 3) },
+            { position: new THREE.Vector3(-3, 6, 35), size: new THREE.Vector3(3, 0.3, 10) }
         ];
 
         //DOOR
@@ -146,7 +146,7 @@ export class Level1 extends SceneBaseClass {
 
         //Texture for platforms 
         const platformTextures = loadTextures("PavingStones")
-        applyTextureSettings(platformTextures, 1, 1);
+        applyTextureSettings(platformTextures, 3, 2);
 
         return {groundTextures,wallTextures,platformTextures}
     }
