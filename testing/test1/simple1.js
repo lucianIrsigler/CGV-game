@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { World, Body, Plane, Box, Vec3 } from 'cannon-es';
+import { World, Body, Plane, Box, Vec3,NaiveBroadphase } from 'cannon-es';
 import { CameraManager } from '../../src/scripts/Scene/CameraManager';
 import { ObjectManager } from '../../src/scripts/Scene/ObjectManager';
 import { LightManager } from '../../src/scripts/Scene/LightManager';
@@ -16,6 +16,7 @@ document.body.appendChild(renderer.domElement);
 // --------------------------CANNON.JS WORLD-------------------------------
 const world = new World();
 world.gravity.set(0, -9.82, 0); // Set gravity
+world.broadphase = new NaiveBroadphase();
 
 // --------------------------MANAGERS-------------------------------
 const objManager = new ObjectManager(scene, world);
@@ -46,16 +47,15 @@ const model = gltf.scene; // Get the loaded model
 scene.add(model); // Add the model to the scene
 model.rotation.set(0, 0, 0); // Rotate the model
 model.scale.set(1, 1, 1); // Scale the model if necessary
-model.position.set(0, 0.5, 0);
+model.position.set(0, 1, 0);
 
 // --------------------------CANNON.JS FOR PLAYER MODEL-------------------------------
 let playerBody = new Body({
     mass: 1, // Dynamic body
-    position: new Vec3(0, 0.5, 0), // Start position
+    position: new Vec3(0, 1, 0), // Start position
+    shape:new Box(new Vec3(1, 1, 1))
 });
 
-const boxShape = new Box(new Vec3(0.5, 1, 0.5)); // Box shape for the player
-playerBody.addShape(boxShape);
 world.addBody(playerBody);
 
 // --------------------------INIT CAMERA MANAGER-------------------------------
@@ -76,17 +76,18 @@ lightManager.addLight("ambient", new THREE.AmbientLight(0xFFFFFF, 10));
 document.addEventListener("keydown", (e) => {
   switch (e.code){
     case "KeyR":
-      const isFirstPerson = cameraManager.getFirstPerson();
-      if (isFirstPerson) {
-        cameraManager.toggleThirdPerson();
-      } else {
-        cameraManager.toggleFirstPerson();
-      }
-      break;
+      // const isFirstPerson = cameraManager.getFirstPerson();
+      // if (isFirstPerson) {
+      //   cameraManager.toggleThirdPerson();
+      // } else {
+      //   cameraManager.toggleFirstPerson();
+      // }
+      // break;
     
   }
 });
 
+cameraManager.toggleThirdPerson();
 
 
 

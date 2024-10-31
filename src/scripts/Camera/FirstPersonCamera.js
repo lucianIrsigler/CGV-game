@@ -31,6 +31,8 @@ export class FirstPersonCamera {
         // Optional: Offset the camera position to align with first-person view
         const cameraOffset = new THREE.Vector3(0, 1, 0); // Adjust height as needed
         this.camera_.position.copy(this.playerBody.position).add(cameraOffset);
+
+        this.camera_.rotateY(Math.PI);
     }
     
     /**
@@ -39,8 +41,8 @@ export class FirstPersonCamera {
      */
     update(timeElapsedS) {
         // Manage visibility of target and player body
-        this.input_.target_.visible = false; // Hide target when in first person
-        this.input_.playerBody.visible = false; // Hide player body when in first person
+        this.input_.target_.visible = true; // Hide target when in first person
+        this.input_.playerBody.visible = true; // Hide player body when in first person
         
         // Update input controls and camera
         this.input_.update(timeElapsedS);

@@ -34,6 +34,7 @@ export class ThirdPersonInputController {
         this.speed_ = 0.14 ;
         this.phi_ = 0;
         this.theta_ = 0;
+        this.rotation = new THREE.Vector3(0,0,0);
 
 
         //Jump stuff
@@ -243,6 +244,7 @@ export class ThirdPersonInputController {
         const q = new THREE.Quaternion();
         q.multiplyQuaternions(qx, qz);
 
+        this.rotation = q;
         this.target_.quaternion.copy(q);
         this.playerBody.quaternion.copy(q);
     }

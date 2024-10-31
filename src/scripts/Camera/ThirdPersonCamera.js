@@ -22,7 +22,8 @@ export class ThirdPersonCamera{
         this.currentPositon_ = new THREE.Vector3();
         this.currentLookat_ = new THREE.Vector3();
         
-        this.idealOffsetValue = new THREE.Vector3(-1,2,-2);
+        this.prevIdealOffset = new THREE.Vector3(-1,2,-2);
+        this.prevLookAt = new THREE.Vector3(-1,2,-2);
     }
 
 
@@ -35,6 +36,7 @@ export class ThirdPersonCamera{
         idealOffset.applyQuaternion(qR);
 
         idealOffset.add(this.input_.target_.position);
+        this.prevIdealOffset = idealOffset;
         return idealOffset;
     }
 
@@ -47,6 +49,7 @@ export class ThirdPersonCamera{
 
         idealLookAt.applyQuaternion(qR);
         idealLookAt.add(this.input_.target_.position);
+        this.prevLookAt = idealLookAt;
         return idealLookAt;
     }
 

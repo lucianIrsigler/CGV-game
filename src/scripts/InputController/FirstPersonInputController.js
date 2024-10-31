@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { Body,Vec3,Box } from 'cannon-es';
 import { SoundEffectsManager } from '../Scene/SoundEffectManger';
 
-
 const soundEffectsManager = new SoundEffectsManager();
 
 
@@ -111,6 +110,8 @@ export class FirstPersonInputController {
         this.keys_[e.keyCode] = false;
     }
     
+
+
     /**
      * Casts a raycast downwards, and checks if the intersected object has a distance less than 2.25,
      * If it does, then the ground is grounded, else its not
@@ -141,20 +142,20 @@ export class FirstPersonInputController {
     
       // Apply movement based on keys pressed
       if (this.keys_[KEYS.w]) {
-          this.playerBody.position.x += forward.x * this.speed_; // Move forward
-          this.playerBody.position.z += forward.z * this.speed_;
-      }
-      if (this.keys_[KEYS.s]) {
-          this.playerBody.position.x -= forward.x * this.speed_; // Move backward
+          this.playerBody.position.x -= forward.x * this.speed_; // Move forward
           this.playerBody.position.z -= forward.z * this.speed_;
       }
+      if (this.keys_[KEYS.s]) {
+          this.playerBody.position.x += forward.x * this.speed_; // Move backward
+          this.playerBody.position.z += forward.z * this.speed_;
+      }
       if (this.keys_[KEYS.a]) {
-          this.playerBody.position.x -= right.x * this.speed_; // Move left
-          this.playerBody.position.z -= right.z * this.speed_;
+          this.playerBody.position.x += right.x * this.speed_; // Move left
+          this.playerBody.position.z += right.z * this.speed_;
       }
       if (this.keys_[KEYS.d]) {
-          this.playerBody.position.x += right.x * this.speed_; // Move right
-          this.playerBody.position.z += right.z * this.speed_;
+          this.playerBody.position.x -= right.x * this.speed_; // Move right
+          this.playerBody.position.z -= right.z * this.speed_;
       }
     
       // Jump logic
@@ -244,7 +245,7 @@ export class FirstPersonInputController {
         const q = new THREE.Quaternion();
         q.multiplyQuaternions(qx, qz);
 
-        this.rotation =q;
+        this.rotation = q;
         this.target_.quaternion.copy(q);
         this.playerBody.quaternion.copy(q);
     }

@@ -1,7 +1,9 @@
 import { FirstPersonCamera } from "../Camera/FirstPersonCamera"
 import { ThirdPersonCamera } from "../Camera/ThirdPersonCamera"
 import * as THREE from 'three';
-import { Quaternion,Vec3 } from "cannon";
+import * as CANNON from "cannon-es"
+
+
 /**
  * Class manages switching between first person and third person
  */
@@ -29,39 +31,32 @@ export class CameraManager{
     }
 
     updateRotation() {
-        // Get the target's world quaternion
-    
-        // First-person camera
-        if (this.firstPerson) {
-            let worldPos = new THREE.Vector3();
-            this.target.getWorldPosition(worldPos);
-            this.fps.camera_.position.copy(worldPos);
-        } 
-        // Third-person camera
-        else {
-            this.thirdPerson.camera_.quaternion.copy(worldQuaternion);
-            const thirdPersonOffset = new THREE.Vector3(0, 2, -5); 
-            this.thirdPerson.camera_.position.copy(this.target.position).add(thirdPersonOffset);
-            // Ensure third-person camera looks at the target
-            this.thirdPerson.camera_.lookAt(this.target.position);
+        //we switching to first person here
+
+        if (!this.firstPerson){
+            this.fps.input_.phi_ = this.thirdPerson.input_.phi_;
+            this.fps.input_.theta_ = this.thirdPerson.input_.theta_;
+        }else{
+            this.thirdPerson.input_.phi_ = this.fps.input_.phi_;
+            this.thirdPerson.input_.theta_ = this.fps.input_.theta_;
+
         }
     }
-    
 
     /**
      * Sets camera mode to first person
      */
     toggleFirstPerson(){
-        this.firstPerson = true;
         this.updateRotation();
+        this.firstPerson = true;
     }
 
     /**
      * Sets camera mode to third person
      */
     toggleThirdPerson(){
+        this.updateRotation();
         this.firstPerson=false;
-        // this.updateRotation();
 
     }
 
