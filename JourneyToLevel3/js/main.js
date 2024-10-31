@@ -468,7 +468,7 @@ class Boulder extends Box {
 }
 
 class ModelBox extends Box {
-    constructor({ url, x, y, z, desiredHeight, gravity = -0.02 }) {
+    constructor({ url, x, y, z, desiredHeight, gravity = -0.01 }) {
         super({
             width: 1,  // Placeholder values
             height: 1,
@@ -546,7 +546,7 @@ let groundZLocationTracker = groundDepth / 2;
 
 let numGroundsTracker = 0
 
-let maxGroundsAllowed = 25;
+let maxGroundsAllowed = 2;
 
 let previousGroundX = 0
 let previousGroundY = groundYDisplacement
