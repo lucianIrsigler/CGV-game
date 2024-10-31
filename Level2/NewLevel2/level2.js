@@ -3,6 +3,10 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { CurvedPlatform } from './curvedPlatform.js';
 import { CPBoxLamp } from './CPBoxLamp.js';
 import { CircularPlatform } from './circularPlatform.js';
+import { LoadingManagerCustom } from "../../src/scripts/Loaders/Loader";
+import { Door } from '../../src/scripts/Objects/Door';
+import { door } from '../../src/data/doorPos1';
+
 //SCENE AND RENDERER---------------------------------------------------
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer();
@@ -43,25 +47,40 @@ const roomRadius = curvedPlatformOuterRadius;
 const floorDepth = 1;
 const ceilingDepth = 1;
 const roomHeight = floorDepth + numberOfPlatforms * curvedPlatformHeight + ceilingDepth + 2 * curvedPlatformHeight;
+
+const movingPlatforms = []; // Array to store moving platforms
+
 //CURVED PLATFORMS
 for (let i = 0; i <= numberOfPlatforms; i++) {
     //Add box and lamp platform where every 4th platform would be
     if (i % 4 === 0) {
         const cpBoxLamp = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
-        cpBoxLamp.position.y = i * curvedPlatformHeight;
+        if (i > 0 && i < 8) {
+            cpBoxLamp.position.y = 0; // Set initial position to the same height as the first platform
+            movingPlatforms.push({ platform: cpBoxLamp, targetY: i * curvedPlatformHeight }); // Add to moving platforms array with target height
+        }
+        else
+        {
+            cpBoxLamp.position.y = i * curvedPlatformHeight;
+        }
         cpBoxLamp.rotation.y = i * rotation;
-        // cpBoxLamp.updateMatrixWorld();
-        // const lampWorldPos = new THREE.Vector3();
-        // cpBoxLamp.lamp.getWorldPosition(lampWorldPos);
-        // console.log(lampWorldPos);
         scene.add(cpBoxLamp);
     } else {
         const curvedPlatform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
-        curvedPlatform.position.y = i * curvedPlatformHeight;
+        if (i > 0 && i < 8) {
+            curvedPlatform.position.y = 0; // Set initial position to the same height as the first platform
+            movingPlatforms.push({ platform: curvedPlatform, targetY: i * curvedPlatformHeight }); // Add to moving platforms array with target height
+        } else {
+            curvedPlatform.position.y = i * curvedPlatformHeight;
+        }
         curvedPlatform.rotation.y = i * rotation;
         scene.add(curvedPlatform);
     }
 }
+// const doorOne = door.doorOne;
+// door.init_door_(scene, doorOne);
+// const doorTwo = door.doorTwo;
+// door.init_door_(scene, doorTwo);
 //MOSTERS PLATFORM
 const circularPlatform = new CircularPlatform(circlePlatformInnerRadius, circlePlatformOuterRadius, circlePlatformDepth);
 scene.add(circularPlatform);
@@ -88,9 +107,23 @@ window.addEventListener('resize', () => {
 //----------------------------------------------------------------------
 
 //ANIMATE--------------------------------------------------------------
+let clock = new THREE.Clock();
+
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
+
+    let time = clock.getElapsedTime();
+    movingPlatforms.forEach(({ platform, targetY }) => {
+        const delay = 2; // Delay in seconds
+        const period = 4; // Period of the sine wave in seconds
+        const amplitude = (targetY - 0) / 2; // Amplitude of the sine wave
+
+        if (time > delay) {
+            platform.position.y = 0 + amplitude * (1 + Math.sin((time - delay) * (2 * Math.PI / period))); // Animate from initial height to target height
+        }
+    });
+
     renderer.render(scene, camera);
 }
 animate();

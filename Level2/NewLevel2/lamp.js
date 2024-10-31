@@ -10,6 +10,7 @@ export class Lamp extends THREE.Object3D {
         this.color = color;
         this.mesh = this.createMesh();
         this.add(this.mesh);
+        this.boundingBox = new THREE.Box3().setFromObject(this.mesh);
     }
 
     createMesh() {
@@ -39,8 +40,16 @@ export class Lamp extends THREE.Object3D {
             coneLight.position.copy(lampPos).add(new THREE.Vector3(0, 5, 0));
             lampGroup.add(coneLight);
             lampGroup.add(coneLight.target);
+
+            // Update bounding box
+            this.boundingBox.setFromObject(lampGroup);
         });
 
         return lampGroup;
+    }
+
+    checkCollision(otherObject) {
+        const otherBoundingBox = new THREE.Box3().setFromObject(otherObject);
+        return this.boundingBox.intersectsBox(otherBoundingBox);
     }
 }
