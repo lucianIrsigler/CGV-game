@@ -51,6 +51,7 @@ export class AnimationManager {
         }
     }
 
+
     stopAnimationLoop() {
         if (this.currentScene) {
             this.currentScene.stopAnimate();
