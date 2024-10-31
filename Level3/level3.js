@@ -55,18 +55,30 @@ const loaderObject = new GLTFLoader(loadingManager);
 
 const monsterLoader = new GLTFLoader(loadingManager);
 const currentMonster = getRandomMonster();
-// const currentMonster = monster.anya;
+// const currentMonster = monster.toon_spike;
 
 loaderObject.load(currentMonster.scene, function (gltf) {
     monsterModel = gltf.scene;
     scene.add(monsterModel);
-    monsterModel.position.set(currentMonster.positionX, currentMonster.positionY, currentMonster.positionZ);
+    monsterModel.position.set(currentMonster.positionX, currentMonster.positionY, currentMonster.positionZ-2);
     monsterModel.scale.set(currentMonster.scaleX, currentMonster.scaleY, currentMonster.scaleZ);
     monsterModel.castShadow = true;
+
+    // Traverse the model and update the material
+    monsterModel.traverse((node) => {
+        if (node.isMesh) {
+            node.material = new THREE.MeshStandardMaterial({
+                color: node.material.color,
+                map: node.material.map,
+                normalMap: node.material.normalMap,
+                roughness: 0.5, // Adjust as needed
+                metalness: 0.5  // Adjust as needed
+            });
+        }
+    });
 }, undefined, function (error) {
-    console.error('An error happened while loading the monster monsterModel:', error);
-}
-);
+    console.error('An error happened while loading the monster model:', error);
+});
 
 
 // Load player
@@ -96,7 +108,14 @@ document.getElementById('health-bar-container').style.display = 'none';
 const ambientSound = new Audio('ambience.mp3');
 ambientSound.volume = 0.3;
 ambientSound.loop = true;
-ambientSound.play();
+
+document.addEventListener('click', () => {
+    if (!ambientSound.playing) {
+        ambientSound.play().catch(error => {
+            console.error('Failed to play ambient sound:', error);
+        });
+    }
+});
 
 restartButton.addEventListener("click", restartGame);
 
@@ -109,7 +128,23 @@ function restartGame() {
 
     // Reset character and enemy positions
     cube.position.set(0, 1.5, 0); // Reset player position
-    cubeEnemy.position.set(10, 2, 5); // Reset enemy position
+    switch(currentMonster){
+        case monster.tall_monster:
+            cubeEnemy.position.set(10, 2, 5); // Reset enemy position
+            break;
+        case monster.monster_ignan:
+            cubeEnemy.position.set(10, 3, 5); // Reset enemy position
+            break;
+        case monster.toon_spike:
+            cubeEnemy.position.set(10, 4.5, 5); // Reset enemy position
+            break;
+        case monster.anya:
+            cubeEnemy.position.set(10, 1, 5); // Reset enemy position
+            break;
+        default:
+            cubeEnemy.position.set(10, 3, 5); // Reset enemy position
+            break;
+    }
     cubeEnemy.material.color.set(0x040405); // Reset enemy color to original'
     enemyLight.position.copy(cubeEnemy.position); // Reset light position to enemy position
 
@@ -122,6 +157,7 @@ function restartGame() {
 
     // Reset health
     health = maxHealth; // Reset current health to max
+    enemyCurrentHealth = enemyMaxHealth;
 
     // make enemy visible again
     // cubeEnemy.visible = true;
@@ -151,10 +187,44 @@ scene.add(cube);
 cube.visible = false;
 
 // Cube (enemy)
-const geometryEnemy = new THREE.BoxGeometry(1.3, 3, 1.3);
+let geometryEnemy = null;
 const materialEnemy = new THREE.MeshStandardMaterial({ color: 0x040405 });
-const cubeEnemy = new THREE.Mesh(geometryEnemy, materialEnemy);
-cubeEnemy.position.set(10, 2, 5); // Set initial position of the cube
+let cubeEnemy = null;
+let enemyMaxHealth; // Max health of the enemy
+switch(currentMonster){
+    case monster.tall_monster:
+        enemyMaxHealth = 150;
+        geometryEnemy = new THREE.BoxGeometry(1.3, 3, 1.3);
+        cubeEnemy = new THREE.Mesh(geometryEnemy, materialEnemy);
+        cubeEnemy.position.set(10, 2, 5); // Set initial position of the cube
+        break;
+    case monster.monster_ignan:
+        enemyMaxHealth = 200;
+        geometryEnemy = new THREE.BoxGeometry(3, 5, 3);
+        cubeEnemy = new THREE.Mesh(geometryEnemy, materialEnemy);
+        cubeEnemy.position.set(10, 3, 5); // Set initial position of the cube
+        break;
+    case monster.toon_spike:
+        enemyMaxHealth = 200;
+        geometryEnemy = new THREE.BoxGeometry(5.5, 8, 5.5);
+        cubeEnemy = new THREE.Mesh(geometryEnemy, materialEnemy);
+        cubeEnemy.position.set(10, 4.5, 5); // Set initial position of the cubes
+        break;
+    case monster.anya:
+        enemyMaxHealth = 100;
+        geometryEnemy = new THREE.BoxGeometry(1.3, 2, 1.3);
+        cubeEnemy = new THREE.Mesh(geometryEnemy, materialEnemy);
+        cubeEnemy.position.set(10, 1, 5); // Set initial position of the cube
+        break;
+    default:
+        enemyMaxHealth = 100;
+        geometryEnemy = new THREE.BoxGeometry(1.3, 3, 1.3);
+        cubeEnemy = new THREE.Mesh(geometryEnemy, materialEnemy);
+        cubeEnemy.position.set(10, 3, 5); // Set initial position of the cube
+        break;
+}
+
+// const geometryEnemy = new THREE.BoxGeometry(1.3, 3, 1.3);
 scene.add(cubeEnemy);
 cubeEnemy.visible = false;
 
@@ -164,7 +234,7 @@ enemyLight.position.set(10, 2, 5);  // Set the light position to the cube's posi
 scene.add(enemyLight);
 
 // Create a point light to simulate the player emitting light
-const playerLight = new THREE.PointLight(0xffffff, 1, 100); // Color, intensity, distance
+const playerLight = new THREE.PointLight(0xffffff, 1, 50); // Color, intensity, distance
 playerLight.position.set(0, 1.5, 0);  // Set the light position to the cube's position
 scene.add(playerLight);
 
@@ -203,8 +273,8 @@ function updateEnemyMovement() {
     }
 
     // Optionally: Add bounds to keep the enemy within a certain area
-    cubeEnemy.position.x = THREE.MathUtils.clamp(cubeEnemy.position.x, -49, 49); // Adjust bounds as necessary
-    cubeEnemy.position.z = THREE.MathUtils.clamp(cubeEnemy.position.z, -49, 49); // Adjust bounds as necessary
+    cubeEnemy.position.x = THREE.MathUtils.clamp(cubeEnemy.position.x, -45, 45); // Adjust bounds as necessary
+    cubeEnemy.position.z = THREE.MathUtils.clamp(cubeEnemy.position.z, -45, 45); // Adjust bounds as necessary
 }
 
 // Ground
@@ -289,7 +359,7 @@ function loadLamps() {
             model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
             model.castShadow = true;
 
-            const lampLight = new THREE.PointLight(0xA96CC3, 30, 10); // Purple light - (color, intensity, distance)
+            const lampLight = new THREE.PointLight(0xA96CC3, 30, 50); // Purple light - (color, intensity, distance)
             lampLight.position.set(lamp.positionX, lamp.positionY + 2, lamp.positionZ); 
             model.add(lampLight);
             scene.add(lampLight);
@@ -480,10 +550,27 @@ function animate() {
     // Ensure monsterModel and cubeEnemy are loaded before accessing their properties
     if (monsterModel && cubeEnemy) {
         monsterModel.position.copy(cubeEnemy.position);
-        let temp = cube.rotation*-1;
-        // monsterModel.rotation.copy(cubeEnemy.rotation);
-        monsterModel.rotation.copy(temp);
-        monsterModel.lookAt(cube.position);
+        // let temp = cube.rotation*-1; 
+        monsterModel.rotation.copy(cubeEnemy.rotation);
+        // monsterModel.rotation.copy(temp);
+        // monsterModel.lookAt(cube.position);
+        switch(currentMonster){
+            case monster.tall_monster:
+                monsterModel.position.y = cubeEnemy.position.y - 0;
+                break;
+            case monster.monster_ignan:
+                monsterModel.position.y = cubeEnemy.position.y - 2.5;
+                break;
+            case monster.toon_spike:
+                monsterModel.position.y = cubeEnemy.position.y - 4;
+                break;
+            case monster.anya:
+                monsterModel.position.y = cubeEnemy.position.y - 0.5;
+                break;
+            default:
+                monsterModel.position.y = cubeEnemy.position.y + 1.5;
+                break;
+        }
     }
 
     playerLight.position.set(cube.position.x, cube.position.y + 1.5, cube.position.z);
@@ -583,7 +670,7 @@ const crosshair = new Crosshair(5, 'white');
 
 // Shooting the enemy
 // Enemy health variables
-const enemyMaxHealth = 100; // Max health of the enemy
+
 let enemyCurrentHealth = enemyMaxHealth; // Current health starts at max
 
 let enemyHits = 0; // Initialize hit counter
@@ -721,11 +808,11 @@ function enemyShoot() {
 }
 
 // Health System
-let maxHealth = 100;
+let maxHealth = 100; // Define the maximum health
 let health = maxHealth;
 let loaded = false;
 const damageRate = 1; // Define the damage rate
-const healingRate = 100; // Define the healing rate
+const healingRate = 5; // Define the healing rate
 let points = lampsArray.map(lamp => new THREE.Vector3(lamp.positionX, lamp.positionY, lamp.positionZ)); // Convert lamp positions to Vector3 objects
 
 //Update Player Health
@@ -762,7 +849,7 @@ function startDamageTimer() {
                 // Check distance to each light
                 if (calcEuclid(cube.position.x, cube.position.z, light.x, light.z)) {
                     valid = true;
-                    heal(healingRate);
+                    heal(healingRate);  
                 }
             });
 

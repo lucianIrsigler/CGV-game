@@ -1,24 +1,38 @@
 import * as THREE from 'three';
 import { ThirdPersonInputController } from "../InputController/ThirdPersonInputController";
+import { Body,Vec3,Box } from 'cannon-es';
+
 
 //https://www.youtube.com/watch?v=UuNPHOJ_V5o&ab_channel=SimonDev
 export class ThirdPersonCamera{
-    constructor(camera,target,character,scene) {
-        this.scene = scene;
-        this.character = character;
+    /**
+     * 
+     * @param {THREE.Camera} camera 
+     * @param {THREE.Object3D} target
+     * @param {Body} playerBody 
+     * @param {THREE.Scene} scene 
+     */
+    constructor(camera,target,playerBody,scene) {
         this.camera_ = camera;
+        this.scene = scene;
+        this.target_ = target
+        this.playerBody = playerBody;
+        this.input_ = new ThirdPersonInputController(scene,target,playerBody);
 
         this.currentPositon_ = new THREE.Vector3();
         this.currentLookat_ = new THREE.Vector3();
-        this.input_ = new ThirdPersonInputController(target,scene,character.calcGravity(),character.calcJumpSpeed());
+        
+        this.prevIdealOffset = new THREE.Vector3(-1,2,-2);
+        this.prevLookAt = new THREE.Vector3(-1,2,-2);
     }
 
-    reset(){
-        this.input_.reset();
+    updateVariables(phi,theta,target,playerBody,camera){
+        this.input_.updateVariables(phi,theta,target,playerBody)
+        this.camera_ = camera;
     }
 
     calculateIdealOffset_(){
-        const idealOffset =  new THREE.Vector3(-1,3,-3);
+        const idealOffset =  new THREE.Vector3(-1,2,-2);
 
         const qR = new THREE.Quaternion();
         qR.setFromEuler(this.input_.target_.rotation); 
@@ -26,11 +40,12 @@ export class ThirdPersonCamera{
         idealOffset.applyQuaternion(qR);
 
         idealOffset.add(this.input_.target_.position);
+        this.prevIdealOffset = idealOffset;
         return idealOffset;
     }
 
     calculateIdealLookAt_(){
-        const idealLookAt = new THREE.Vector3(0,0,5);
+        const idealLookAt = new THREE.Vector3(0,0,4);
 
         const qR = new THREE.Quaternion();
         qR.setFromEuler(this.input_.target_.rotation); 
@@ -38,14 +53,15 @@ export class ThirdPersonCamera{
 
         idealLookAt.applyQuaternion(qR);
         idealLookAt.add(this.input_.target_.position);
+        this.prevLookAt = idealLookAt;
         return idealLookAt;
     }
-
-    
 
 
     update(timeElapsedS){
         this.input_.target_.visible=true;
+      this.input_.playerBody.visible=true;
+
         this.input_.update(timeElapsedS);
 
         const idealOffset = this.calculateIdealOffset_();
@@ -62,9 +78,6 @@ export class ThirdPersonCamera{
 
         this.camera_.position.copy(this.currentPositon_);
         this.camera_.lookAt(this.currentLookat_);
-
         // console.log("camera:",this.currentPositon_);
-
-
     }
 }

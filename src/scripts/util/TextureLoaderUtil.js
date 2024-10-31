@@ -1,19 +1,21 @@
 import * as THREE from 'three';
 
-export function loadTextures(textureFolder,loader) {
-    const textureLoader = new THREE.TextureLoader(loader.loadingManager);
 
-    if (textureFolder==null){
-        textureFolder="";
-    }
+/**
+ * Loads the textures from a specific folder
+ * @param {string} textureFolder 
+ * @returns 
+ */
+export function loadTextures(textureFolder) {
+    const textureLoader = new THREE.TextureLoader();
 
-    const colorMap = textureLoader.load(`${textureFolder}PavingStones/Color.jpg`);
-    const aoMap = textureLoader.load(`${textureFolder}PavingStones/AmbientOcclusion.jpg`);
-    const displacementMap = textureLoader.load(`${textureFolder}PavingStones/Displacement.jpg`);
-    const metalnessMap = textureLoader.load(`${textureFolder}PavingStones/Metalness.jpg`);
-    const normalMapGL = textureLoader.load(`${textureFolder}PavingStones/NormalGL.jpg`);
-    const normalMapDX = textureLoader.load(`${textureFolder}PavingStones/NormalDX.jpg`);
-    const roughnessMap = textureLoader.load(`${textureFolder}PavingStones/Roughness.jpg`);
+    const colorMap = textureLoader.load(`src/textures/${textureFolder}/Color.jpg`);
+    const aoMap = textureLoader.load(`src/textures/${textureFolder}/AmbientOcclusion.jpg`);
+    const displacementMap = textureLoader.load(`src/textures/${textureFolder}/Displacement.jpg`);
+    const metalnessMap = textureLoader.load(`src/textures/${textureFolder}/Metalness.jpg`);
+    const normalMapGL = textureLoader.load(`src/textures/${textureFolder}/NormalGL.jpg`);
+    const normalMapDX = textureLoader.load(`src/textures/${textureFolder}/NormalDX.jpg`);
+    const roughnessMap = textureLoader.load(`src/textures/${textureFolder}/Roughness.jpg`);
 
     // Return an object with all loaded textures
     return {

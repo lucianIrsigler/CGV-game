@@ -2,11 +2,11 @@ export const door = {
     "doorOne":{
         height_diff:270,
         scene:"src/models/medieval_door/scene.gltf",
-        scaleX:0.003,
-        scaleY:0.003,
+        scaleX:0.005,
+        scaleY:0.005,
         scaleZ:0.003,
         positionX:-3, 
-        positionY:4,
+        positionY:6,
         positionZ:39,
     },
     "doorTwo":{

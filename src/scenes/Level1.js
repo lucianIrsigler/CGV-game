@@ -1,87 +1,106 @@
 import * as THREE from 'three';
 import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass";
-import { door } from "../data/doorPos1";
 import { lamps } from "../data/lampPos1";
 import { ObjectManager } from "../scripts/Scene/ObjectManager";
 import { LightManager } from "../scripts/Scene/LightManager";
 import { lightsConfigLevel1 } from "../data/lightPos1";
-import { LoadingManager } from "../scripts/Loaders/Loader";
-import { CameraManager } from "../scripts/Camera/CameraManager";
-import { Character } from "../scripts/Characters/Character";
-import { calcEuclid } from '../scripts/util/calcEuclid';
+import { LoadingManagerCustom } from "../scripts/Loaders/Loader";
+import { CameraManager } from "../scripts/Scene/CameraManager";
+import { World, Body, Box,Vec3 } from 'cannon-es';
 import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil';
+import { LightMechanicManager } from '../scripts/Scene/LightMechanicManager';
+import { Door } from '../scripts/Objects/Door';
+import { door } from '../data/doorPos1';
+import { MiniMap } from '../scripts/Objects/Minimap';
+import { getRandomInterval } from '../scripts/util/randomInterval';
+import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger';
+
+
+const soundEffectsManager = new SoundEffectsManager();
+
+soundEffectsManager.toggleLoop("creep2",true);
 
 
 export class Level1 extends SceneBaseClass {
     constructor() {
         super(); // Call the base class constructor
-        this.lampsArray=Object.values(lamps);
+
+        //DOM stuff
         this.gameOverScreen = document.getElementById("gameOverScreen");
         this.restartButton = document.getElementById("restartButton");
-        this.objManager = new ObjectManager(this.scene);
-        this.lightManager = new LightManager(this.scene);
-        this.loader = new LoadingManager();
-        this.cameraManager;
-        this.target;
+        
 
-        this.platforms = [
-            { position: new THREE.Vector3(3, 2, 15), size: new THREE.Vector3(5, 0.5, 5) },
-            { position: new THREE.Vector3(-3, 4, 20), size: new THREE.Vector3(5, 0.5, 5) },
-            { position: new THREE.Vector3(3, 2, 30), size: new THREE.Vector3(3, 0.3, 3) },
-            { position: new THREE.Vector3(-3, 4, 35), size: new THREE.Vector3(3, 0.3, 10) }
-        ];
+        //cannon.js world
+        this.world = new World();
+        this.world.gravity.set(0, -12, 0);
+        this.playerBody; //cannon.js model
+        this.target; //player model
 
-        this.miniMapCamera = null;
-        this.miniMapRender = null;
+
+
+        //light stuff
         this.points = [];
-        this.character;
+        this.lampsArray=Object.values(lamps);
         this.characterLight;
 
-        //door stuff
-        this.Door;
-        this.isDoorOpen = false;
-        this.doorPrompt = document.getElementById('doorPrompt');
-        this.doorOpenDistance = 2; // Distance at which the prompt appears
-        this.audioContext;
-        this.doorCreakBuffer;
-        this.doorAnimationAction;
 
+        //MANAGERS
+        this.cameraManager;
+        this.objManager = new ObjectManager(this.scene,this.world);
+        this.lightManager = new LightManager(this.scene);
+        this.loader = new LoadingManagerCustom();
+        this.lightMechanicManager = new LightMechanicManager(this.characterLight,100,20,10);
 
+        
+        //platform positions
+        this.platforms = [
+            { position: new THREE.Vector3(3, 1.5, 15), size: new THREE.Vector3(5, 3, 5) },
+            { position: new THREE.Vector3(-3, 1.5, 20), size: new THREE.Vector3(5, 6.9, 5) },
+            { position: new THREE.Vector3(3, 1.5, 30), size: new THREE.Vector3(3, 3, 3) },
+            { position: new THREE.Vector3(-3, 1.5, 35), size: new THREE.Vector3(3, 9, 10) }
+        ];
 
-        //minimap
-        this.lightTimers = {}; // Track time spent near lights
-        this.lastMiniMapRenderTime = 0; // To track the last time the mini-map was rendered
-        this.miniMapRenderInterval = 100; // 100ms interval for mini-map rendering
+        //DOOR
+        this.door = new Door(this.loader);
+        this.miniMap = new MiniMap(this.scene);
 
         //for animation
         this.lastTime = 0;
-        this.points = [];
         this.animationId = null;
 
-        //health
-        this.health =100;
-        this.healthNumberElement =document.getElementById('health-number');
-        this.damageRate = 20; // Define the damage rate
-        this.healingRate = 10; // Define the healing rate
+        // flags
+        this.playerLoaded = false;
+        this.objectsLoaded = false;
+
+
+        //sound
+        this.nextSoundTime = 1000;
+        this.playingAlready = false;
     }
 
+    /**
+     * Initilizes the scene with all the objects+lights
+     */
     initScene(){
+
         this.init_eventHandlers_();
         this.init_lighting_();
         this.init_camera_();
         this.init_objects_();
-        this.init_miniMap_();
-        this.init_door_();
+        this.miniMap.init_miniMap_(window,document,this.scene);
 
-        //Start functions
+        const currentDoor = door.doorOne;
+        this.door.init_door_(this.scene,currentDoor);
+
         this.startDamageTimer();
-
         window.addEventListener('load', this.initAudio);
-    }
+       
+    }   
 
+    /**
+     * Inits scene's document's event handlers
+     */
     init_eventHandlers_(){
-
-        
         document.addEventListener("keydown", (e) => {
             switch (e.code) {
               case "KeyR":
@@ -97,109 +116,103 @@ export class Level1 extends SceneBaseClass {
             }
           })
 
-        
+        window.addEventListener("click", () => {
+            if (!this.playingAlready){
+                soundEffectsManager.playSound("creep2", 0.1);
+                this.playingAlready=true;
+            }
+        });
+        window.addEventListener("keydown", () => {
+            if (!this.playingAlready){
+                soundEffectsManager.playSound("creep2", 0.1);
+                this.playingAlready=true;
+            }
+        });
 
         this.restartButton.addEventListener("click", this.restart.bind(this));
     }
-
-    //TODO make into class
-    init_miniMap_(){
-        this.miniMapCamera = new THREE.OrthographicCamera(
-            window.innerWidth / -2, window.innerWidth / 2,
-            window.innerHeight / 2, window.innerHeight / -2,
-            0.1, 1000
-        );
-        this.miniMapCamera.position.set(0, 100, 0); // Position the mini-map camera above the scene
-        this.miniMapCamera.lookAt(0,0,15); // Look at the center of the scene
-
-        // Set the zoom factor
-        this.miniMapCamera.zoom = 12.5; // Increase this value to zoom in
-        this.miniMapCamera.updateProjectionMatrix(); // Update the projection matrix after changing the zoom
-
-        this.miniMapRenderer = new THREE.WebGLRenderer({ alpha: true });
-        this.miniMapRenderer.setSize(200, 200); // Set the size of the mini-map
-        this.miniMapRenderer.domElement.style.position = 'absolute';
-        this.miniMapRenderer.domElement.style.top = '10px';
-        this.miniMapRenderer.domElement.style.right = '10px';
-        document.body.appendChild(this.miniMapRenderer.domElement);
-    }
-
-    //TODO use managers
-    init_door_(){
-        // Door variables
-        let Door;
-        let doorMixer;
-        const currentDoor = door.doorOne;
-
-
-        // Load the door model
-        try{
-            this.loader.loadModel(currentDoor.scene,"Door",(gltf) =>{
-
-                console.log(this.scene.children);
-
-                Door = gltf.scene;
-                this.Door = Door;
-
-                Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
-                Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
-                Door.castShadow = true;
-
-                doorMixer = new THREE.AnimationMixer(this.Door);
-
-                const animations = gltf.animations;
-                if (animations && animations.length > 0) {
-                    this.doorAnimationAction = doorMixer.clipAction(animations[0]);
-                }
-                this.doorMixer = doorMixer;
-                this.Door = Door;
-                this.addObject(Door);
-
-            });
-            
-            console.log("Door loaded");
-        }catch(error){
-            console.error('An error happened', error);
-        };
-    }
-
-    init_objects_() {
-        //load object
-        this.initialize();
-
-        const groundTextures = loadTextures('src/textures/',this.loader);
+    
+    /**
+     * Loads and applies textures
+     * @returns groundTexture,wallTexture,platformTexture
+     */
+    async _init_textures(){
+        const groundTextures = loadTextures("PavingStones")
         applyTextureSettings(groundTextures, 1, 5);
 
         //Texture for walls
-        const wallTextures = loadTextures('src/textures/',this.loader);
+        const wallTextures = loadTextures("PavingStones")
         applyTextureSettings(wallTextures, 4, 1); 
 
         //Texture for platforms 
-        const platformTextures = loadTextures('src/textures/',this.loader);
-        applyTextureSettings(platformTextures, 3, 2); 
-            
-        
-        //add geometries
-        this.objManager.addGeometry("sideWall",new THREE.BoxGeometry(50, 1, 20));
+        const platformTextures = loadTextures("PavingStones")
+        applyTextureSettings(platformTextures, 3, 2);
+
+        return {groundTextures,wallTextures,platformTextures}
+    }
+
+    /**
+     * Loads player model
+     */
+    async _init_player(){
+        const gltf = await this.loader.loadModel('src/models/cute_alien_character/scene.gltf', 'player');
+        const model = gltf.scene; // Get the loaded model
+        this.addObject(model); // Add the model to the scene
+        model.rotation.set(0, 0, 0); // Rotate the model
+        model.scale.set(1,1,1); // Scale the model if necessary
+        model.position.set(0, 0.5, 0);
+        model.name = "player"; // Name the model
+        this.target = model;
+        this.target.visible=false;
+
+        //create cannon.js body for model
+        this.playerBody = new Body({
+            mass: 1, // Dynamic body
+            position: new Vec3(0, 2, 0), // Start position
+        });
+        const boxShape = new Box(new Vec3(0.5, 1, 0.5)); // Box shape for the player
+        this.playerBody.addShape(boxShape);
+        this.world.addBody(this.playerBody);
+
+
+        this.cameraManager = new CameraManager(
+            this.camera,
+            this.target,
+            this.playerBody,
+            this.scene
+        );
+
+        this.setupCharacterLight();
+        this.playerLoaded = true;
+    }
+
+    /**
+     * Inits the geometries used in the scene
+     */
+    async _initGeometries(){
+        this.objManager.addGeometry("sideWall",new THREE.BoxGeometry(50, 1, 30));
         this.objManager.addGeometry("platform",new THREE.BoxGeometry(10, 1, 50));
         this.objManager.addGeometry("character",new THREE.BoxGeometry(1, 1, 1));
         this.objManager.addGeometry("ground",new THREE.PlaneGeometry(20, 20));
-        this.objManager.addGeometry("redCube",new THREE.BoxGeometry(3, 1, 3));
+    }
 
+    /**
+     * Inits the materials used in the scene
+     */
+    async _initMaterials(){
+        const {groundTextures,wallTextures,platformTextures} = await this._init_textures()
 
-
-        //add materials
         this.objManager.addMaterial("sideWall",new THREE.MeshStandardMaterial({
-                map: wallTextures.colorMap,
-                aoMap: wallTextures.aoMap,
-                displacementMap: wallTextures.displacementMap,
-                metalnessMap: wallTextures.metalnessMap,
-                normalMap: wallTextures.normalMapDX, 
-                roughnessMap: wallTextures.roughnessMap,
-                displacementScale: 0,
-                metalness: 0.1,
-                roughness: 0.5
-            })
+            map: wallTextures.colorMap,
+            aoMap: wallTextures.aoMap,
+            displacementMap: wallTextures.displacementMap,
+            metalnessMap: wallTextures.metalnessMap,
+            normalMap: wallTextures.normalMapDX, 
+            roughnessMap: wallTextures.roughnessMap,
+            displacementScale: 0,
+            metalness: 0.1,
+            roughness: 0.5
+        })
         );
 
         this.objManager.addMaterial("platform", new THREE.MeshStandardMaterial({
@@ -233,63 +246,110 @@ export class Level1 extends SceneBaseClass {
         )
         
         this.objManager.addMaterial("ground",new THREE.MeshStandardMaterial({ color: 0x808080 }));
-        this.objManager.addMaterial("redCube",new THREE.MeshBasicMaterial({ color: 0x0000ff }));
-        this.objManager.addMaterial("greenCube",new THREE.MeshBasicMaterial({ color: 0x008000 }));
+    }
 
-        
-        // mesh = this.objManager.createObject("ground","ground","ground",{x:0,y:0,z:0},{x:Math.PI/2,y:0,z:0});
-        //scene.add(mesh);
+    /**
+     * Creates the objects for the scene
+     */
+    async createObjects(){
+        await this._initGeometries();
+        await this._initMaterials();
 
-        let res = this.loadLamps();
-
-        // Walls
-        this.objManager.createObject("bottom","platform","platform",{x:0,y:-0.5,z:20},null);
-        this.objManager.getObject("bottom").isGround=true;
+        const groundMesh = this.objManager.createVisualObject("ground", "platform", "platform", {x:0,y:-0.5,z:20});
+        const groundBody = this.objManager.createPhysicsObject("ground", "platform", {x:0,y:-0.5,z:20}, null, 0);
+        this.objManager.linkObject("ground", groundMesh, groundBody);
 
 
+        let topPos = {x:0,y:15,z:20};
 
-        let topPos = {x:0,y:10,z:20};
-        this.objManager.createObject("top","platform","platform",topPos,null);
+        const topMesh = this.objManager.createVisualObject("top", "platform", "platform", topPos);
+        const topBody = this.objManager.createPhysicsObject("top", "platform", topPos, null, 0);
+        this.objManager.linkObject("top", topMesh, topBody);
 
         topPos.y+=2;
-        this.objManager.createObject("redCube","redCube","redCube",topPos,null);
-        this.objManager.createObject("greenBlock","redCube","greenCube",{x:-3,y:topPos.y,z:39},null);
 
+        const wallConfigurations = [
+            {
+                name: "backWall",
+                geometry: "sideWall",
+                material: "sideWall",
+                position: { x: 0, y: 2, z: -5 },
+                rotation: { x: Math.PI / 2, y: 0, z: 0 }
+            },
+            {
+                name: "left",
+                geometry: "sideWall",
+                material: "sideWall",
+                position: { x: -5, y: 0.8, z: 15 },
+                rotation: { x: Math.PI / 2, y: 0, z: Math.PI / 2 }
+            },
+            {
+                name: "right",
+                geometry: "sideWall",
+                material: "sideWall",
+                position: { x: 5, y: 0.8, z: 15 },
+                rotation: { x: Math.PI / 2, y: 0, z: Math.PI / 2 }
+            },
+            {
+                name: "end",
+                geometry: "sideWall",
+                material: "sideWall",
+                position: { x: 0, y: 2, z: 40 },
+                rotation: { x: Math.PI / 2, y: 0, z: 0 }
+            }
+        ];
         
-        this.objManager.createObject("backWall","sideWall","sideWall",{x:0,y:2,z:-5},{x:Math.PI/2,y:0,z:0});
-        this.objManager.createObject("left","sideWall","sideWall",{x:-5,y:0.8,z:15},{x:Math.PI/2,y:0,z:Math.PI/2});
-        this.objManager.createObject("right","sideWall","sideWall",{x:5,y:0.8,z:15},{x:Math.PI/2,y:0,z:Math.PI/2});
-        this.objManager.createObject("end","sideWall","sideWall",{x:0,y:2,z:40},{x:Math.PI/2,y:0,z:0});
+
+        wallConfigurations.forEach((wall)=>{
+            const tempMesh = this.objManager.createVisualObject(wall.name,wall.geometry,wall.material,wall.position,wall.rotation);
+            const tempBody = this.objManager.createPhysicsObject(wall.name, wall.geometry, wall.position, wall.rotation, 0);
+            this.objManager.linkObject(wall.name,tempMesh, tempBody);
+        })
+
 
         this.scene.background = new THREE.Color(0x333333);
 
-        //Platforms 
-
         let i = 0;
-        this.platforms.forEach(platform => {
+        this.platforms.forEach((platform)=>{
             this.objManager.addGeometry("temp",new THREE.BoxGeometry(platform.size.x, platform.size.y, platform.size.z));
-            this.objManager.createObject("platform"+i,"temp","platforms",platform.position);
-            this.objManager.getObject("platform"+i).isGround=true;
+            
+            this.objManager.createVisualObject("platform"+i,"temp","platforms",platform.position);
+            this.objManager.createPhysicsObject("platform"+i,"temp",platform.position);
+
             this.objManager.removeGeometry("temp");
             i+=1;
-        });
-
-
-        //TODO I GOT UP TO HERE        
-        //charcter light 
-        // Position camera initially at the same place as the character
-        // this.camera.position.set(this.character.position.x, this.character.position.y + 0.5, this.character.position.z);
+        })
 
     }
 
+    /**
+     * Inits the objects in the scene
+     */
+    async init_objects_() {
+        const player = this._init_player()
+        let res = this.loadLamps();
+        let out = this.createObjects()
+
+        //add stuff for minimap
+        this.miniMap.addPlayer("#FF0000");
+        this.miniMap.addEndGoal({x:-3,y:20,z:39},"#00FF00")
+
+    }
+
+    /**
+     * Inits the camera in the scene
+     */
     init_camera_() {
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.set(0,12,20);
     }
 
+    /**
+     * Inits all the lighting required
+     */
     init_lighting_() {
 
-        let temp = new THREE.AmbientLight(0x000000,1000);
+        let temp = new THREE.AmbientLight(0x101010, 0.75);
         this.lightManager.addLight("ambient", temp, null);
 
 
@@ -325,14 +385,29 @@ export class Level1 extends SceneBaseClass {
 
     }
 
+    /**
+     * Animation function
+     * @param {} currentTime 
+     * @returns 
+     */
     animate=(currentTime)=> {
-        if (!this.loader.getLoaded()){
-            //wait till loaded
-            requestAnimationFrame(this.animate);
+        this.animationId = requestAnimationFrame(this.animate);
+
+        if (this.cameraManager==undefined||!this.loader.isLoaded() || !this.playerLoaded){
             return;
         }
+
+        this.world.step(1 / 60);
+        this.objManager.update();
+
         const timeElapsedS = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
+
+        if (currentTime >= this.nextSoundTime) {
+            soundEffectsManager.playSound("growl",0.5)
+            this.nextSoundTime = currentTime + getRandomInterval(7000, 20000); // Set the next sound time (1-5 seconds)
+        }
+
 
 
         // // Update the door animation mixer if it exists
@@ -341,14 +416,12 @@ export class Level1 extends SceneBaseClass {
         }
     
         // Check proximity to the door
-        this.checkDoorProximity();
+        this.door.checkDoorProximity(this.target);
     
         //Handle the 'E' key press to open the door
         document.addEventListener('keydown', (e) => {
             if (e.key === 'e') {
-                if (this.doorPrompt.style.display === 'block') {
-                    this.openDoor(); 
-                }
+                this.door.checkIfOpen()
             }
         });
         
@@ -357,280 +430,121 @@ export class Level1 extends SceneBaseClass {
         // Render the scene
         this.renderer.render(this.scene, this.cameraManager.getCamera());
 
-        //update minimap at defined time interval
-        const currentTimeMiniMap = Date.now();
+        //update minimap
+        this.miniMap.update(this.scene,this.target)
 
-        if (currentTimeMiniMap - this.lastMiniMapRenderTime >= this.miniMapRenderInterval) {
-            this.miniMapRenderer.render(this.scene, this.miniMapCamera);
-            this.lastMiniMapRenderTime = currentTimeMiniMap; // Update the time of last render
-        }
-
-        this.animationId = requestAnimationFrame(this.animate);
     }
 
+    /**
+     * Stops the animation
+     */
     stopAnimate=()=> {
         cancelAnimationFrame(this.animationId)
         this.animationId=null;
     }
 
-    initAudio() {
-        console.log("hello");
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        this.loadDoorCreakSound();
-    }
-    
-    // Load door creak sound
-    loadDoorCreakSound() {
-        const self = this;
-        fetch('../audio/wooden-door-creaking.mp3')
-            .then((response) => {
-                return response.arrayBuffer(); // Return the promise
-            })
-            .then(arrayBuffer => self.audioContext.decodeAudioData(arrayBuffer))
-            .then(audioBuffer => {
-                self.doorCreakBuffer = audioBuffer;
-                console.log('Audio buffer loaded:', audioBuffer); // Log the loaded buffer
-            })
-            .catch(error => console.error('Error loading door creak sound:', error));
-    }
-    
-
-
-    async initialize() {
-        try {
-            await this.loader.loadModel('./public/assets/hollow_knight/scene.glb', 'player', (gltf) => {
-                const model = gltf.scene; // Get the loaded model
-                this.addObject(model); // Add the model to the scene
-                model.rotation.set(0, 0, 0); // Rotate the model
-                model.scale.set(0.5, 0.5, 0.5); // Scale the model if necessary
-                model.position.set(0, 0.5, 0);
-                model.name = "player"; // Name the model
-                this.target = model;
-                this.target.visible=false;
-                this.cameraManager = new CameraManager(
-                    this.camera,
-                    this.target,
-                    new Character(3.0,0.3),
-                    this.scene
-                )
-
-                this.setupCharacterLight();
-
-            });
-            console.log('Model loaded and added to the scene.');
-        } catch (error) {
-            console.error('Failed to load model:', error);
-        }
-    }
-
-    openDoor() {
-        if (!this.isDoorOpen && this.doorAnimationAction) {
-            this.doorAnimationAction.reset();
-            this.doorAnimationAction.play();
-            this.isDoorOpen = true;
-            this.playDoorCreakSound(); // Play the door creak sound
-            this.gameOverScreen.style.display = 'block';
-            this.gameOverScreen.innerHTML = "<h1>Success!</h1><p>You opened the door!</p>";
-        }
-    }
-
-    playDoorCreakSound() {
-        console.log(this.doorCreakBuffer);
-        if (this.doorCreakBuffer) {
-            const source = this.audioContext.createBufferSource();
-            source.buffer = this.doorCreakBuffer;
-            source.connect(this.audioContext.destination);
-            source.start();
-        }
-    }
-
-
+    /**
+     * Sets up the lighting around the player
+     */
     setupCharacterLight() {
         this.characterLight = new THREE.PointLight(0xffffff, 1, 10);
         this.characterLight.position.set(0, 2, 0); // Slightly above the character
         this.target.add(this.characterLight); // Attach the light to the character
+
+        this.lightMechanicManager.characterLight = this.characterLight;
     }
 
-    // Function to load lamps
+    /**
+     * Loads all the lamps from the JSON file
+     */
     async loadLamps() {
-        let i=0;
-        
-        this.lampsArray.forEach(lamp => {
-            i+=1;
-            try{
-            this.loader.loadModel(lamp.scene,"lamp"+Math.random(),(gltf) => {  // Use an arrow function here
-                let model = gltf.scene;
-                this.addObject(model);
-                model.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
-                model.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
-                model.castShadow = true;
+        // Load the model once
+        const gltf = await this.loader.loadModel(this.lampsArray[0].scene, "lamp");
+        const model = gltf.scene;
     
-                const lampLight = new THREE.PointLight(0xA96CC3, 0.5, 2); // Purple light 
-                let position={x:lamp.positionX, y:lamp.positionY + 2, z:lamp.positionZ}; 
-                this.lightManager.addLight(null,lampLight,position)
-            });
-            console.log('Lamp loaded and added to the scene.');
-        }catch(error){
-            console.error('An error happened while loading the lamp model:', error);
-        }});
+        // Predefine light properties
+        const lightColor = 0xA96CC3;
+        const lightIntensity = 0.5;
+        const lightDistance = 2;
+    
+        // Iterate through each lamp in the lampsArray
+        this.lampsArray.forEach(lamp => {
+            // Clone the model for each lamp
+            const clone = model.clone();
+            
+            // Set position and scale
+            clone.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
+            clone.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
+            clone.castShadow = true;
+    
+            // Add the cloned lamp object to the scene
+            this.addObject(clone);
+    
+            // Create and position the light for the lamp
+            const lampLight = new THREE.PointLight(lightColor, lightIntensity, lightDistance);
+            lampLight.position.set(lamp.positionX, lamp.positionY + 2, lamp.positionZ);
+            
+            // Optionally, add to a group or manage lights differently if needed
+            let position = {x:lampLight.position.x,y:lampLight.position.y+2,z:lampLight.position.z};
+            this.lightManager.addLight(null, lampLight, position);
+        });
     }
-
-
-    flickerLight(light, index) {
-        let flickerDuration = 2; // Flicker for 2 seconds
-        let flickerInterval = 100; // Flicker every 200ms
-        let flickerCount = flickerDuration * 1000 / flickerInterval; // Total flickers
-        let originalIntensity = light.intensity;
-
-        let flickerEffect = setInterval(() => {
-            light.intensity = light.intensity === 0 ? originalIntensity : 0; // Toggle light intensity
-            flickerCount--;
-
-            if (flickerCount <= 0) {
-                clearInterval(flickerEffect);
-                light.intensity = 0; // Turn off the light
-                // Reset the timer for this light
-                if (this.lightTimers[index]) {
-                    this.lightTimers[index].time = 0;
-                    this.lightTimers[index].flickering = false;
-                }
-
-                // Apply damage if the character is still near the light
-                if (calcEuclid(this.target.position.x, this.target.position.z, light.position.x, light.position.z)) {
-                    this.takeDamage(this.damageRate); // Take the same damage as usual when the light goes off
-                }
-            }
-        }, flickerInterval);
-    }
-
-    checkDoorProximity() {
-        if (this.Door==undefined){
-            return;
-        }
-        const distance = this.target.position.distanceTo(this.Door.position);
-        
-        if (distance <= this.doorOpenDistance) {
-            this.doorPrompt.style.display = 'block'; // Show prompt
-        } else {
-            this.doorPrompt.style.display = 'none'; // Hide prompt
-        }
-    }
-
-
+    
+    
+    /**
+     * Handles character death
+     */
     handleCharacterDeath() {
+        this.lightMechanicManager.resetHealth();
         this.gameOverScreen.style.display = "block";
         document.body.style.cursor = "pointer"
+        this.playerBody.position.set(0,0.5,0);
     }
 
+    /**
+     * Restarts the level
+     */
     restart() {
         this.gameOverScreen.style.display = "none";
 
-        // Reset character position and camera
-        this.target.position.set(0, 0.5, 0);
-        // this.camera.position.set(this.target.position.x, this.target.position.y + 0.5, this.target.position.z);
-        this.target.rotation.y = Math.PI;
+        this.playerBody.position.set(0, 0.5, 0);
 
-        // Reset health
-        this.health = 100;
-        this.healthNumberElement.textContent = this.health; // Reset health number in the HTML
 
-        // Reload textures
-        //TODO uncomment?
-        // textures.forEach(texture => {
-        //     texture.needsUpdate = true; // Mark texture for update
-        // });  
-
-        // Use the toggleLightIntensity function to turn on all lights at intensity 5
         this.points.forEach(light => this.toggleLightIntensity(light));
         this.lampsArray.forEach(lampLight => {
             lampLight.intensity = 0.5; // Reset to original intensity
         });
-        this.updateCharacterLight();
+
         document.body.style.cursor = "none"
-        this.cameraManager.resetStates();
     }
 
-    //TODO PUT INTO CLASS OF ITS OWN
+    /**
+     * Light to toggle the intensity to 5 for
+     * @param {THREE.Light} light 
+     */
     toggleLightIntensity(light) {
         light.intensity = 5;
     }
 
-    updateCharacterLight() {
-        if (this.characterLight) {
-            // Calculate light intensity and distance based on health
-            const maxIntensity = 1;
-            const maxDistance = 5;
-            const minIntensity = 0.2;
-            const minDistance = 1;
-
-            const healthPercentage = this.health / 100;
-            
-            this.characterLight.intensity = minIntensity + (maxIntensity - minIntensity) * healthPercentage;
-            this.characterLight.distance = minDistance + (maxDistance - minDistance) * healthPercentage;
-        }
-    }
-
-    takeDamage(amount) {
-        this.health -= amount;
-        this.health = Math.max(0, this.health); // Ensure health doesn't go below 0
-        this.healthNumberElement.textContent = this.health;
-        this.updateCharacterLight(); // Update light when health changes
-
-        if (this.health <= 0) {
-            this.handleCharacterDeath();
-        }
-    }
-
-    heal(amount) {
-        this.health += amount;
-        this.health = Math.min(100, this.health); // Cap health at 100
-        this.healthNumberElement.textContent = this.health;
-        this.updateCharacterLight(); // Update light when health changes
-    }
-    
-    startDamageTimer() {
-        setInterval(() => {
-            if (this.loader.getLoaded()) {
-                let valid = false;
-
-                this.points.forEach((light, index) => {
-                    // Check distance to each light
-                    if (calcEuclid(this.target.position.x, this.target.position.z, light.position.x, light.position.z)) {
-                        valid = true;
-
-                        // Initialize or increment the timer for this light
-                        if (!this.lightTimers[index]) {
-                            this.lightTimers[index] = { time: 0, flickering: false };
-                        }
-
-                        this.lightTimers[index].time += 1; // Increment time spent in light
-
-                        // Heal if the light is on
-                        if (light.intensity > 0) {
-                            this.heal(this.healingRate);
-                        }
-
-                        // Check if time exceeds 3 seconds
-                        if (this.lightTimers[index].time >= 3 && !this.lightTimers[index].flickering) {
-                            this.lightTimers[index].flickering = true;
-                            this.flickerLight(light, index); // Pass index for reset after flickering
-                        }
-                    } else {
-                        // Reset the timer if not in light
-                        if (this.lightTimers[index]) {
-                            this.lightTimers[index].time = 0;
-                            this.lightTimers[index].flickering = false;
-                        }
-                    }
-                });
-
-                if (!valid) {
-                    this.takeDamage(this.damageRate); // Take damage if not within any light
-                }
+    /**
+     * Starts the health mechanic
+     */
+    startDamageTimer(){
+        setInterval(()=>{
+            if (this.loader.isLoaded()){
+                this.lightMechanicManager.damageTimer(this.points,this.target)
             }
-        }, 1000); // Call this function every second
+
+            // console.log(this.lightMechanicManager.getHealth())
+            if (this.lightMechanicManager.getHealth()<=0){
+                this.handleCharacterDeath();
+            }
+        },1000);
     }
 
+    /**
+     * Disposes of assets in the level
+     */
     disposeLevel(){
         if (!this.scene) return;
 
