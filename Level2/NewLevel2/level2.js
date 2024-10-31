@@ -7,6 +7,7 @@ import { LoadingManagerCustom } from "../../src/scripts/Loaders/Loader";
 import { Door } from '../../src/scripts/Objects/Door';
 import { door } from '../../src/data/doorPos1';
 
+import { ButtonPlatform } from './buttonPlatform.js';
 //SCENE AND RENDERER---------------------------------------------------
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer();
@@ -104,7 +105,6 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
-//----------------------------------------------------------------------
 
 //ANIMATE--------------------------------------------------------------
 let clock = new THREE.Clock();
@@ -114,8 +114,9 @@ let animatePlatforms = false;
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
-
-    let time = clock.getElapsedTime();
+    
+    // Original vertical movement animation
+    let verticalTime = verticalAnimationClock.getElapsedTime();
     movingPlatforms.forEach(({ platform, targetY }) => {
         if (animatePlatforms) {
             const duration = 2; // Duration of the animation in seconds
