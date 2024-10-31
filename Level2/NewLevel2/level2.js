@@ -3,11 +3,6 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { CurvedPlatform } from './curvedPlatform.js';
 import { CPBoxLamp } from './CPBoxLamp.js';
 import { CircularPlatform } from './circularPlatform.js';
-import { LoadingManagerCustom } from "../../src/scripts/Loaders/Loader";
-import { Door } from '../../src/scripts/Objects/Door';
-import { door } from '../../src/data/doorPos1';
-import { OscillatingMist } from './Fog.js';
-
 import { ButtonPlatform } from './buttonPlatform.js';
 //SCENE AND RENDERER---------------------------------------------------
 const scene = new THREE.Scene();
@@ -32,30 +27,12 @@ controls.screenSpacePanning = false;
 //----------------------------------------------------------------------
 
 //LIGHTING--------------------------------------------------------------
-// const ambientLight = new THREE.AmbientLight(0x0f0f0f);
-// ambientLight.intensity = 2;
-// scene.add(ambientLight);
-// const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-// directionalLight.position.set(0, 10, 10).normalize();
-// scene.add(directionalLight);
-
-//Other lighting 
-// Create ambient light with a lower intensity and darker color for subtle background illumination
-const ambientLight = new THREE.AmbientLight(0x0a0a0a); // Darker ambient color
-ambientLight.intensity = 0.5; // Reduced intensity to match the spooky setting
+const ambientLight = new THREE.AmbientLight(0x0f0f0f);
+ambientLight.intensity = 10;
 scene.add(ambientLight);
-
-// Create a directional light with a cool, dim tone to simulate moonlight or an eerie glow
-const directionalLight = new THREE.DirectionalLight(0x666666, 0.3); // Softer, dimmer tone
-directionalLight.position.set(-5, 10, 5).normalize(); // Off-center for angled shadows
-directionalLight.castShadow = true; // Enables shadows for added depth
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(0, 10, 10).normalize();
 scene.add(directionalLight);
-
-// Optionally, add a fog effect light source if more shadow definition is desired
-const fogLight = new THREE.PointLight(0x333333, 0.2); // Dark grey point light in fog
-fogLight.position.set(0, 5, 0); // Position near the center of the scene
-scene.add(fogLight);
-
 //----------------------------------------------------------------------
 
 // Helper function to calculate the shortest rotation angle
@@ -190,14 +167,14 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
-//----------------------------------------------------------------------
 
 //ANIMATION FUNCTION------------------------------------------------
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
-
-    let time = clock.getElapsedTime();
+    
+    // Original vertical movement animation
+    let verticalTime = verticalAnimationClock.getElapsedTime();
     movingPlatforms.forEach(({ platform, targetY }) => {
         if (animatePlatforms) {
             const duration = 2;
