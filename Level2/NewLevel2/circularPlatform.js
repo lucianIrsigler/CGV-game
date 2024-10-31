@@ -1,5 +1,11 @@
 import * as THREE from 'three';
 import { CurvedPlatform } from './curvedPlatform.js';
+import { loadTextures, applyTextureSettings } from './TextureLoaderUtil';
+
+const textureLoader = new THREE.TextureLoader();
+const baseTexture = textureLoader.load('PavingStones.jpg');
+baseTexture.wrapS = baseTexture.wrapT = THREE.RepeatWrapping;
+baseTexture.repeat.set(5, 5);
 
 export class CircularPlatform extends THREE.Object3D {
     constructor(innerRadius, outerRadius, depth) {

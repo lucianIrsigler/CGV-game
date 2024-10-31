@@ -1,4 +1,3 @@
-// layout.js
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { CurvedPlatform } from './curvedPlatform.js';
@@ -29,32 +28,28 @@ scene.add(ambientLight, directionalLight);
 //----------------------------------------------------------------------
 
 //ADDING OBJECTS TO SCENE-------------------------------------------
-
 const circlePlatformInnerRadius = 0;
 const circlePlatformOuterRadius = 18;
 const circlePlatformDepth = 1;
 const curvedPlatformInnerRadius = 18;
 const curvedPlatformOuterRadius = 25;
 const curvedPlatformDepth = 1;
-const height = 3;
+const curvedPlatformHeight = 3;
 const numberOfPlatforms = 16;
 const rotation = Math.PI / 4;
 const roomRadius = 30;
 const floorDepth = 1;
 const ceilingDepth = 1;
-const roomHeight = floorDepth + numberOfPlatforms * height + ceilingDepth + 2 * height;
-for (let i = 0; i <= numberOfPlatforms; i++) 
-    {
+const roomHeight = floorDepth + numberOfPlatforms * curvedPlatformHeight + ceilingDepth + 2 * curvedPlatformHeight;
+for (let i = 0; i <= numberOfPlatforms; i++) {
     if (i % 4 === 0) {
         const cpBoxLamp = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
-        cpBoxLamp.position.y = i * height;
+        cpBoxLamp.position.y = i * curvedPlatformHeight;
         cpBoxLamp.rotation.y = i * rotation;
         scene.add(cpBoxLamp);
-    } 
-    else 
-    {
+    } else {
         const curvedPlatform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
-        curvedPlatform.position.y = i * height;
+        curvedPlatform.position.y = i * curvedPlatformHeight;
         curvedPlatform.rotation.y = i * rotation;
         scene.add(curvedPlatform);
     }
@@ -72,12 +67,13 @@ wall.position.y = roomHeight - 1;
 scene.add(wall);
 //----------------------------------------------------------------------
 
-// Handle Window Resizing
+//HANDLE WINDOW RESIZE-------------------------------------------------
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
+//----------------------------------------------------------------------
 
 //ANIMATE--------------------------------------------------------------
 function animate() {
