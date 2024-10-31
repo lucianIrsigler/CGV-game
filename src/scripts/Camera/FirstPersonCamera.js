@@ -20,6 +20,13 @@ export class FirstPersonCamera {
         this.input_ = new FirstPersonInputController(scene, target, playerBody);
     }
     
+
+    updateVariables(phi,theta,target,playerBody,camera){
+        this.input_.updateVariables(phi,theta,target,playerBody)
+        this.camera_ = camera;
+    }
+
+
     /**
      * Updates the camera to match the input controller's rotation and position
      * @param {*} _

@@ -2,6 +2,7 @@ import { FirstPersonCamera } from "../Camera/FirstPersonCamera"
 import { ThirdPersonCamera } from "../Camera/ThirdPersonCamera"
 import * as THREE from 'three';
 import * as CANNON from "cannon-es"
+import { cameraFar } from "three/webgpu";
 
 
 /**
@@ -34,12 +35,20 @@ export class CameraManager{
         //we switching to first person here
 
         if (!this.firstPerson){
-            this.fps.input_.phi_ = this.thirdPerson.input_.phi_;
-            this.fps.input_.theta_ = this.thirdPerson.input_.theta_;
+            let phi = this.thirdPerson.input_.phi_;
+            let theta = this.thirdPerson.input_.theta_;
+            let playerBody = this.thirdPerson.input_.playerBody;
+            let target = this.thirdPerson.input_.target_;
+            let camera = this.thirdPerson.camera_;
+            this.fps.updateVariables(phi,theta,target,playerBody,camera);
         }else{
-            this.thirdPerson.input_.phi_ = this.fps.input_.phi_;
-            this.thirdPerson.input_.theta_ = this.fps.input_.theta_;
+            let phi = this.fps.input_.phi_;
+            let theta = this.fps.input_.theta_;
+            let playerBody = this.fps.input_.playerBody;
+            let target = this.fps.input_.target_;
+            let camera = this.fps.camera_;
 
+            this.thirdPerson.updateVariables(phi,theta,target,playerBody,camera);
         }
     }
 

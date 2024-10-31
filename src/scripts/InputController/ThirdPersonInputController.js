@@ -45,6 +45,20 @@ export class ThirdPersonInputController {
     }
 
     /**
+     * Updates the physics variables
+     * @param {*} phi 
+     * @param {*} theta 
+     * @param {*} target 
+     * @param {*} playerBody 
+     */
+    updateVariables(phi,theta,target,playerBody){
+      this.phi_=phi;
+      this.theta_=theta;
+      this.target_=target;
+      this.playerBody=playerBody;
+    }
+
+    /**
      * Initilizes some variables and adds event listeners
      */
     initialize_() {

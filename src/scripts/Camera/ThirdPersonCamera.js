@@ -26,6 +26,10 @@ export class ThirdPersonCamera{
         this.prevLookAt = new THREE.Vector3(-1,2,-2);
     }
 
+    updateVariables(phi,theta,target,playerBody,camera){
+        this.input_.updateVariables(phi,theta,target,playerBody)
+        this.camera_ = camera;
+    }
 
     calculateIdealOffset_(){
         const idealOffset =  new THREE.Vector3(-1,2,-2);
