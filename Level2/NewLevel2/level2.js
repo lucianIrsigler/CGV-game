@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { CurvedPlatform } from './curvedPlatform.js';
 import { CPBoxLamp } from './CPBoxLamp.js';
 import { CircularPlatform } from './circularPlatform.js';
-
+import { ButtonPlatform } from './buttonPlatform.js';
 //SCENE AND RENDERER---------------------------------------------------
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer();
@@ -65,13 +65,32 @@ const movingPlatforms = []; // Array for platforms 1-7
 const rotatingPlatforms = []; // Array for platforms 9-11
 const upperMovingPlatforms = []; // Array for platforms 13-15
 
+// Function to handle button clicks
+function handleButtonClick(key) {
+    const keyEvent = new KeyboardEvent('keydown', { key });
+    window.dispatchEvent(keyEvent);
+}
+
 //CURVED PLATFORMS
 for (let i = 0; i <= numberOfPlatforms; i++) {
     let platform;
     
-    if (i % 4 === 0) {
+    if (i % 4 === 0 && i < 13) {
+        platform = new ButtonPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+        // Add event listener for button clicks
+        if (i === 0) {
+            platform.isClicked = () => handleButtonClick('1');
+        } else if (i === 8) {
+            platform.isClicked = () => handleButtonClick('3');
+        } else if (i === 12) {
+            platform.isClicked = () => handleButtonClick('5');
+        }
+    } 
+    else if(i % 4 === 0){
         platform = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
-    } else {
+    }
+    
+    else {
         platform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
     }
     
@@ -132,7 +151,7 @@ wall.position.y = roomHeight - 1;
 scene.add(wall);
 
 //ANIMATION STATE----------------------------------------------------
-let clock = new THREE.Clock();
+// let clock = new THREE.Clock();
 let verticalAnimationClock = new THREE.Clock();
 let rotationAnimationClock = new THREE.Clock();
 let upperPlatformsClock = new THREE.Clock();
@@ -175,9 +194,9 @@ function animate() {
         const progress = Math.min(rotationTime / duration, 1);
         
         rotatingPlatforms.forEach(platform => {
-            const index = platform.userData.index;
+            // const index = platform.userData.index;
             const startRotation = platform.userData.originalRotation;  // Starting under platform 12
-            const targetRotation = platform.userData.targetRotation;   // Their respective positions
+            // const targetRotation = platform.userData.targetRotation;   // Their respective positions
             
             if (!reverseRotation) {
                 const easedProgress = Math.pow(progress, 0.8);
