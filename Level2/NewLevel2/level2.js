@@ -50,6 +50,10 @@ for (let i = 0; i <= numberOfPlatforms; i++) {
         const cpBoxLamp = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
         cpBoxLamp.position.y = i * curvedPlatformHeight;
         cpBoxLamp.rotation.y = i * rotation;
+        // cpBoxLamp.updateMatrixWorld();
+        // const lampWorldPos = new THREE.Vector3();
+        // cpBoxLamp.lamp.getWorldPosition(lampWorldPos);
+        // console.log(lampWorldPos);
         scene.add(cpBoxLamp);
     } else {
         const curvedPlatform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
