@@ -109,22 +109,46 @@ window.addEventListener('resize', () => {
 //ANIMATE--------------------------------------------------------------
 let clock = new THREE.Clock();
 
+let animatePlatforms = false;
+
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
 
     let time = clock.getElapsedTime();
     movingPlatforms.forEach(({ platform, targetY }) => {
-        const delay = 2; // Delay in seconds
-        const period = 4; // Period of the sine wave in seconds
-        const amplitude = (targetY - 0) / 2; // Amplitude of the sine wave
+        if (animatePlatforms) {
+            const duration = 2; // Duration of the animation in seconds
+            const progress = Math.min(time / duration, 1); // Progress of the animation (0 to 1)
 
-        if (time > delay) {
-            platform.position.y = 0 + amplitude * (1 + Math.sin((time - delay) * (2 * Math.PI / period))); // Animate from initial height to target height
+            platform.position.y = progress * targetY; // Move from initial height to target height
+
+            if (progress >= 1) {
+                platform.position.y = targetY; // Ensure the platform stays at the target height
+            }
+        } else {
+            const duration = 2; // Duration of the animation in seconds
+            const progress = Math.min(time / duration, 1); // Progress of the animation (0 to 1)
+
+            platform.position.y = (1 - progress) * targetY; // Move from target height to initial height
+
+            if (progress >= 1) {
+                platform.position.y = 0; // Ensure the platform stays at the initial height
+            }
         }
     });
 
     renderer.render(scene, camera);
 }
+
+window.addEventListener('keydown', (event) => {
+    if (event.key === '1') {
+        animatePlatforms = false;
+        clock.start(); // Restart the clock to reset the animation timing
+    } else if (event.key === '2') {
+        animatePlatforms = true;
+        clock.start(); // Restart the clock to reset the animation timing
+    }
+});
 animate();
 //----------------------------------------------------------------------
