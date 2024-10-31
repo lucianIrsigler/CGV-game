@@ -3,16 +3,18 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { CurvedPlatform } from './curvedPlatform.js';
 import { CPBoxLamp } from './CPBoxLamp.js';
 import { CircularPlatform } from './circularPlatform.js';
-import { LoadingManagerCustom } from "../../src/scripts/Loaders/Loader";
-import { Door } from '../../src/scripts/Objects/Door';
-import { door } from '../../src/data/doorPos1';
-
 import { ButtonPlatform } from './buttonPlatform.js';
 //SCENE AND RENDERER---------------------------------------------------
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+
+// Simulate key press 4 on load
+window.addEventListener('load', () => {
+    const keyEvent = new KeyboardEvent('keydown', { key: '4' });
+    window.dispatchEvent(keyEvent);
+});
 //----------------------------------------------------------------------
 
 //CAMERA AND CONTROLS--------------------------------------------------
@@ -33,7 +35,16 @@ directionalLight.position.set(0, 10, 10).normalize();
 scene.add(directionalLight);
 //----------------------------------------------------------------------
 
-//ADDING OBJECTS TO SCENE-------------------------------------------
+// Helper function to calculate the shortest rotation angle
+function calculateShortestRotation(current, target) {
+    let diff = target - current;
+    // Normalize the difference to be between -π and π
+    while (diff > Math.PI) diff -= 2 * Math.PI;
+    while (diff < -Math.PI) diff += 2 * Math.PI;
+    return diff;
+}
+
+//CONSTANTS------------------------------------------------------------
 const circlePlatformInnerRadius = 0;
 const circlePlatformOuterRadius = 18;
 const circlePlatformDepth = 1;
@@ -43,8 +54,8 @@ const curvedPlatformDepth = 1;
 const curvedPlatformHeight = 3;
 const numberOfPlatforms = 16;
 const rotation = Math.PI / 4;
-// const roomRadius = 30;
-const roomRadius = curvedPlatformOuterRadius;
+const roomInnerRadius = curvedPlatformOuterRadius;
+const roomOuterRadius = curvedPlatformOuterRadius + 1;
 const floorDepth = 1;
 const ceilingDepth = 1;
 const roomHeight = floorDepth + numberOfPlatforms * curvedPlatformHeight + ceilingDepth + 2 * curvedPlatformHeight;
@@ -54,12 +65,26 @@ const movingPlatforms = []; // Array for platforms 1-7
 const rotatingPlatforms = []; // Array for platforms 9-11
 const upperMovingPlatforms = []; // Array for platforms 13-15
 
+// Function to handle button clicks
+function handleButtonClick(key) {
+    const keyEvent = new KeyboardEvent('keydown', { key });
+    window.dispatchEvent(keyEvent);
+}
+
 //CURVED PLATFORMS
 for (let i = 0; i <= numberOfPlatforms; i++) {
     let platform;
     
     if (i % 4 === 0 && i < 13) {
         platform = new ButtonPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+        // Add event listener for button clicks
+        if (i === 0) {
+            platform.isClicked = () => handleButtonClick('1');
+        } else if (i === 8) {
+            platform.isClicked = () => handleButtonClick('3');
+        } else if (i === 12) {
+            platform.isClicked = () => handleButtonClick('5');
+        }
     } 
     else if(i % 4 === 0){
         platform = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
@@ -100,29 +125,33 @@ for (let i = 0; i <= numberOfPlatforms; i++) {
             targetY: i * curvedPlatformHeight 
         });
     }
+    // Handle all other platforms
+    else {
+        platform.position.y = i * curvedPlatformHeight;
+    }
+    
+    platform.rotation.y = i * rotation;
+    scene.add(platform);
 }
-// const doorOne = door.doorOne;
-// door.init_door_(scene, doorOne);
-// const doorTwo = door.doorTwo;
-// door.init_door_(scene, doorTwo);
-//MOSTERS PLATFORM
+
+//ROOM SETUP----------------------------------------------------------
 const circularPlatform = new CircularPlatform(circlePlatformInnerRadius, circlePlatformOuterRadius, circlePlatformDepth);
 scene.add(circularPlatform);
-//ROOM FLOOR
-const floor = new CircularPlatform(0, roomRadius, floorDepth);
+
+const floor = new CircularPlatform(0, roomOuterRadius, floorDepth);
 floor.position.y = -1;
 scene.add(floor);
-//ROOM CEILING
-const ceiling = new CircularPlatform(0, roomRadius, ceilingDepth);
+
+const ceiling = new CircularPlatform(0, roomOuterRadius, ceilingDepth);
 ceiling.position.y = roomHeight;
 scene.add(ceiling);
-//ROOM WALL
-const wall = new CircularPlatform(curvedPlatformOuterRadius + curvedPlatformOuterRadius-curvedPlatformInnerRadius, roomRadius, roomHeight);
+
+const wall = new CircularPlatform(roomInnerRadius, roomOuterRadius, roomHeight);
 wall.position.y = roomHeight - 1;
 scene.add(wall);
 
 //ANIMATION STATE----------------------------------------------------
-let clock = new THREE.Clock();
+// let clock = new THREE.Clock();
 let verticalAnimationClock = new THREE.Clock();
 let rotationAnimationClock = new THREE.Clock();
 let upperPlatformsClock = new THREE.Clock();
@@ -139,11 +168,7 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-//ANIMATE--------------------------------------------------------------
-let clock = new THREE.Clock();
-
-let animatePlatforms = false;
-
+//ANIMATION FUNCTION------------------------------------------------
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
@@ -169,9 +194,9 @@ function animate() {
         const progress = Math.min(rotationTime / duration, 1);
         
         rotatingPlatforms.forEach(platform => {
-            const index = platform.userData.index;
+            // const index = platform.userData.index;
             const startRotation = platform.userData.originalRotation;  // Starting under platform 12
-            const targetRotation = platform.userData.targetRotation;   // Their respective positions
+            // const targetRotation = platform.userData.targetRotation;   // Their respective positions
             
             if (!reverseRotation) {
                 const easedProgress = Math.pow(progress, 0.8);
@@ -216,20 +241,49 @@ function animate() {
                 // Rising animation (key 6)
                 platform.position.y = targetY + (startY - targetY) * progress;
             }
+        });
+        
+        if (progress >= 1) {
+            animateUpperPlatforms = false;
         }
-    });
-
+    }
+    
     renderer.render(scene, camera);
 }
 
+//KEYBOARD EVENT HANDLERS--------------------------------------------
 window.addEventListener('keydown', (event) => {
-    if (event.key === '2') {
-        animatePlatforms = false;
-        clock.start(); // Restart the clock to reset the animation timing
-    } else if (event.key === '1') {
-        animatePlatforms = true;
-        clock.start(); // Restart the clock to reset the animation timing
+    switch(event.key) {
+        case '1':
+            animatePlatforms = true;
+            verticalAnimationClock.start();
+            break;
+        case '2':
+            animatePlatforms = false;
+            verticalAnimationClock.start();
+            break;
+        case '3':
+            rotatingPlatformsActive = true;
+            reverseRotation = false;
+            rotationAnimationClock.start();
+            break;
+        case '4':
+            rotatingPlatformsActive = true;
+            reverseRotation = true;
+            rotationAnimationClock.start();
+            break;
+        case '5':
+            animateUpperPlatforms = true;
+            upperPlatformsDescending = true;
+            upperPlatformsClock.start();
+            break;
+        case '6':
+            animateUpperPlatforms = true;
+            upperPlatformsDescending = false;
+            upperPlatformsClock.start();
+            break;
     }
 });
+
+//START ANIMATION----------------------------------------------------
 animate();
-//----------------------------------------------------------------------
