@@ -5,4 +5,4 @@ import { Level3 } from "./src/scenes/Level3";
 
 let animationManager = new AnimationManager()
 
-animationManager.switchScene(new Level3());
+animationManager.switchScene(new Level1());
