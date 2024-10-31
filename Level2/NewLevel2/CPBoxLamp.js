@@ -19,7 +19,7 @@ export class CPBoxLamp extends CurvedPlatform {
     createGroup() {
         const group = new THREE.Group();
         this.box = new Box(boxLength, boxHeight, boxWidth);
-        this.lamp = new Lamp(1, 1, 1, 0x0000ff);
+        this.lamp = new Lamp(boxLength/4, 0, 0, 0x0000ff);
         this.lamp.position.set(0, 0, this.innerRadius + (this.outerRadius - this.innerRadius) / 2);
         this.box.position.set(0, boxHeight/2, this.innerRadius + boxWidth / 2);
         group.add(this.box);
