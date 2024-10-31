@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { CurvedPlatform } from './curvedPlatform.js';
-import { loadTextures, applyTextureSettings } from './TextureLoaderUtil';
+import { loadTextures, applyTextureSettings } from '../../src/scripts/util/TextureLoaderUtil.js';
 
 const textureLoader = new THREE.TextureLoader();
 const baseTexture = textureLoader.load('PavingStones.jpg');

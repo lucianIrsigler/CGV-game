@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 export class Lamp extends THREE.Object3D {
     constructor(x, y, z, color) {
@@ -14,23 +15,31 @@ export class Lamp extends THREE.Object3D {
     createMesh() {
         const lampGroup = new THREE.Group();
 
-        const baseGeometry = new THREE.CylinderGeometry(this.x, this.x, this.z / 10, 32);
-        const baseMaterial = new THREE.MeshStandardMaterial({ color: this.color });
-        const baseMesh = new THREE.Mesh(baseGeometry, baseMaterial);
-        baseMesh.position.y = this.z / 20;
-        lampGroup.add(baseMesh);
+        const baseLamp = {
+            scene: "/street_lamp/scene.gltf",
+            scaleX: 0.1,
+            scaleY: 0.1,
+            scaleZ: 0.1,
+            positionX: this.x, 
+            positionY: this.y, 
+            positionZ: this.z,  
+        };
 
-        const poleGeometry = new THREE.CylinderGeometry(this.x / 4, this.x / 4, this.z, 32);
-        const poleMaterial = new THREE.MeshStandardMaterial({ color: this.color });
-        const poleMesh = new THREE.Mesh(poleGeometry, poleMaterial);
-        poleMesh.position.y = this.z / 2;
-        lampGroup.add(poleMesh);
-
-        const shadeGeometry = new THREE.ConeGeometry(this.x, this.z / 2, 32);
-        const shadeMaterial = new THREE.MeshStandardMaterial({ color: this.color });
-        const shadeMesh = new THREE.Mesh(shadeGeometry, shadeMaterial);
-        shadeMesh.position.y = this.z;
-        lampGroup.add(shadeMesh);
+        const loader = new GLTFLoader();
+        //LOAD LAMPS FROM "street_lamp"
+        loader.load(baseLamp.scene, (gltf) => {
+            const lampMesh = gltf.scene;
+            lampMesh.scale.set(baseLamp.scaleX, baseLamp.scaleY, baseLamp.scaleZ);
+            lampMesh.position.set(baseLamp.positionX, baseLamp.positionY, baseLamp.positionZ);
+            lampGroup.add(lampMesh);
+            
+            //LIGHTING
+            const lampPos = new THREE.Vector3(baseLamp.positionX, baseLamp.positionY, baseLamp.positionZ);
+            const coneLight = new THREE.SpotLight(0xA96CC3, 40, 10, Math.PI / 4, 0.5, 2);
+            coneLight.position.copy(lampPos).add(new THREE.Vector3(0, 5, 0));
+            lampGroup.add(coneLight);
+            lampGroup.add(coneLight.target);
+        });
 
         return lampGroup;
     }

@@ -1,20 +1,5 @@
 import * as THREE from 'three';
-import { loadTextures, applyTextureSettings } from './TextureLoaderUtil';
-
-const platformTexture = loadTextures('PavingStones');
-applyTextureSettings(platformTexture, 0.07, 0.07); 
-platformTexture.wrapS = platformTexture.wrapT = THREE.RepeatWrapping;
-const material = new THREE.MeshStandardMaterial({
-    map: platformTexture.colorMap,
-    aoMap: platformTexture.aoMap,
-    displacementMap: platformTexture.displacementMap,
-    metalnessMap: platformTexture.metalnessMap,
-    normalMap: platformTexture.normalMapDX, 
-    roughnessMap: platformTexture.roughnessMap,
-    displacementScale: 0,
-    metalness: 0.1,
-    roughness: 0.5
-});
+import { loadTextures, applyTextureSettings } from '../../src/scripts/util/TextureLoaderUtil.js';
 
 const angle = Math.PI / 4;
 const sectorAngle = Math.PI / 4;
@@ -39,7 +24,32 @@ export class CurvedPlatform extends THREE.Object3D {
 
         const extrudeSettings = { depth: this.depth, bevelEnabled: false };
         const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-        const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+        //GET TEXTURES FROM "PavingStones"
+        const textureLoader = new THREE.TextureLoader();
+        const colorMap = textureLoader.load('PavingStones/Color.jpg');
+        const aoMap = textureLoader.load('PavingStones/AmbientOcclusion.jpg');
+        const displacementMap = textureLoader.load('PavingStones/Displacement.jpg');
+        const metalnessMap = textureLoader.load('PavingStones/Metalness.jpg');
+        const normalMapDX = textureLoader.load('PavingStones/NormalDX.jpg');
+        const roughnessMap = textureLoader.load('PavingStones/Roughness.jpg');
+        
+        [colorMap, aoMap, displacementMap, metalnessMap, normalMapDX, roughnessMap].forEach(texture => {
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(0.2, 0.2);
+        });
+        colorMap.encoding = THREE.sRGBEncoding;
+        const material = new THREE.MeshStandardMaterial({
+            map: colorMap,
+            aoMap: aoMap,
+            displacementMap: displacementMap,
+            metalnessMap: metalnessMap,
+            normalMap: normalMapDX, 
+            roughnessMap: roughnessMap,
+            displacementScale: 0,
+            metalness: 0.1,
+            roughness: 0.5
+        });
+
         const mesh = new THREE.Mesh(geometry, material);
         mesh.rotateX(Math.PI / 2);
         mesh.rotateZ(angle/2);

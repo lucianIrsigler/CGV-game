@@ -1,18 +1,5 @@
 import * as THREE from 'three';
-import { loadTextures, applyTextureSettings } from './TextureLoaderUtil';
-
-const textureLoader = new THREE.TextureLoader();
-const colorMap = textureLoader.load('../Planks/PlanksColor.jpg');
-const aoMap = textureLoader.load('../Planks/PlanksAmbientOcclusion.jpg');
-const displacementMap = textureLoader.load('../Planks/PlanksDisplacement.jpg');
-const metalnessMap = textureLoader.load('../Planks/PlanksMetalness.jpg');
-const normalMapDX = textureLoader.load('../Planks/PlanksNormalDX.jpg');
-const roughnessMap = textureLoader.load('../Planks/PlanksRoughness.jpg');
-
-[colorMap, aoMap, displacementMap, metalnessMap, normalMapDX, roughnessMap].forEach(texture => {
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(0.2, 0.2);
-});
+import { loadTextures, applyTextureSettings } from '../../src/scripts/util/TextureLoaderUtil';
 
 export class Box extends THREE.Object3D {
     constructor(x, y, z) {
@@ -26,8 +13,21 @@ export class Box extends THREE.Object3D {
 
     createMesh() {
         const geometry = new THREE.BoxGeometry(this.x, this.y, this.z);
-
-        geometry.attributes.uv2 = geometry.attributes.uv;
+        //GET TEXTURES FROM "Planks"
+        const textureLoader = new THREE.TextureLoader();
+        const colorMap = textureLoader.load('/Planks/PlanksColor.jpg');
+        const aoMap = textureLoader.load('Planks/PlanksAmbientOcclusion.jpg');
+        const displacementMap = textureLoader.load('Planks/PlanksDisplacement.jpg');
+        const metalnessMap = textureLoader.load('Planks/PlanksMetalness.jpg');
+        const normalMapDX = textureLoader.load('Planks/PlanksNormalDX.jpg');
+        const roughnessMap = textureLoader.load('Planks/PlanksRoughness.jpg');
+        
+        [colorMap, aoMap, displacementMap, metalnessMap, normalMapDX, roughnessMap].forEach(texture => {
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(0.2, 0.2);
+        });
+        colorMap.encoding = THREE.sRGBEncoding;
+        
         const material = new THREE.MeshStandardMaterial({
             map: colorMap,
             aoMap: aoMap,

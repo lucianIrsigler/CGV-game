@@ -4,6 +4,8 @@ import { SoundEffectsManager } from "./SoundEffectManger";
 import { Bullet } from "../Objects/bullet";
 import { Enemy } from "../Objects/Enemy";
 import { cos } from 'three/webgpu';
+// import * as CANNON from 'cannon-es'; // Import Cannon.js for physics
+
 import { compressSync } from 'three/examples/jsm/libs/fflate.module.js';
 
 const soundEffectsManager = new SoundEffectsManager();
@@ -36,11 +38,11 @@ export class GunManager{
 
     updateAllBullets(){
         this.bullets.forEach((bullet)=>{
-            bullet.updateForce();
+            bullet.update(this.scene);
         })
 
         this.enemyBullets.forEach((bullet)=>{
-            bullet.updateForce(); 
+            bullet.update(this.scene);
         })
     }
 
@@ -107,40 +109,52 @@ export class GunManager{
 
         const bullet = new Bullet(position, colour,world,this.scene); // Create bullet at the cube's position
         
-        const direction = this.player.position.clone().sub(this.enemy.enemyBody.position).normalize();
-        bullet.velocity.copy(direction); // Set bullet velocity to point at the player
-        bullet.body.velocity.copy(direction);
-        this.enemyBullets.push(bullet); // Add bullet to the array
+        // Calculate the bullet direction based on the camera's forward direction
+        const direction = new THREE.Vector3(); // Create a new vector for direction
+        camera.getWorldDirection(direction); // Get the direction the camera is facing
+
+        console.log(direction);
+        
+        direction.normalize(); // Normalize the direction vector
+
+        // bullet.body.velocity.copy(direction);
+        bullet.velocity.copy(direction); // Set bullet velocity to point in the camera's direction
+        this.bullets.push(bullet); // Add bullet to the array
+
         this.scene.add(bullet.mesh);
         this.scene.add(bullet.light);
     }
 
-
-    updateBulletsPlayer(target){
-        let i =0;
-        this.bullets.forEach((bullet)=>{
+    updateBulletsPlayer(target) {
+        this.bullets = this.bullets.filter((bullet, index) => {
             const isActive = bullet.update(this.scene);
-        })
-    }
-
-    updateBulletsEnemy(target){
-        let i =0;
-
-        this.enemyBullets.forEach((bullet)=>{
-            const isActive = bullet.update(this.scene);
-
-            if (this.detectCollision(bullet,target)){
-                this.handlePlayerHit(30);
-                this.scene.remove(bullet.mesh)
-                this.scene.remove(bullet.light)
-                this.enemyBullets.splice(i, 1)
-            }else if (!isActive) {
-                this.enemyBullets.splice(i, 1); 
+    
+            if (isActive && this.detectCollision(bullet, target)) {
+                this.enemy.handleEnemyHit();
+                this.scene.remove(bullet.mesh);
+                this.scene.remove(bullet.light);
+                return false; // Remove this bullet after collision
             }
-            i+=1;
-        })
+    
+            return isActive; // Keep bullet only if it's still active
+        });
     }
-
+    
+    updateBulletsEnemy(target) {
+        this.enemyBullets = this.enemyBullets.filter((bullet, index) => {
+            const isActive = bullet.update(this.scene);
+    
+            if (isActive && this.detectCollision(bullet, target)) {
+                this.handlePlayerHit(30);
+                this.scene.remove(bullet.mesh);
+                this.scene.remove(bullet.light);
+                return false; // Remove this bullet after collision
+            }
+    
+            return isActive; // Keep bullet only if it's still active
+        });
+    }
+    
 
     enemyShoot(target,camera){
         if (!this.enemy.enemyShootCooldown){
@@ -181,17 +195,25 @@ export class GunManager{
 
 
 
-    detectCollision(bullet,object){
-        return false;
-        // const r1 =bullet.shapes[0].boundingSphereRadius
-        // const r2 =object.shapes[0].boundingSphereRadius
-
-        // const distance = bullet.position.distanceTo(object.position);
-
-        // // console.log(distance <= (r1 + r2))
-
-        // return distance <= (r1 + r2);
+    detectCollision(bullet, target) {
+        // Check if bullet and target both exist and have positions
+        if (!bullet || !bullet.mesh || !target || !target.position) {
+            console.warn("Bullet or target position is undefined");
+            return false;
+        }
+        
+        const bulletPosition = bullet.mesh.position;
+        const targetPosition = target.position;
+    
+        const distance = bulletPosition.distanceTo(targetPosition);
+    
+        // Assuming a collision threshold distance
+        const collisionThreshold = 1.0;
+    
+        return distance < collisionThreshold;
     }
+    
+    
 
 
     takeDamage(amount) {

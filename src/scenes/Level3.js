@@ -107,7 +107,7 @@ export class Level3 extends SceneBaseClass{
 
           })
 
-          document.addEventListener('mousedown', (event) => {
+        document.addEventListener('mousedown', (event) => {
             //TODO add setting thing back
             if (event.button === 0) { // Only shoot if menu is not open
                 this.gunManager.addBulletPlayer(this.cameraManager.getCamera(),0xffffff,this.world);

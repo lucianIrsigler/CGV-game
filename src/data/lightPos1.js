@@ -64,7 +64,7 @@ export const lightsConfigLevel1 = [
     {
         name: "spotlight5",
         type: "SpotLight",
-        color:  0x800080,//0xffa500, Orange light
+        color:  0x800080,//0xffa500, Orange light 0x101010,
         intensity: 10,
         distance: 6,
         angle: Math.PI / 6,
