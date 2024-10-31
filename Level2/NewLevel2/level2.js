@@ -142,10 +142,10 @@ function animate() {
 }
 
 window.addEventListener('keydown', (event) => {
-    if (event.key === '1') {
+    if (event.key === '2') {
         animatePlatforms = false;
         clock.start(); // Restart the clock to reset the animation timing
-    } else if (event.key === '2') {
+    } else if (event.key === '1') {
         animatePlatforms = true;
         clock.start(); // Restart the clock to reset the animation timing
     }
