@@ -15,7 +15,7 @@ export const monsters3 = {
         scaleY:1.7,
         scaleZ:1.7,
         positionX:10,
-        positionY:3,
+        positionY:0,
         positionZ:5,
         health:200
     },
