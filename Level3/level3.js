@@ -102,7 +102,7 @@ const gameOverScreen = document.getElementById("gameOverScreen");
 const restartButton = document.getElementById("restartButton");
 let isGamePaused = false; // Flag to track if the game is paused
 let isEnemyAsleep = true;
-document.getElementById('health-bar-container').style.display = 'none';
+document.getElementById('boss-health-bar-container').style.display = 'none';
 
 //ambient sound
 const ambientSound = new Audio('ambience.mp3');
@@ -151,7 +151,7 @@ function restartGame() {
     // Reset health
     enemyCurrentHealth = enemyMaxHealth; // Reset current health to max
     enemyHits = 0; // Reset hit counter
-    document.getElementById('health-bar-container').style.display = 'none';
+    document.getElementById('boss-health-bar-container').style.display = 'none';
     updateEnemyHealthBar(); // Update health bar to full width
     updatePlayerHealthBar(); // Update player health bar
 
@@ -580,7 +580,7 @@ function animate() {
     if(!isEnemyAsleep && enemyCurrentHealth > 0){
         updateEnemyMovement(); // Update enemy's random movement
         enemyShoot(); // Enemy shooting logic
-        document.getElementById('health-bar-container').style.display = 'block';
+        document.getElementById('boss-health-bar-container').style.display = 'block';
         rotateMonster();
     }
     
@@ -678,7 +678,7 @@ let enemyHitCooldown = false; // Flag to check if enemy is already hit and waiti
 
 // Function to update the health bar based on current health
 function updateEnemyHealthBar() {
-    const healthBar = document.getElementById('health-bar');
+    const healthBar = document.getElementById('boss-health-bar');
     const healthPercentage = (enemyCurrentHealth / enemyMaxHealth) * 100; // Calculate percentage
     healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
 }
@@ -755,7 +755,7 @@ function youWin() {
     enemyCurrentHealth = 0; // Prevent negative health
     gameOverScreen.style.display = "block"; // Show game over screen
     document.exitPointerLock(); // Exit mouse lock
-    document.getElementById('health-bar-container').style.display = 'none';
+    document.getElementById('boss-health-bar-container').style.display = 'none';
     crosshair.hideCrosshair();
     // cubeEnemy.visible = false;
     enemyLight.visible = false;
@@ -772,7 +772,7 @@ function youLose() {
     gameOverScreen.style.display = "block"; // Show game over screen
     document.exitPointerLock(); // Exit mouse lock
     crosshair.hideCrosshair();
-    document.getElementById('health-bar-container').style.display = 'none';
+    document.getElementById('boss-health-bar-container').style.display = 'none';
     // cubeEnemy.visible = false;
     enemyLight.visible = false;
     ambientSound.pause();

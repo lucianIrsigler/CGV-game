@@ -173,3 +173,31 @@ label{
     100% { opacity: 1; }
 }
 
+#boss-health-bar-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border: 2px solid #000000;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+#boss-health-bar {
+    height: 100%;
+    background-color: red;
+    width: 100%;
+    transition: width 0.3s ease;
+}
+
+#boss-name {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    font-weight: bold;
+}
