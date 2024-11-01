@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ThirdPersonInputController } from "../InputController/ThirdPersonInputController";
+import { ThirdPersonInputController } from "../InputController/ThirdPersonInputController.js";
 import { Body,Vec3,Box } from 'cannon-es';
 
 

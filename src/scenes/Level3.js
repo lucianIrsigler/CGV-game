@@ -1,23 +1,23 @@
 import * as THREE from 'three';
 
 import CannonDebugger from 'cannon-es-debugger';
-import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass";
-import { ObjectManager } from "../scripts/Scene/ObjectManager";
-import { LightManager } from "../scripts/Scene/LightManager";
-import { LoadingManagerCustom } from "../scripts/Loaders/Loader";
-import { LightMechanicManager } from "../scripts/Scene/LightMechanicManager";
-import { CameraManager } from "../scripts/Scene/CameraManager";
-import { GunManager } from '../scripts/Scene/GunManager';
+import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass.js";
+import { ObjectManager } from "../scripts/Scene/ObjectManager.js";
+import { LightManager } from "../scripts/Scene/LightManager.js";
+import { LoadingManagerCustom } from "../scripts/Loaders/Loader.js";
+import { LightMechanicManager } from "../scripts/Scene/LightMechanicManager.js";
+import { CameraManager } from "../scripts/Scene/CameraManager.js";
+import { GunManager } from '../scripts/Scene/GunManager.js';
 
-import { getRandomMonster } from "../scripts/util/getRandomMonster";
-import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil';
-import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger';
-import { World, Body, Box,Vec3,Sphere } from 'cannon-es';
-import { Enemy } from '../scripts/Objects/Enemy';
-import {Crosshair} from "../scripts/Objects/Crosshair";
-import { monsters3 } from "../data/monster3";
-import { lamps3 } from "../data/lampPos3";
-import { player } from '../../Level3/player';
+import { getRandomMonster } from "../scripts/util/getRandomMonster.js";
+import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil.js';
+import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger.js';
+import { World, Body, Box,Vec3,Sphere } from 'cannon-es.js';
+import { Enemy } from '../scripts/Objects/Enemy.js';
+import {Crosshair} from "../scripts/Objects/Crosshair.js";
+import { monsters3 } from "../data/monster3.js";
+import { lamps3 } from "../data/lampPos3.js";
+import { player } from '../../Level3/player.js';
 
 
 

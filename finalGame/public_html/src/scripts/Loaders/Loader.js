@@ -1,6 +1,8 @@
 //This handles loading models and the scene
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/Addons.js';
+//import * as THREE from 'three';
+// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+
+
 
 //https://www.youtube.com/watch?v=zMzuPIiznQ4&ab_channel=WaelYasmina
 
@@ -22,13 +24,13 @@ this.addObject(model); // Add the model to the scene
 ... do whatever with the model. i.e scale ...
 
 //create cannon.js body for model
-this.playerBody = new Body({
+this.playerBody = new CANNON.Body({
     mass: 1, // Dynamic body
-    position: new Vec3(0, 2, 0), // Start position
+    position: new CANNON.Vec3(0, 2, 0), // Start position
 });
 
 //create hitbox
-const boxShape = new Box(new Vec3(0.5, 1, 0.5)); // Box shape for the player
+const boxShape = new CANNON.Box(new CANNON.Vec3(0.5, 1, 0.5)); // Box shape for the player
 this.playerBody.addShape(boxShape);
 this.world.addBody(this.playerBody);
 
@@ -43,7 +45,9 @@ this.cameraManager = new CameraManager(
 
 */
 
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
+// import * as duh from 'three/examples/jsm/controls/OrbitControls.js';
 /**
  * Class to do the loading bar
  */

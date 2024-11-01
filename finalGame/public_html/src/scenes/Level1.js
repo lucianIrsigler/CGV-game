@@ -1,19 +1,19 @@
-import * as THREE from 'three';
-import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass";
-import { lamps } from "../data/lampPos1";
-import { ObjectManager } from "../scripts/Scene/ObjectManager";
-import { LightManager } from "../scripts/Scene/LightManager";
-import { lightsConfigLevel1 } from "../data/lightPos1";
-import { LoadingManagerCustom } from "../scripts/Loaders/Loader";
-import { CameraManager } from "../scripts/Scene/CameraManager";
-import { World, Body, Box,Vec3 } from 'cannon-es';
-import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil';
-import { LightMechanicManager } from '../scripts/Scene/LightMechanicManager';
-import { Door } from '../scripts/Objects/Door';
-import { door } from '../data/doorPos1';
-import { MiniMap } from '../scripts/Objects/Minimap';
-import { getRandomInterval } from '../scripts/util/randomInterval';
-import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger';
+//import * as THREE from 'three';
+import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass.js";
+import { lamps } from "../data/lampPos1.js";
+import { ObjectManager } from "../scripts/Scene/ObjectManager.js";
+import { LightManager } from "../scripts/Scene/LightManager.js";
+import { lightsConfigLevel1 } from "../data/lightPos1.js";
+import { LoadingManagerCustom } from "../scripts/Loaders/Loader.js";
+import { CameraManager } from "../scripts/Scene/CameraManager.js";
+// import { World, Body, Box,Vec3 } from 'cannon-es';
+import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil.js';
+import { LightMechanicManager } from '../scripts/Scene/LightMechanicManager.js';
+import { Door } from '../scripts/Objects/Door.js';
+import { door } from '../data/doorPos1.js';
+import { MiniMap } from '../scripts/Objects/Minimap.js';
+import { getRandomInterval } from '../scripts/util/randomInterval.js';
+import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger.js';
 
 
 const soundEffectsManager = new SoundEffectsManager();
@@ -31,7 +31,7 @@ export class Level1 extends SceneBaseClass {
         
 
         //cannon.js world
-        this.world = new World();
+        this.world = new CANNON.World();
         this.world.gravity.set(0, -12, 0);
         this.playerBody; //cannon.js model
         this.target; //player model
@@ -166,11 +166,11 @@ export class Level1 extends SceneBaseClass {
         this.target.visible=false;
 
         //create cannon.js body for model
-        this.playerBody = new Body({
+        this.playerBody = new CANNON.Body({
             mass: 1, // Dynamic body
-            position: new Vec3(0, 2, 0), // Start position
+            position: new CANNON.Vec3(0, 2, 0), // Start position
         });
-        const boxShape = new Box(new Vec3(0.5, 1, 0.5)); // Box shape for the player
+        const boxShape = new CANNON.Box(new CANNON.Vec3(0.5, 1, 0.5)); // Box shape for the player
         this.playerBody.addShape(boxShape);
         this.world.addBody(this.playerBody);
 
@@ -421,7 +421,15 @@ export class Level1 extends SceneBaseClass {
         //Handle the 'E' key press to open the door
         document.addEventListener('keydown', (e) => {
             if (e.key === 'e') {
-                this.door.checkIfOpen()
+                const val = this.door.checkIfOpen();
+
+                if (val==true){
+                    this.endLevel();
+                    this.stopAnimate();
+                    document.getElementById("doorPrompt").style.display="none";
+                    document.getElementById("gameOverScreen").style.display="none";
+
+                }
             }
         });
         

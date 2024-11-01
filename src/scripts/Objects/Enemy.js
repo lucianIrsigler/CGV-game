@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from "cannon-es";
-import { SoundEffectsManager } from '../Scene/SoundEffectManger';
+import { SoundEffectsManager } from '../Scene/SoundEffectManger.js';
 
 
 const soundEffectsManager = new SoundEffectsManager();

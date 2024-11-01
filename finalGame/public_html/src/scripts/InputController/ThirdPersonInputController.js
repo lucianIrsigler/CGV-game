@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { Body,Vec3,Box } from 'cannon-es';
+//import * as THREE from 'three';
+// import { Body,Vec3,Box } from 'cannon-es';
 import { SoundEffectsManager } from '../Scene/SoundEffectManger.js';
 
 
@@ -24,14 +24,14 @@ export class ThirdPersonInputController {
   /**
    * @param {THREE.Scene} scene scene 
    * @param {THREE.Object3D} target three.js mesh
-   * @param {Body} playerBody cannon.js player body for the target
+   * @param {} playerBody cannon.js player body for the target
    */
     constructor(scene,target,playerBody) {
         this.scene=scene;
         this.target_ = target
         this.playerBody = playerBody;
 
-        this.speed_ = 0.5 ;
+        this.speed_ = 0.3 ;
         this.phi_ = 0;
         this.theta_ = 0;
         this.rotation = new THREE.Vector3(0,0,0);
