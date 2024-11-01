@@ -3,10 +3,42 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import * as dat from 'dat.gui'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
+import { LoadingManager } from 'three';
+
+const loader = new GLTFLoader();
+
+let playerModel;
+loader.load(
+    'js/cute_alien_character/scene.gltf',
+    function (gltf) {
+        // `gltf.scene` is the root of the loaded model
+        playerModel = gltf.scene;
+        scene.add(playerModel);
+
+        // Optional: Set the model's position, scale, rotation
+        playerModel.position.set(0, 0, 0);
+        playerModel.scale.set(5, 5, 5);
+
+        // Optional: Enable shadow casting for the model
+        playerModel.traverse((node) => {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
 
 
-// hallow night
-const hallowURL = new URL('../assets/HallowKnight.glb', import.meta.url)
+
+    },
+    undefined, // Progress function (optional)
+    function (error) {
+        console.error('An error occurred while loading the model:', error);
+    }
+);
+
+
+// Importing hallow night
+
 
 const carUrl = new URL('../assets/car.glb', import.meta.url)
 const duckUrl = new URL('../assets/duck.glb', import.meta.url)
@@ -493,7 +525,7 @@ let groundZLocationTracker = groundDepth / 2;
 
 let numGroundsTracker = 0
 
-let maxGroundsAllowed = 20;
+let maxGroundsAllowed = 10;
 
 let previousGroundX = 0
 let previousGroundY = groundYDisplacement
@@ -592,6 +624,7 @@ duckModel = new Box({
     position: { x: 0, y: 20, z: 0 }
 })
 scene.add(duckModel)
+duckModel.visible = false
 
 
 //#endregion OBJECTS =========================
@@ -679,6 +712,12 @@ const animate = (time) => {
 
     if (gameStarted) {
 
+        // Ensure playerModel and duckModel are loaded before accessing their properties
+        if (playerModel && duckModel) {
+            playerModel.position.copy(duckModel.position).add(new THREE.Vector3(0, playerModel.scale.x / 2, 0)); // Offset by 5 units up
+            playerModel.rotation.copy(duckModel.rotation);
+            playerModel.rotation.y += Math.PI; // Ensure it faces away
+        }
         step += options.speed
         const deltaTime = clock.getDelta()
 

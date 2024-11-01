@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
@@ -367,7 +367,7 @@ class Boulder extends Box {
 
 const boulders = []
 let frames = 0
-let spawnRate = 10
+let spawnRate = 30 // lower is more frequent
 let followDuck = true
 
 let previousTime = 0;
@@ -973,7 +973,7 @@ const animate = (time) => {
         <ul class="rules-list">
             <li>Well done!</li>
             <li>You are looking quite delicious!</li>
-            <li>Go on to the boss, he could use a good snack.</li>
+            <li>The boss could use a good snack.</li>
             <button class="start-level-button">Take me to him!!!</button>
         </ul>`
 
@@ -1062,7 +1062,7 @@ const animate = (time) => {
         // Spawn boulders
         if (frames % spawnRate === 0 && spawnBoulders) {
 
-            spawnRate = Math.max(20, spawnRate - 10)
+            spawnRate = Math.max(30, spawnRate - 10)
 
             let boulderX = getRandomNumber(duckModel.position.x - 20, duckModel.position.x + 20)
             let boulderZ = getRandomNumber(duckModel.position.z - 300, duckModel.position.z)
