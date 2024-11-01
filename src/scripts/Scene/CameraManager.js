@@ -1,5 +1,5 @@
-import { FirstPersonCamera } from "../Camera/FirstPersonCamera"
-import { ThirdPersonCamera } from "../Camera/ThirdPersonCamera"
+import { FirstPersonCamera } from "../Camera/FirstPersonCamera.js"
+import { ThirdPersonCamera } from "../Camera/ThirdPersonCamera.js"
 import * as THREE from 'three';
 
 

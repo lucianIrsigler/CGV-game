@@ -1,5 +1,5 @@
-import * as THREE from 'three'; // Import necessary modules
-import * as CANNON from 'cannon-es'; // Import Cannon.js for physics
+//import * as THREE from 'three'; // Import necessary modules
+//import * as CANNON from 'cannon-es'; // Import Cannon.js for physics
 
 // Bullet class
 export class Bullet {

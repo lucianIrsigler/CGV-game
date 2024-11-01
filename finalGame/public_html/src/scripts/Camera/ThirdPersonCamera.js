@@ -1,6 +1,6 @@
-import * as THREE from 'three';
-import { ThirdPersonInputController } from "../InputController/ThirdPersonInputController";
-import { Body,Vec3,Box } from 'cannon-es';
+//import * as THREE from 'three';
+import { ThirdPersonInputController } from "../InputController/ThirdPersonInputController.js";
+// import { Body,Vec3,Box } from 'cannon-es';
 
 
 //https://www.youtube.com/watch?v=UuNPHOJ_V5o&ab_channel=SimonDev
@@ -9,7 +9,7 @@ export class ThirdPersonCamera{
      * 
      * @param {THREE.Camera} camera 
      * @param {THREE.Object3D} target
-     * @param {Body} playerBody 
+     * @param {} playerBody 
      * @param {THREE.Scene} scene 
      */
     constructor(camera,target,playerBody,scene) {

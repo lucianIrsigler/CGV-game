@@ -1,4 +1,4 @@
-import { calcEuclid } from "../util/calcEuclid";
+import { calcEuclid } from "../util/calcEuclid.js";
 
 export class LightMechanicManager {
     constructor(characterLight, health = 100, damageRate = 20, healingRate = 10) {
@@ -97,6 +97,10 @@ export class LightMechanicManager {
      */
     damageTimer(points, target) {
         let valid = false;
+
+        if (target==undefined){
+            return;
+        }
 
         points.forEach((light, index) => {
             // Check distance to each light

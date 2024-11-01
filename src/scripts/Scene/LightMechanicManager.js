@@ -1,4 +1,4 @@
-import { calcEuclid } from "../util/calcEuclid";
+import { calcEuclid } from "../util/calcEuclid.js";
 
 export class LightMechanicManager {
     constructor(characterLight, health = 100, damageRate = 20, healingRate = 10) {

@@ -1,5 +1,5 @@
-import { door } from "../../data/doorPos1";
-import * as THREE from 'three';
+import { door } from "../../data/doorPos1.js";
+//import * as THREE from 'three';
  
 
 export class Door{
@@ -132,6 +132,8 @@ export class Door{
     checkIfOpen(){
         if (this.doorPrompt.style.display === 'block') {
             this.openDoor();
+            return true;
         }
+        return false;
     }
 }

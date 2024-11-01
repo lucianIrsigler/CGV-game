@@ -50,7 +50,7 @@ export class Level3 extends SceneBaseClass{
         this.health = this.maxHealth;
         this.loaded = false;
         this.damageRate = 1; // Define the damage rate
-        this.healingRate = 5; // Define the healing rate
+        this.healingRate = 10; // Define the healing rate
 
         this.world = new World();
         this.enemyModel;
@@ -72,6 +72,7 @@ export class Level3 extends SceneBaseClass{
         this.playingAlready = false
 
         //lights
+        this.points = [];
         this.lampsArray = Object.values(lamps3);
         this.playerLight;
         this.enemyLight;
@@ -93,7 +94,6 @@ export class Level3 extends SceneBaseClass{
 
         this.currentMonster = getRandomMonster(monsters3);
 
-
     }
 
 
@@ -104,6 +104,8 @@ export class Level3 extends SceneBaseClass{
         this.init_lighting_();
         this.init_camera_();
         this.init_objects_();
+
+        this.startDamageTimer();
 
     }   
 
@@ -150,21 +152,23 @@ export class Level3 extends SceneBaseClass{
 
         window.addEventListener("click", () => {
             if (!this.playingAlready){
-                soundEffectsManager.playSound("ambienceLevel3", 0.3);
+                // soundEffectsManager.playSound("ambienceLevel3", 0.3);
                 this.playingAlready=true;
             }
         });
 
         window.addEventListener("keydown", () => {
             if (!this.playingAlready){
-                soundEffectsManager.playSound("ambienceLevel3", 0.3);
+                // soundEffectsManager.playSound("ambienceLevel3", 0.3);
                 this.playingAlready=true;
             }
         });
 
-        this.restartButton.addEventListener("click", this.restartGame);
-
     };
+
+    restartGame() {
+        location.reload(); // Reload the page to restart the game
+    }
 
     // Handle Player hit
     handlePlayerHit(dmg) {
@@ -176,15 +180,46 @@ export class Level3 extends SceneBaseClass{
         this.health -= amount;
         this.health = Math.max(0, this.health); // Ensure health doesn't go below 0
         // updateCharacterLight(); // Update light when health changes
-        if (this.health <= 0) {
-            youLose(); // Call the lose condition function
-        }
+        // console.log("Player health:", this.health); // Log the player's health
     }
 
     updatePlayerHealthBar(){
         const healthBar = document.getElementById('user-health-bar');
         const healthPercentage = (this.health / this.maxHealth) * 100; // Calculate percentage
         healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
+    }
+
+    heal(amount) {
+        this.health += amount;
+        this.health = Math.min(100, this.health); // Cap health at 100
+        // updateCharacterLight(); // Update light when health changes
+    }
+
+    calcEuclid(x1, z1, x2, z2) {
+        const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
+        return distance <= 4;
+    }
+
+    // function to heal player at lamp
+    startDamageTimer(){
+        setInterval(()=>{
+            if (this.loader.isLoaded()){
+                let valid = false;
+
+                this.points.forEach((point) => {
+                    if (this.calcEuclid(this.playerBody.position.x, this.playerBody.position.z, point.x, point.z)) {
+                        valid = true;
+                        console.log("Player is near a light source");
+                        this.heal(10);
+                    }
+                });
+            }
+
+            // console.log(this.lightMechanicManager.getHealth())
+            if (this.lightMechanicManager.getHealth()<=0){
+                this.youLose();
+            }
+        },200);
     }
 
     init_lighting_(){
@@ -198,7 +233,6 @@ export class Level3 extends SceneBaseClass{
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.01); // Soft white light, 0.01 is the intensity
         this.lightManager.addLight("ambient",ambientLight);
-
 
 
         this.enemyLight = this.lightManager.getLight("enemyLight");
@@ -290,19 +324,11 @@ export class Level3 extends SceneBaseClass{
         this.enemyBody.addShape(boxShape);
         this.world.addBody(this.enemyBody);
 
-        this.enemyBody.addEventListener('collide', (event) => {
-            let obj = this.world.getBodyById(event.body.id);
-            if (this.gunManager.isPlayerBullet(obj)) {
-                this.gunManager.enemy.handleEnemyHit();
-                this.gunManager.removeBulletPlayer(obj);
-            }
-        });
-
         this.enemy = new Enemy(currentMonster.health,{x:currentMonster.positionX,y:currentMonster.positionY,z:currentMonster.positionZ},this.enemyModel,this.enemyBody,this.enemyLight);
 
 
         
-        this.gunManager = new GunManager(this.scene,100,this.enemy,this.playerBody,this.world);
+        this.gunManager = new GunManager(this.scene, this.health, this.enemy, this.player, this.world, this);
 
     }
 
@@ -446,42 +472,50 @@ export class Level3 extends SceneBaseClass{
             let position = {x:lampLight.position.x,y:lampLight.position.y+2,z:lampLight.position.z};
             this.lightManager.addLight(null, lampLight, position);
         });
+         // Add lamp positions to points array
+        this.lampsArray.forEach(lamp => {
+            this.points.push(new Vec3(lamp.positionX, lamp.positionY, lamp.positionZ));
+        });
     }
+   
 
-    restartGame() {
-    }
 
-     youWin() {
-        document.getElementById('header-end').innerText = "You Win!\nYou have slain the beast aka your MOM!!! *GASP*\nShe turned into a monster because you didn't do the dishes!";
-        isEnemyAsleep = true;
-        isGamePaused = true; // Pause the game
+    youWin() {
+        //stop animations
+        cancelAnimationFrame(this.animationId);
+
+        document.getElementById('gameOverHeader').innerText = "You Win!\nYou have defeated the monster and escaped the darkness!";
+        this.enemy.asleep = true;
+
         console.log("You win!"); // Display win message if health reaches zero
-        enemyCurrentHealth = 0; // Prevent negative health
-        gameOverScreen.style.display = "block"; // Show game over screen
-        document.exitPointerLock(); // Exit mouse lock
-        document.getElementById('health-bar-container').style.display = 'none';
-        crosshair.hideCrosshair();
-        // cubeEnemy.visible = false;
-        enemyLight.visible = false;
+        this.gameOverScreen.style.display = "block"; // Show game over screen
+
+        document.getElementById('user-health-bar-container').style.display = 'none';
+        document.getElementById('boss-health-bar-container').style.display = 'none';
+        this.enemyLight.visible = false;
+
+        this.restartButton.addEventListener("click", this.restartGame); // Restart the game when the button is clicked
         //stop ambient sound
-        ambientSound.pause();
+        soundEffectsManager.toggleLoop("ambienceLevel3")
     }
     
     // Function to handle loss condition
-     youLose() {
-        document.getElementById('header-end').innerText = "You Died!\nYou ran out of light and the darkness consumed you!";
+    youLose() {
+        //stop animations
+        cancelAnimationFrame(this.animationId);
+
+        document.getElementById('gameOverHeader').innerText = "You Died!\nYou ran out of light and the darkness consumed you!";
         this.enemy.asleep = true;
 
         console.log("You lose!"); // Display lose message if health reaches zero
         this.gameOverScreen.style.display = "block"; // Show game over screen
 
-        //TODO ADD THIS
-        // document.exitPointerLock(); // Exit mouse lock
-        // crosshair.hideCrosshair();
-        // document.getElementById('health-bar-container').style.display = 'none';
-        // cubeEnemy.visible = false;
+        document.getElementById('user-health-bar-container').style.display = 'none';
+        document.getElementById('boss-health-bar-container').style.display = 'none';
         this.enemyLight.visible = false;
 
+        this.restartButton.addEventListener("click", this.restartGame); // Restart the game when the button is clicked
+        //stop ambient sound
         soundEffectsManager.toggleLoop("ambienceLevel3")
     }
 
@@ -507,9 +541,10 @@ export class Level3 extends SceneBaseClass{
 
         
         this.updatePlayerHealthBar();
+        this.takeDamage(0.1);
 
         this.gunManager.updateBulletsPlayer(this.enemyBody);
-        let tmp = this.gunManager.updateBulletsEnemy(this.playerBody);
+        this.gunManager.updateBulletsEnemy(this.playerBody);
     
         this.playerLight.position.set(this.playerBody.position.x, this.playerBody.position.y + 1.5, this.playerBody.position.z);
         this.enemyLight.position.set(this.enemyBody.position.x, this.enemyBody.position.y + 2, this.enemyBody.position.z);
@@ -519,6 +554,12 @@ export class Level3 extends SceneBaseClass{
 
         this.renderer.render(this.scene, this.cameraManager.getCamera());
 
+        if (this.health <= 0) {
+            this.youLose(); // Call the lose condition function
+        } 
+        else if (this.enemy.getHealth() <= 0) {
+            this.youWin(); // Call the win condition function
+        }
     }
 
     /**

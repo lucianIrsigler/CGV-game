@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 
-import { SoundEffectsManager } from "./SoundEffectManger";
-import { Bullet } from "../Objects/bullet";
-import { Enemy } from "../Objects/Enemy";
+import { Vector3 } from 'three';
+
+import { SoundEffectsManager } from "./SoundEffectManger.js";
+import { Bullet } from "../Objects/bullet.js";
+import { Enemy } from "../Objects/Enemy.js";
 import { cos } from 'three/webgpu';
-import { Level3 } from '../../scenes/Level3';
 // import * as CANNON from 'cannon-es'; // Import Cannon.js for physics
 
 
@@ -18,7 +19,7 @@ export class GunManager{
      * @param {int} playerHealth 
      * @param {Enemy} enemy 
      */
-    constructor(scene,playerHealth,enemy,player,world){
+    constructor(scene,playerHealth,enemy,player,world,level3){
         this.scene = scene;
         this.playerHealth =playerHealth;
         this.player = player
@@ -28,6 +29,9 @@ export class GunManager{
 
         this.bullets = [];
         this.enemyBullets = [];
+
+        this.level3 = level3; // Create an instance of Level3
+        // this.level3.initScene(); // Initialize the scene if needed
     }
 
 
@@ -89,7 +93,8 @@ export class GunManager{
     
             if (isActive && this.detectCollision(bullet, target)) {
                 console.log("ouch")
-                this.handlePlayerHit(30);
+                this.level3.takeDamage(15); // damage player
+                this.level3.updatePlayerHealthBar();
                 this.scene.remove(bullet.mesh);
                 this.scene.remove(bullet.light);
                 return false; // Remove this bullet after collision
@@ -136,40 +141,43 @@ export class GunManager{
         }
     }
 
-
-
-    handlePlayerHit(dmg){
-        this.playerHealth -= dmg;
-        this.updatePlayerHealthBar();
-    }
-
     isPlayerBullet(bullet){
         return bullet.colour == 0xff0000;
     }
 
-
-    detectCollision(bullet, target) {
-        // Check if bullet and target both exist and have positions
-        if (!bullet || !bullet.mesh || !target || !target.position) {
-            console.warn("Bullet or target position is undefined");
+    detectCollision(bullet, targetBody) {
+        if (!bullet || !bullet.mesh || !targetBody) {
+            console.warn("Bullet or target body is undefined");
             return false;
         }
-        
+    
+        // Get the bullet's position
         const bulletPosition = bullet.mesh.position;
-        const targetPosition = target.position;
     
-        const distance = bulletPosition.distanceTo(targetPosition);
+        // Get the target body's position and dimensions (use half extents for bounding box calculations)
+        const targetPosition = targetBody.position;
+        const boxHalfExtents = targetBody.shapes[0].halfExtents; // Assuming targetBody has one box shape
     
-        // Assuming a collision threshold distance
-        const collisionThreshold = 1.0;
+        // Calculate min and max bounds for the target body's bounding box
+        const minBound = new Vector3(
+            targetPosition.x - boxHalfExtents.x,
+            targetPosition.y - boxHalfExtents.y,
+            targetPosition.z - boxHalfExtents.z
+        );
     
-        return distance < collisionThreshold; // if distance between bullet and target is less than threshold, return true
-    }
-
-    updatePlayerHealthBar(){
-        const healthBar = document.getElementById('user-health-bar');
-        const healthPercentage = (this.playerHealth / 100) * 100; // Calculate percentage
-        healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
+        const maxBound = new Vector3(
+            targetPosition.x + boxHalfExtents.x,
+            targetPosition.y + boxHalfExtents.y,
+            targetPosition.z + boxHalfExtents.z
+        );
+    
+        // Check if bullet's position is within the bounding box
+        const isWithinBounds =
+            bulletPosition.x >= minBound.x && bulletPosition.x <= maxBound.x &&
+            bulletPosition.y >= minBound.y && bulletPosition.y <= maxBound.y &&
+            bulletPosition.z >= minBound.z && bulletPosition.z <= maxBound.z;
+    
+        return isWithinBounds;
     }
     
 }

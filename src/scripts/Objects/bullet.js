@@ -21,7 +21,7 @@ export class Bullet {
         this.light.position.copy(this.mesh.position); // Light starts at bullet's position
 
         this.intensityGrowthRate = 0.1; // Control how quickly the light intensity grows
-        this.maxDistance = 50; // Set maximum travel distance for the bullet
+        this.maxDistance = 60; // Set maximum travel distance for the bullet
         this.initialPosition = position.clone(); // Store the bullet's initial position
 
 

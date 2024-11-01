@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Body } from 'cannon-es';
-import { FirstPersonInputController } from '../InputController/FirstPersonInputController';
+import { FirstPersonInputController } from '../InputController/FirstPersonInputController.js';
 
 /**
  * Class that controls the camera for first person

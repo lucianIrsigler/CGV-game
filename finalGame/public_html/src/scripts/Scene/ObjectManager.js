@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { World,Body, Box, Sphere, Vec3 } from 'cannon-es';
+//import * as THREE from 'three';
+// import { World,Body, Box, Sphere, Vec3 } from 'cannon-es';
 
 
 /**
@@ -29,7 +29,7 @@ export class ObjectManager {
     /**
      * Scene is the three.js scene, and world is a cannon.js world
      * @param {THREE.Scene} scene 
-     * @param {World} physicsWorld 
+     * @param {CANNON.World} physicsWorld 
      */
     constructor(scene,physicsWorld) {
         this.scene = scene;
@@ -170,7 +170,7 @@ export class ObjectManager {
         let shape;
         if (this.geometries[geometryName] instanceof THREE.BoxGeometry) {
             const { width, height, depth } = this.geometries[geometryName].parameters;
-            shape = new Box(new Vec3(width / 2, height / 2, depth / 2)); // Convert to Cannon dimensions
+            shape = new CANNON.Box(new CANNON.Vec3(width / 2, height / 2, depth / 2)); // Convert to Cannon dimensions
         } else if (this.geometries[geometryName] instanceof THREE.SphereGeometry) {
             const { radius } = this.geometries[geometryName].parameters;
             shape = new Sphere(radius);
@@ -179,9 +179,9 @@ export class ObjectManager {
             return;
         }
 
-        const body = new Body({
+        const body = new CANNON.Body({
             mass: mass,
-            position: position ? new Vec3(position.x, position.y, position.z) : new Vec3(0, 0, 0),
+            position: position ? new CANNON.Vec3(position.x, position.y, position.z) : new CANNON.Vec3(0, 0, 0),
         });
         body.addShape(shape);
         if (rotation) body.quaternion.setFromEuler(rotation.x, rotation.y, rotation.z);
@@ -197,7 +197,7 @@ export class ObjectManager {
      * update function to work properly
      * @param {string} name 
      * @param {THREE.Mesh} mesh 
-     * @param {Body} cannon.js body 
+     * @param {CANNON.Body} cannon.js body 
      * @returns 
      */
     linkObject(name, mesh, body) {
@@ -212,8 +212,8 @@ export class ObjectManager {
      * Removes all the objects from the scene
      */
     removeAllObjects() {
-        this.objects.forEach(obj => this.scene.remove(obj));
-        this.bodies.forEach(b => this.physicsWorld.removeBody(b.body));
+        // this.objects.forEach(obj => this.scene.remove(obj));
+        // this.bodies.forEach(b => this.physicsWorld.removeBody(b.body));
 
         this.objects = [];
         this.bodies = [];
