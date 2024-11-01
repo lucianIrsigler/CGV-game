@@ -41,7 +41,7 @@ stage 4:
     * Boulders continue to fall, in larger amounts.
 */
 let stage = 0
-let spawnBoulders = false
+let spawnBoulders = true
 let lightFollowsDuck = false
 let groundsDescend = false
 let groundsOscilate = false
@@ -85,7 +85,10 @@ orbit.update()
 renderer.setClearColor(0x00fffff)
 
 const textureLoader = new THREE.TextureLoader()
-scene.background = textureLoader.load(halloweenBackgroundUrl)
+// scene.background = textureLoader.load(halloweenBackgroundUrl)
+
+//make the scene have light dark background
+scene.background = new THREE.Color(0x222222)
 
 //#endregion
 
@@ -151,9 +154,9 @@ function oscilateXSpotLight(deltaTime) {
     // If the object is close to the target, pick a new random target
     if (Math.abs(spotLight.position.x - spotLightTargetLastStage.position.x) < 5) {
         if (getRandomNumber(1, 10) <= 5) {
-            spotLightTargetLastStage.position.x = getRandomNumber(grounds[grounds.length - 1].left, grounds[grounds.length - 1].position.x);  // New random target between -10 and 10
+            spotLightTargetLastStage.position.x = getRandomNumber(lastGround.left, lastGround.position.x);  // New random target between -10 and 10
         } else {
-            spotLightTargetLastStage.position.x = getRandomNumber(grounds[grounds.length - 1].position.x, grounds[grounds.length - 1].right);  // New random target between -10 and 10
+            spotLightTargetLastStage.position.x = getRandomNumber(lastGround.position.x, lastGround.right);  // New random target between -10 and 10
         }
     }
 
@@ -223,7 +226,7 @@ function boxCollision({ box1, box2 }) {
 
 
 class Box extends THREE.Mesh {
-    constructor({ width, height, depth, color = '#00ff00', gravity = 0, xAcceleration = false, zAcceleration = false, maxZSpeed = 2, maxXSpeed = 2, isGround = false, velocity = {
+    constructor({ width, height, depth, color = '#00ff00', gravity = 0, xAcceleration = false, zAcceleration = false, maxZSpeed = 4, maxXSpeed = 4, isGround = false, velocity = {
         x: 0,
         y: 0,
         z: 0
@@ -248,16 +251,21 @@ class Box extends THREE.Mesh {
         this.front = this.position.z + this.depth / 2
         this.back = this.position.z - this.depth / 2
 
-        this.gravity = gravity
         this.zAcceleration = zAcceleration
         this.xAcceleration = xAcceleration
 
         this.zSpeed = 0.01
         this.xSpeed = 0.01
-        this.bounceHeight = 0.5
 
         this.maxZSpeed = maxZSpeed
         this.maxXSpeed = maxXSpeed
+
+        this.gravity = gravity * 120
+        this.bounceHeight = 0.5
+        this.terminalGravityVelocity = -40
+
+        this.velocity.z = this.velocity.z * 120
+
     }
 
     updateSides() {
@@ -271,8 +279,7 @@ class Box extends THREE.Mesh {
         this.back = this.position.z - this.depth / 2
     }
 
-    updateMovement() {
-        this.position.x += this.velocity.x
+    updateMovement(deltaTime) {
 
         if (this.zAcceleration) {
             this.velocity.z = Math.min(this.maxZSpeed, this.velocity.z + this.zSpeed)
@@ -285,18 +292,22 @@ class Box extends THREE.Mesh {
         this.position.x += this.velocity.x
     }
 
-    update() {
+    update(deltaTime) {
         this.updateSides()
 
-        this.updateMovement()
+        this.updateMovement(deltaTime)
 
         // grounds.forEach(ground => {
-        this.applyGravity(grounds[0])
+        this.applyGravity(deltaTime)
         // })
     }
 
-    applyGravity() {
-        this.velocity.y += this.gravity
+    applyGravity(deltaTime) {
+
+        this.velocity.y += this.gravity * deltaTime
+
+        // Limit fall speed to terminal velocity
+        this.velocity.y = Math.max(this.velocity.y, this.terminalGravityVelocity);
 
         let collision = false
         let collidedGround = null
@@ -461,74 +472,10 @@ class Boulder extends Box {
 
         this.radius = radius;
 
-        this.zSpeed = 0.02;
+        this.zSpeed = 0.2;
     }
 
     // Optionally override methods or add new ones specific to Boulder
-}
-
-class ModelBox extends Box {
-    constructor({ url, x, y, z, desiredHeight, gravity = -0.01 }) {
-        super({
-            width: 1,  // Placeholder values
-            height: 1,
-            depth: 1,
-            color: 'white',
-            gravity,
-            position: { x, y, z }
-        });
-
-        this.model = null;
-        this.desiredHeight = desiredHeight;
-
-        // Remove the mesh from the scene since we don't want to see the box
-        scene.remove(this);
-
-        this.loadModel(url);
-    }
-
-    loadModel(url) {
-        const assetLoader = new GLTFLoader();
-        assetLoader.load(url, (gltf) => {
-            this.model = gltf.scene;
-            scene.add(this.model);
-
-            this.model.position.copy(this.position);
-
-            // Calculate the bounding box of the model to get its dimensions
-            const box = new THREE.Box3().setFromObject(this.model);
-            const size = new THREE.Vector3();
-            box.getSize(size);
-
-            // Apply scaling to the model
-            const scaleFactor = this.desiredHeight / size.y;
-            this.model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-            // Update the Box dimensions
-            this.width = size.x * scaleFactor;
-            this.height = size.y * scaleFactor;
-            this.depth = size.z * scaleFactor;
-
-            // Update the bounding box of the ModelBox
-            this.updateSides();
-        }, undefined, (error) => {
-            console.error('An error occurred while loading the model:', error);
-        });
-    }
-
-    updateSides() {
-        super.updateSides();
-        if (this.model) {
-            this.model.position.copy(this.position);
-        }
-    }
-
-    update() {
-        super.update();
-        if (this.model) {
-            this.model.position.copy(this.position);
-        }
-    }
 }
 
 let groundHeight = 2;
@@ -536,7 +483,7 @@ let groundWidth = 40;
 let groundDepth = 60;
 
 let lastStageGroundWidth = groundWidth * 4
-let lastStageGroundDepth = groundDepth * 10
+let lastStageGroundDepth = groundDepth * 15
 let lastStageGroundHeight = groundHeight * 2
 
 let groundGap = 15
@@ -635,16 +582,16 @@ const createGrounds = (numGrounds = 10) => {
 
 createGrounds(2)
 
-const insertModel = ({ url, x, y, z, desiredHeight }) => {
-    const modelBox = new ModelBox({ url: url.href, x, y, z, desiredHeight });
-    scene.add(modelBox); // Add the ModelBox to the scene
-    return modelBox; // Optionally return the instance for further manipulation
-}
-
-// Example: Insert the duck model at (0, 0, 0) and scale it to have a height of 5 units
-duckModel = insertModel({ url: duckUrl, x: 0, y: 20, z: 0, desiredHeight: 5 });
-duckModel.visible = false // Change the color of the duck model
-
+// make a duck model an rectangular box
+duckModel = new Box({
+    width: 4,
+    height: 8,
+    depth: 4,
+    color: '#00ff00',
+    gravity: -0.02,
+    position: { x: 0, y: 20, z: 0 }
+})
+scene.add(duckModel)
 
 
 //#endregion OBJECTS =========================
@@ -679,11 +626,11 @@ gui.add(options, 'firstPerson').onChange((value) => {
     if (value) {
         // First-person view: slightly above the duck's head and no backward offset
         followOffset = new THREE.Vector3(0, 1.5, -4);
-        duckModel.visible = false;
+        // duckModel.visible = false;
     } else {
         // Third-person view: behind and slightly above the duck
         followOffset = new THREE.Vector3(0, 6, 20);
-        duckModel.visible = true;
+        // duckModel.visible = true;
     }
 });
 
@@ -716,8 +663,8 @@ let interval = 2000;
 
 let lastDescendingGround = 0;
 
-let originalDuckMovementSpeed = 60 // 100 is normal speed
-let maxDuckMovementSpeed = 120 // 400 is max speed
+let originalDuckMovementSpeed = 100 // 10000 is normal speed
+let maxDuckMovementSpeed = 400 // 40000 is max speed
 let duckAcceleration = 10
 let duckMovementSpeed = originalDuckMovementSpeed
 
@@ -805,7 +752,7 @@ const animate = (time) => {
         //#endregion HELPERS =======================
 
         //#region DUCK =======================
-        duckModel.update()
+        duckModel.update(deltaTime)
 
         duckModel.velocity.x = 0
         duckModel.velocity.z = 0
@@ -834,8 +781,7 @@ const animate = (time) => {
         <ul class="rules-list">
             <li>Well done!</li>
             <li>You are looking quite delicious!</li>
-            <li>Head over to the FINAL FIGHT!</li>
-            <li>The boss could use a good feast!</li>
+            <li>Go on to the boss, he could use a good snack.</li>
             <button class="start-level-button">Take me to him!!!</button>
         </ul>`
 
@@ -887,7 +833,7 @@ const animate = (time) => {
 
         //#region BOULDERS =======================
         boulders.forEach(boulder => {
-            boulder.update()
+            boulder.update(deltaTime)
 
             if (boulder.position.z > duckModel.position.z + 50) {
                 scene.remove(boulder)
@@ -899,6 +845,12 @@ const animate = (time) => {
             }
             if (boxCollision({ box1: boulder, box2: duckModel }) && boulderCanDamage) {
                 console.log('hit enemy')
+
+                // when hit, then red for only 500 milliseconds
+                duckModel.material.color.set(0xff0000)
+                setTimeout(() => {
+                    duckModel.material.color.set(0x00ff00)
+                }, 500)
 
                 // just decrease hp by 10
                 document.getElementById('powerLevel').setAttribute('value',
@@ -918,7 +870,7 @@ const animate = (time) => {
         // Spawn boulders
         if (frames % spawnRate === 0 && spawnBoulders) {
 
-            spawnRate = Math.max(30, spawnRate - 10)
+            spawnRate = Math.max(20, spawnRate - 10)
 
             let boulderX = getRandomNumber(duckModel.position.x - 20, duckModel.position.x + 20)
             let boulderZ = getRandomNumber(duckModel.position.z - 300, duckModel.position.z)
@@ -932,7 +884,7 @@ const animate = (time) => {
             const boulder = new Boulder({
                 radius: 2,
                 color: '#D2691E',
-                gravity: -0.01, // 0.01 is normal gravity
+                gravity: -0.02, // 0.01 is normal gravity
                 zAcceleration: true,
                 velocity: {
                     x: 0,
@@ -954,7 +906,7 @@ const animate = (time) => {
 
         //#region GROUNDS =======================
         grounds.forEach(ground => {
-            ground.update()
+            ground.update(deltaTime)
 
             if (ground.position.z > duckModel.position.z + 100 && ground != grounds[grounds.length - 1]) {
                 scene.remove(ground)
