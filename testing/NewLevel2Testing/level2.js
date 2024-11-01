@@ -4,9 +4,11 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { CurvedPlatform } from './curvedPlatform.js';
 import { CPBoxLamp } from './CPBoxLamp.js';
 import { CircularPlatform } from './circularPlatform.js';
+import { ButtonPlatform } from './buttonPlatform.js';
 import {CameraManager} from "../../src/scripts/Scene/CameraManager.js"
 import CannonDebugger from 'cannon-es-debugger';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
+import { Box } from './box.js';
 
 //SCENE AND RENDERER---------------------------------------------------
 const scene = new THREE.Scene();
@@ -22,6 +24,15 @@ world.gravity.set(0,-9,8,0);
 
 
 let cannonDebugger = new CannonDebugger(scene,world);
+
+
+function calculateShortestRotation(current, target) {
+    let diff = target - current;
+    // Normalize the difference to be between -π and π
+    while (diff > Math.PI) diff -= 2 * Math.PI;
+    while (diff < -Math.PI) diff += 2 * Math.PI;
+    return diff;
+}
 
 
 //CAMERA AND CONTROLS--------------------------------------------------
@@ -53,6 +64,9 @@ scene.add(directionalLight);
 
 //ADDING OBJECTS TO SCENE-------------------------------------------
 const circlePlatformInnerRadius = 0;
+const angle = Math.PI/4;
+const sectorAngle = Math.PI / 4;
+
 const circlePlatformOuterRadius = 18;
 const circlePlatformDepth = 1;
 const curvedPlatformInnerRadius = 18;
@@ -62,79 +76,171 @@ const curvedPlatformHeight = 3;
 const numberOfPlatforms = 16;
 const rotation = Math.PI / 4;
 // const roomRadius = 30;
-const roomRadius = curvedPlatformOuterRadius;
+const roomInnerRadius = curvedPlatformOuterRadius;
+const roomOuterRadius = curvedPlatformOuterRadius + 1;
 const floorDepth = 1;
 const ceilingDepth = 1;
 const roomHeight = floorDepth + numberOfPlatforms * curvedPlatformHeight + ceilingDepth + 2 * curvedPlatformHeight;
 
 const movingPlatforms = []; // Array to store moving platforms
+const rotatingPlatforms = []; // Array for platforms 9-11
+const upperMovingPlatforms = []; // Array for platforms 13-15
 
-//CURVED PLATFORMS
-for (let i = 0; i <= numberOfPlatforms; i++) {
-    // Add box and lamp platform where every 4th platform would be
-    if (i % 4 === 0) {
-        const cpBoxLamp = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+
+
+// const cpBoxLamp = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
         
-        // Set initial height based on the platform index
-        if (i > 0 && i < 8) {
-            cpBoxLamp.position.y = 0; // Set initial position to the same height as the first platform
-        } else {
-            cpBoxLamp.position.y = i * curvedPlatformHeight;
-        }
-        
-        // Apply rotation
-        cpBoxLamp.rotation.y = i * rotation;
+// cpBoxLamp.position.y=5;
+// cpBoxLamp.body.position.y=4.5;
+// cpBoxLamp.boxBody.position.y=6.5;
 
-        scene.add(cpBoxLamp);
+// cpBoxLamp.quaternion.setFromEuler(0,0,0);
+// cpBoxLamp.boxBody.quaternion.setFromEuler(0,0,0);
 
-    } else {
-        const curvedPlatform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+// cpBoxLamp.body.position.z =  cpBoxLamp.innerRadius + (cpBoxLamp.outerRadius - cpBoxLamp.innerRadius) / 2
+    
+// world.addBody(cpBoxLamp.body)
+// world.addBody(cpBoxLamp.boxBody)
+// scene.add(cpBoxLamp);
 
-        // Set initial height based on the platform index
-        if (i > 0 && i < 8) {
-            curvedPlatform.position.y = 0; // Set initial position to the same height as the first platform
-        } else {
-            curvedPlatform.position.y = i * curvedPlatformHeight;
-        }
 
-        // Apply rotation
-        curvedPlatform.rotation.y = i * rotation;
-
-        // Synchronize Cannon.js body with Three.js mesh
-        scene.add(curvedPlatform);
-    }
+function positionAndRotateBody(body, innerRadius, outerRadius, rotationAngle) {
+    // Calculate the middle point between inner and outer radius
+    const radius = innerRadius + (outerRadius - innerRadius) / 2;
+    
+    // Calculate the position in world space based on the rotation angle
+    const x = Math.sin(rotationAngle) * radius;
+    const z = Math.cos(rotationAngle) * radius;
+    
+    // Set the position
+    body.position.x = x;
+    body.position.z = z;
+    
+    // Create quaternion for rotation
+    const rotationQuaternion = new CANNON.Quaternion();
+    rotationQuaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), rotationAngle);
+    body.quaternion.copy(rotationQuaternion);
 }
 
 
 
 
-// const doorOne = door.doorOne;
-// door.init_door_(scene, doorOne);
-// const doorTwo = door.doorTwo;
-// door.init_door_(scene, doorTwo);
-//MOSTERS PLATFORM
+for (let i = 0; i <= numberOfPlatforms; i++) {
+    let platform;
+    
+    if (i % 4 === 0 && i < 13) {
+        platform = new ButtonPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+        // Add event listener for button clicks
+        if (i === 0) {
+            platform.isClicked = () => handleButtonClick('1');
+        } else if (i === 8) {
+            platform.isClicked = () => handleButtonClick('3');
+        } else if (i === 12) {
+            platform.isClicked = () => handleButtonClick('5');
+        }
+    } 
+    else if(i % 4 === 0){
+        platform = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+    }
+    
+    else {
+        platform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+    }
+    
+    // Handle platforms 1-7
+    if (i > 0 && i < 8) {
+        platform.position.y = 0;
+        movingPlatforms.push({ platform, targetY: i * curvedPlatformHeight });
+    }
+    // Handle platforms 9-11 (rotating platforms)
+    else if (i >= 9 && i <= 11) {
+        platform.position.y = i * curvedPlatformHeight;
+        const platformTwelveRotation = 12 * rotation;
+        const finalRotation = i * rotation;  // Their eventual positions after pressing 3
+        
+        // Immediately set the platform to start under platform 12
+        platform.rotation.y = platformTwelveRotation;
+        
+        platform.userData.originalRotation = platformTwelveRotation;  // Start under platform 12
+        platform.userData.targetRotation = finalRotation;  // Their respective positions (9,10,11)
+        platform.userData.rotationDiff = calculateShortestRotation(platformTwelveRotation, finalRotation);
+        platform.userData.index = i - 9;
+        platform.userData.rotationSpeed = 1 + (11 - i) * 0.2;
+        rotatingPlatforms.push(platform);
+    }
+       
+    // Handle platforms 13-15 (upper moving platforms)
+    else if (i >= 13 && i <= 15) {
+        platform.position.y = 16 * curvedPlatformHeight; // Start at platform 16's height
+        upperMovingPlatforms.push({ 
+            platform, 
+            startY: 16 * curvedPlatformHeight,
+            targetY: i * curvedPlatformHeight 
+        });
+    }
+    // Handle all other platforms
+    else {
+        platform.position.y = i * curvedPlatformHeight;
+    }
+    
+    platform.rotation.y = i * rotation;
+
+
+    const rotationQuaternion = new CANNON.Quaternion();
+    rotationQuaternion.setFromEuler(0, platform.rotation.y, 0);
+    
+    if (platform instanceof CPBoxLamp) {
+        console.log(i);
+        // Position and rotate the main platform body
+        positionAndRotateBody(platform.body, platform.innerRadius, platform.outerRadius, i * rotation);
+        platform.body.position.y = platform.position.y - 0.5;
+        
+        // Position and rotate the box body
+        positionAndRotateBody(platform.boxBody, platform.innerRadius, platform.outerRadius, i * rotation);
+
+        if (i==4 || i==12){
+            platform.boxBody.position.z =platform.boxBody.position.z + 2.5;
+
+        }else{
+            platform.boxBody.position.z =platform.boxBody.position.z - 2.5;
+        }
+
+        platform.boxBody.position.y = platform.position.y + 1.5;
+        
+        world.addBody(platform.body);
+        world.addBody(platform.boxBody);
+    } else if (platform instanceof CurvedPlatform) {
+        // Position and rotate the platform body
+        positionAndRotateBody(platform.body, platform.innerRadius, platform.outerRadius, i * rotation);
+        platform.body.position.y = platform.position.y - 0.5;
+        
+        world.addBody(platform.body);
+    }
+    scene.add(platform);
+}
+
+
 const circularPlatform = new CircularPlatform(circlePlatformInnerRadius, circlePlatformOuterRadius, circlePlatformDepth);
 scene.add(circularPlatform);
 world.addBody(circularPlatform.body);
-//ROOM FLOOR
-const floor = new CircularPlatform(0, roomRadius, floorDepth);
+
+const floor = new CircularPlatform(0, roomOuterRadius, floorDepth);
 floor.position.y = -1;
 scene.add(floor);
-world.addBody(floor.body);
-//ROOM CEILING
-const ceiling = new CircularPlatform(0, roomRadius, ceilingDepth);
+
+const ceiling = new CircularPlatform(0, roomOuterRadius, ceilingDepth);
 ceiling.position.y = roomHeight;
 scene.add(ceiling);
-world.addBody(ceiling.body);
-//ROOM WALL
-const wall = new CircularPlatform(curvedPlatformOuterRadius + curvedPlatformOuterRadius-curvedPlatformInnerRadius, roomRadius, roomHeight);
-wall.position.y = roomHeight - 1;
-scene.add(wall);
-world.addBody(wall.body);
 
-//----------------------------------------------------------------------
 
-//HANDLE WINDOW RESIZE-------------------------------------------------
+// const wall = new CircularPlatform(roomInnerRadius, roomOuterRadius, roomHeight);
+// wall.position.y = roomHeight - 1;
+// scene.add(wall);
+
+
+
+
+
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -142,6 +248,14 @@ window.addEventListener('resize', () => {
 });
 //----------------------------------------------------------------------
 
+
+// const platform = new CANNON.Body({
+//     mass:0,
+//     position:new CANNON.Vec3(0,-1,0)
+// })
+
+// platform.addShape(new CANNON.Box(new CANNON.Vec3(100,2,100)))
+// world.addBody(platform)
 
 
 //----------------LOAD PLAYER-----------------------------------------
@@ -218,30 +332,32 @@ function animate(currentTime) {
     world.step(1 / 60);
     cannonDebugger.update();
 
+    // console.log(playerBody.position);
+
 
 
     let time = clock.getElapsedTime();
-    movingPlatforms.forEach(({ platform, targetY }) => {
-        if (animatePlatforms) {
-            const duration = 2; // Duration of the animation in seconds
-            const progress = Math.min(time / duration, 1); // Progress of the animation (0 to 1)
+    // movingPlatforms.forEach(({ platform, targetY }) => {
+    //     if (animatePlatforms) {
+    //         const duration = 2; // Duration of the animation in seconds
+    //         const progress = Math.min(time / duration, 1); // Progress of the animation (0 to 1)
 
-            platform.position.y = progress * targetY; // Move from initial height to target height
+    //         platform.position.y = progress * targetY; // Move from initial height to target height
 
-            if (progress >= 1) {
-                platform.position.y = targetY; // Ensure the platform stays at the target height
-            }
-        } else {
-            const duration = 2; // Duration of the animation in seconds
-            const progress = Math.min(time / duration, 1); // Progress of the animation (0 to 1)
+    //         if (progress >= 1) {
+    //             platform.position.y = targetY; // Ensure the platform stays at the target height
+    //         }
+    //     } else {
+    //         const duration = 2; // Duration of the animation in seconds
+    //         const progress = Math.min(time / duration, 1); // Progress of the animation (0 to 1)
 
-            platform.position.y = (1 - progress) * targetY; // Move from target height to initial height
+    //         platform.position.y = (1 - progress) * targetY; // Move from target height to initial height
 
-            if (progress >= 1) {
-                platform.position.y = 0; // Ensure the platform stays at the initial height
-            }
-        }
-    });
+    //         if (progress >= 1) {
+    //             platform.position.y = 0; // Ensure the platform stays at the initial height
+    //         }
+    //     }
+    // });
 
     renderer.render(scene, camera);
 }

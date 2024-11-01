@@ -62,34 +62,27 @@ export class CurvedPlatform extends THREE.Object3D {
     }
 
     createCompoundBody(innerRadius, outerRadius, depth, numSegments) {
-        const body = new CANNON.Body({ mass: 0 }); // Static body (mass = 0)
-        const segmentAngle = sectorAngle / numSegments;
+        const body = new CANNON.Body({
+            mass:0,
+            position:new CANNON.Vec3(0,0,0)
+        })
+
+        const width = (outerRadius-innerRadius)/2;
+        const height = depth;
+
+        let boxShape = new CANNON.Box(new CANNON.Vec3(width,height/2,width))
+
+        const boxRotationRight = new CANNON.Quaternion();
+        boxRotationRight.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), -Math.PI/10);
+
+
+        const boxRotationLeft = new CANNON.Quaternion();
+        boxRotationLeft.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), Math.PI/10);
         
-        // Calculate segment dimensions
-        const segmentWidth = outerRadius - innerRadius;
-        const boxDepth = depth;
+        body.addShape(boxShape); 
+        body.addShape(boxShape,new CANNON.Vec3(-5,0,-0.5),boxRotationRight);
+        body.addShape(boxShape,new CANNON.Vec3(5,0,-0.5),boxRotationLeft);
 
-        for (let i = 0; i < numSegments; i++) {
-            // Angle for this segment
-            const angleStart = angle + i * segmentAngle;
-            const angleEnd = angleStart + segmentAngle;
-            const middleAngle = (angleStart + angleEnd) / 2;
-
-            // Calculate box size and position
-            const width = segmentWidth;
-            const boxPositionX = Math.cos(middleAngle) * (innerRadius + segmentWidth / 2);
-            const boxPositionY = Math.sin(middleAngle) * (innerRadius + segmentWidth / 2);
-
-            // Create box shape
-            const boxShape = new CANNON.Box(new CANNON.Vec3(width / 2, boxDepth / 2, segmentAngle * (innerRadius + segmentWidth / 2) / 2));
-
-            // Create quaternion for rotation
-            const quaternion = new CANNON.Quaternion();
-            quaternion.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), middleAngle);
-
-            // Add box shape to body
-            body.addShape(boxShape, new CANNON.Vec3(boxPositionX, 0, boxPositionY), quaternion);
-        }
 
         return body;
     }

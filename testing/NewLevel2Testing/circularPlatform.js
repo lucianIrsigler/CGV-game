@@ -35,26 +35,54 @@ export class CircularPlatform extends THREE.Object3D {
     }
 
     createBody() {
-        // Create a cylinder shape for the circular platform
-        // const radius = (this.innerRadius + this.outerRadius) / 2; // Average radius
-        // const height = this.depth;
-        // const body = new CANNON.Body({
-        //     mass: 0, // Static body
-        //     position: new CANNON.Vec3(0, height / 2, 0) // Center the body at the height of the platform
-        // });
-        // const shape = new CANNON.Cylinder(radius, radius, height, 8); // 8 segments for smoothness
-        // body.addShape(shape);
-        // return body;
-
-        const radius = (this.innerRadius + this.outerRadius) / 2; // Average radius
+        const radius = this.outerRadius;
         const height = this.depth;
-
+        
         const body = new CANNON.Body({
-            mass:0,
-            position: new CANNON.Vec3(0,0,0)
-        })
+            mass: 0, // Static body
+            position: new CANNON.Vec3(0, 0, 0)
+        });
 
-        body.addShape(new CANNON.Box(new CANNON.Vec3(radius,0.5,radius)));
+        if (this.innerRadius === 0) {
+            // For solid circular platforms (floor, ceiling)
+            const shape = new CANNON.Cylinder(
+                radius, // radiusTop
+                radius, // radiusBottom
+                height, // height
+                32    // number of segments
+            );
+            
+            // Rotate the cylinder to match Three.js orientation
+            const quat = new CANNON.Quaternion();
+            quat.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+            body.addShape(shape, new CANNON.Vec3(0, 0, 0), quat);
+        } else {
+            // For ring-shaped platforms
+            // Create multiple shapes to approximate a ring
+            const segments = 16; // Number of segments to approximate the ring
+            const angleStep = (2 * Math.PI) / segments;
+            const midRadius = (this.innerRadius + this.outerRadius) / 2;
+            const thickness = this.outerRadius - this.innerRadius;
+            
+            for (let i = 0; i < segments; i++) {
+                const angle = i * angleStep;
+                const x = Math.cos(angle) * midRadius;
+                const z = Math.sin(angle) * midRadius;
+                
+                // Create a box for each segment
+                const shape = new CANNON.Box(new CANNON.Vec3(
+                    thickness / 2,
+                    height / 2,
+                    (2 * Math.PI * midRadius) / segments / 2
+                ));
+                
+                // Position and rotate each segment
+                const quat = new CANNON.Quaternion();
+                quat.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), angle);
+                
+                body.addShape(shape, new CANNON.Vec3(x, 0, z), quat);
+            }
+        }
 
         return body;
     }

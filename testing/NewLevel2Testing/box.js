@@ -52,8 +52,7 @@ export class Box extends THREE.Object3D {
             mass: 0, // Set mass to 0 for static body
             position: new CANNON.Vec3(0, 0, 0) // Position can be adjusted as needed
         });
-
-        // Add a shape that matches the geometry of the box
+        
         body.addShape(new CANNON.Box(new CANNON.Vec3(this.x / 2, this.y / 2, this.z / 2))); // Half extents for Cannon.js
 
         return body;
