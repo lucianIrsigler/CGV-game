@@ -1,32 +1,140 @@
 import { CustomScene1 } from "../src/scenes/testScene1";
-import { Level1 } from "../src/scenes/Level1";
+import { CustomScene } from "../src/scenes/testScene";
+import { CustomScene2 } from "../src/scenes/testScene2";
+import { CustomScene3 } from "../src/scenes/testScene3";
+
 import { AnimationManager } from "../src/scripts/Animation/AnimationLoopHandler";
 
 const animationManager = new AnimationManager();
 
+
+//---------------VARIABLES---------------------------
 let isPaused = false;
 let menuVisible = false;
 let onStartScreen = true;
+let isPlaying = false;
+let isPlayingWholeGame = false;
 
-function toggleMenu() {
-    menuVisible = !menuVisible;
-    const menu = document.getElementById('menu');
-    if (menuVisible) {
-        menu.style.display = 'block';
-        animationManager.pauseAnimation();
-    } else {
-        menu.style.display = 'none';
-        animationManager.resumeAnimation();
+//---------------END VARIABLES-------------------------
+
+//--------------------AUDIO STUFF------------------------------------
+let audio;
+let audio1;
+
+function prepareBackgroundAudio() {
+    audio = new Audio('audio/menu.mp3');
+    audio.volume = 0.9; 
+    audio.loop = true; 
+
+    audio1 = new Audio("audio/menu_click.mp3")
+    audio1.volume = 0.3; 
+
+}
+
+function playMenuClick() {
+    if (audio1) {
+        audio1.currentTime = 0; // Reset to the start of the audio
+        audio1.play().catch(error => {
+            console.error("Error playing audio: ", error);
+        });
+
+        // Stop the audio after 1 second
+        setTimeout(() => {
+            audio1.pause();
+            audio1.currentTime = 0; // Optional: Reset to start for the next play
+        }, 900); // 1000 milliseconds = 1 second
     }
 }
 
-document.getElementById("start").addEventListener("click",()=>{
-    const blankDiv = document.getElementById("blank");
+function playBackgroundAudio() {
+  if (audio) {
+    audio.play().catch(error => {
+      console.error("Error playing audio: ", error);
+    });
+  }
+}
 
+function pauseBackgroundAudio() {
+    if (audio) {
+        audio.pause();
+    }
+}
+
+function resumeBackgroundAudio() {
+    if (audio) {
+        audio.play().catch(error => {
+            console.error("Error playing audio: ", error);
+        });
+    }
+}
+
+window.onload = prepareBackgroundAudio;
+document.addEventListener("click", () => {
+    playBackgroundAudio();  // Call the function here
+});
+
+//--------------------END AUDIO--------------------------------------
+
+
+//---------------------LEVEL STUFF-----------------------------------
+function startLevel(){
+    document.getElementById("blank").style.display="none";
+    document.getElementById("user-health-bar-container").style.display="flex";
+    document.body.style.cursor = "none"; 
+    isPlaying=true;
+    onStartScreen=false;
+    pauseBackgroundAudio();
+    animationManager.pauseAnimation();
+    animationManager.resumeAnimation();
+}
+
+function exitLevel(){
+    animationManager.exitScene();
+    document.getElementById("blank").style.display="flex";
+    document.getElementById("blank").innerHTML = '';
+    document.getElementById("start-menu").style.display="flex";
+    document.getElementById("user-health-bar-container").style.display="none";
+    menuVisible = false;
+
+    document.body.style.cursor =  "url('icons/cursor.png'), auto"; 
+
+    const menu = document.getElementById('menu');
+    menu.style.display = 'none';
+    isPlaying=false;
+    onStartScreen=true;
+    isPlayingWholeGame = false;
+    resumeBackgroundAudio();
+}
+
+
+function goToStartMenu(){
+    animationManager.exitScene();
+    document.getElementById("blank").style.display="flex";
+    document.getElementById("blank").innerHTML = '';
+    document.getElementById("start-menu").style.display="flex";
+    document.getElementById("user-health-bar-container").style.display="none";
+    menuVisible = false;
+
+    document.body.style.cursor =  "url('icons/cursor.png'), auto"; 
+
+    const menu = document.getElementById('menu');
+    menu.style.display = 'none';
+    isPlaying=false;
+    onStartScreen=true;
+    isPlayingWholeGame = false;
+    resumeBackgroundAudio();
+}
+
+//---------------------END LEVEL STUFF-------------------------------
+
+//-------------------UTIL-------------------------------------------
+function addButtons(){
+    const blankDiv = document.getElementById("blank");
     const buttons = [
+        { id: "lvl0", title: "Start the game"},
         { id: 'lvl1', title: 'Level 1' },
         { id: 'lvl2', title: 'Level 2' },
-        { id: 'lvl3', title: 'Level 3' }
+        { id: 'lvl3', title: 'Level 3' },
     ];
 
     // Clear previous content in the blank div
@@ -37,6 +145,7 @@ document.getElementById("start").addEventListener("click",()=>{
     title.classList.add("start-menu-title");
     title.textContent = "Select your level";
     blankDiv.appendChild(title);
+
     // Create and append buttons
     buttons.forEach(button => {
         const newButton = document.createElement("button");
@@ -48,33 +157,61 @@ document.getElementById("start").addEventListener("click",()=>{
 
     document.getElementById("start-menu").style.display="none";
     onStartScreen = false;
+}
+
+function toggleMenu() {
+    menuVisible = !menuVisible;
+    const menu = document.getElementById('menu');
+    if (menuVisible) {
+        document.body.style.cursor =  "url('icons/cursor.png'), auto"; 
+        menu.style.display = 'block';
+        animationManager.pauseAnimation();
+    } else {
+        document.body.style.cursor = "none"; 
+        menu.style.display = 'none';
+        animationManager.resumeAnimation();
+    }
+}
+
+//-------------------------END UTIL---------------------------------
+
+
+document.getElementById("start").addEventListener("click",()=>{
+    playMenuClick();
+    addButtons();
+
+    document.getElementById('lvl0').addEventListener('click', function() {
+        playMenuClick();
+        isPlayingWholeGame = true;
+        startLevel();
+        animationManager.switchScene(new CustomScene(),0);
+    });
+
 
     document.getElementById('lvl1').addEventListener('click', function() {
-        document.getElementById("blank").style.display="none";
-        document.getElementById("fireflies").style.display="none";
-        document.getElementById("health-container").style.display="flex";
-
-        animationManager.switchScene(new Level1());
+        playMenuClick();
+        startLevel();
+        animationManager.switchScene(new CustomScene(),0);
     });
     
     document.getElementById('lvl2').addEventListener('click', function() {
-        document.getElementById("blank").style.display="none";
-        document.getElementById("fireflies").style.display="none";
-        document.getElementById("health-container").style.display="flex";
-
-        animationManager.switchScene(new CustomScene1());
+        playMenuClick();
+        startLevel();
+        animationManager.switchScene(new CustomScene1(),1);
     });
 
     document.getElementById('lvl3').addEventListener('click', function() {
-        document.getElementById("blank").style.display="none";
-        document.getElementById("fireflies").style.display="none";
-        document.getElementById("health-container").style.display="flex";
-
-        animationManager.switchScene(new CustomScene1());
+        playMenuClick();
+        startLevel();
+        animationManager.switchScene(new CustomScene2(),2);
     });
 })
 
+
 document.getElementById("story").addEventListener("click",()=>{
+    playMenuClick();
+
+
     const blankDiv = document.getElementById("blank");
 
     blankDiv.innerHTML = '';
@@ -104,6 +241,8 @@ document.getElementById("story").addEventListener("click",()=>{
 })
 
 document.getElementById("how-to-play").addEventListener("click",()=>{
+    playMenuClick();
+    
     const blankDiv = document.getElementById("blank");
 
     blankDiv.innerHTML = '';
@@ -133,6 +272,8 @@ document.getElementById("how-to-play").addEventListener("click",()=>{
 })
 
 document.getElementById("about").addEventListener("click",()=>{
+    playMenuClick();
+    
     const blankDiv = document.getElementById("blank");
 
     blankDiv.innerHTML = '';
@@ -161,21 +302,16 @@ document.getElementById("about").addEventListener("click",()=>{
 })
 
 document.getElementById("restart-button").addEventListener("click",(e)=>{
+    playMenuClick();
     animationManager.pauseAnimation();
     animationManager.restartScene();
     animationManager.resumeAnimation();
-
     toggleMenu();
 })
 
 document.getElementById("exit-button").addEventListener("click",(e)=>{
-    animationManager.exitScene();
-    document.getElementById("blank").innerHTML = '';
-    document.getElementById("start-menu").style.display="flex";
-    document.getElementById("fireflies").style.display="block";
-    document.getElementById("health-container").style.display="none";
-    
-    toggleMenu();
+    playMenuClick();
+    exitLevel();
 })
 
 
@@ -194,8 +330,64 @@ window.addEventListener('keydown', function(event) {
         }
     }
     else if (event.key === 'Escape') {  // 'Escape' key to open/close menu
+        if (!isPlaying){
+            if (!onStartScreen){
+                document.getElementById("blank").innerHTML = '';
+                document.getElementById("start-menu").style.display="flex";
+                document.getElementById("user-health-bar-container").style.display="none";
+                onStartScreen = false;
+            }
+            return;
+        }
         toggleMenu();
+    }else if (event.code=="KeyH"){
+        if (animationManager.getCurrentScene()!=null){
+            animationManager.getCurrentScene().endLevel();
+        }
     }
 });
 
 
+
+document.addEventListener('levelEnded', (event) => {
+    let numLevels = 3;
+    if (isPlayingWholeGame) {
+        let currentLevelId = animationManager.id; 
+        console.log(`Current Level ID: ${currentLevelId}`);
+
+        animationManager.exitScene();
+
+        //if next level
+        if (currentLevelId < numLevels) {
+            let nextLevelId = currentLevelId + 1;
+            if (nextLevelId==1){
+                animationManager.switchScene(new CustomScene1(),1);
+            }else if (nextLevelId==2){
+                animationManager.switchScene(new CustomScene2(),2);
+            }else if (nextLevelId == 3){
+                animationManager.switchScene(new CustomScene3(),3);
+
+            }
+            animationManager.pauseAnimation();
+            animationManager.resumeAnimation();
+            console.log(`Switching to Level ID: ${nextLevelId}`);
+        } else {
+            console.log("All levels completed!");
+            goToStartMenu()
+            
+        }
+    }
+    else{
+        let currentLevelId = animationManager.id; 
+        console.log(`Current Level ID: ${currentLevelId}`);
+        animationManager.exitScene();
+
+        if (currentLevelId == 2) {
+            animationManager.switchScene(new CustomScene3(),3);
+            animationManager.pauseAnimation();
+            animationManager.resumeAnimation();
+        }else {
+            goToStartMenu();
+        }
+    }
+});
