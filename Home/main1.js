@@ -2,6 +2,7 @@ import { CustomScene1 } from "../src/scenes/testScene1";
 import { CustomScene } from "../src/scenes/testScene";
 import { CustomScene2 } from "../src/scenes/testScene2";
 import { CustomScene3 } from "../src/scenes/testScene3";
+import { Level1 } from "../src/scenes/Level1";
 
 import { AnimationManager } from "../src/scripts/Animation/AnimationLoopHandler";
 
@@ -184,7 +185,7 @@ document.getElementById("start").addEventListener("click",()=>{
         playMenuClick();
         isPlayingWholeGame = true;
         startLevel();
-        animationManager.switchScene(new CustomScene(),0);
+        animationManager.switchScene(new Level1(),0);
     });
 
 
@@ -271,34 +272,8 @@ document.getElementById("how-to-play").addEventListener("click",()=>{
     onStartScreen = false;
 })
 
-document.getElementById("about").addEventListener("click",()=>{
+document.getElementById("endless").addEventListener("click",()=>{
     playMenuClick();
-    
-    const blankDiv = document.getElementById("blank");
-
-    blankDiv.innerHTML = '';
-
-
-    const title = document.createElement("h1");
-    title.classList.add("start-menu-title");
-    title.textContent = "About";
-    blankDiv.appendChild(title);
-
-    let text = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-    Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris 
-    nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit 
-    in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur 
-    sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`;
-
-    const newText = document.createElement("p");
-    newText.classList.add("text");
-    newText.textContent = text;
-    blankDiv.appendChild(newText);
-
-    document.getElementById("user-health-bar-container").style.display="none";
-    document.getElementById("start-menu").style.display="none";
-    onStartScreen = false;
 })
 
 document.getElementById("restart-button").addEventListener("click",(e)=>{

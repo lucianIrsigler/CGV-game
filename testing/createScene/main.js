@@ -25,9 +25,9 @@ function init(){
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
     const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.25;
-controls.screenSpacePanning = false;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = false;
     // Basic cube object
     const geometry = new THREE.BoxGeometry();
     const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -43,48 +43,48 @@ controls.screenSpacePanning = false;
     scene.add(directionalLight);
 
     const circlePlatformInnerRadius = 0;
-const circlePlatformOuterRadius = 18;
-const circlePlatformDepth = 1;
-const curvedPlatformInnerRadius = 18;
-const curvedPlatformOuterRadius = 25;
-const curvedPlatformDepth = 1;
-const curvedPlatformHeight = 3;
-const numberOfPlatforms = 16;
-const rotation = Math.PI / 4;
-// const roomRadius = 30;
-const roomRadius = curvedPlatformOuterRadius;
-const floorDepth = 1;
-const ceilingDepth = 1;
-const roomHeight = floorDepth + numberOfPlatforms * curvedPlatformHeight + ceilingDepth + 2 * curvedPlatformHeight;
+    const circlePlatformOuterRadius = 18;
+    const circlePlatformDepth = 1;
+    const curvedPlatformInnerRadius = 18;
+    const curvedPlatformOuterRadius = 25;
+    const curvedPlatformDepth = 1;
+    const curvedPlatformHeight = 3;
+    const numberOfPlatforms = 16;
+    const rotation = Math.PI / 4;
+    // const roomRadius = 30;
+    const roomRadius = curvedPlatformOuterRadius;
+    const floorDepth = 1;
+    const ceilingDepth = 1;
+    const roomHeight = floorDepth + numberOfPlatforms * curvedPlatformHeight + ceilingDepth + 2 * curvedPlatformHeight;
 
-const movingPlatforms = []; // Array to store moving platforms
+    const movingPlatforms = []; // Array to store moving platforms
 
-//CURVED PLATFORMS
-for (let i = 0; i <= numberOfPlatforms; i++) {
-    //Add box and lamp platform where every 4th platform would be
-    if (i % 4 === 0) {
-        const cpBoxLamp = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
-        if (i > 0 && i < 8) {
-            cpBoxLamp.position.y = 0; // Set initial position to the same height as the first platform
-            movingPlatforms.push({ platform: cpBoxLamp, targetY: i * curvedPlatformHeight }); // Add to moving platforms array with target height
-        }
-        else
-        {
-            cpBoxLamp.position.y = i * curvedPlatformHeight;
-        }
-        cpBoxLamp.rotation.y = i * rotation;
-        scene.add(cpBoxLamp);
-    } else {
-        const curvedPlatform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
-        if (i > 0 && i < 8) {
-            curvedPlatform.position.y = 0; // Set initial position to the same height as the first platform
-            movingPlatforms.push({ platform: curvedPlatform, targetY: i * curvedPlatformHeight }); // Add to moving platforms array with target height
+    //CURVED PLATFORMS
+    for (let i = 0; i <= numberOfPlatforms; i++) {
+        //Add box and lamp platform where every 4th platform would be
+        if (i % 4 === 0) {
+            const cpBoxLamp = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+            if (i > 0 && i < 8) {
+                cpBoxLamp.position.y = 0; // Set initial position to the same height as the first platform
+                movingPlatforms.push({ platform: cpBoxLamp, targetY: i * curvedPlatformHeight }); // Add to moving platforms array with target height
+            }
+            else
+            {
+                cpBoxLamp.position.y = i * curvedPlatformHeight;
+            }
+            cpBoxLamp.rotation.y = i * rotation;
+            scene.add(cpBoxLamp);
         } else {
-            curvedPlatform.position.y = i * curvedPlatformHeight;
+            const curvedPlatform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+            if (i > 0 && i < 8) {
+                curvedPlatform.position.y = 0; // Set initial position to the same height as the first platform
+                movingPlatforms.push({ platform: curvedPlatform, targetY: i * curvedPlatformHeight }); // Add to moving platforms array with target height
+            } else {
+                curvedPlatform.position.y = i * curvedPlatformHeight;
+            }
+            curvedPlatform.rotation.y = i * rotation;
+            scene.add(curvedPlatform);
         }
-        curvedPlatform.rotation.y = i * rotation;
-        scene.add(curvedPlatform);
-    }
 }
 const circularPlatform = new CircularPlatform(circlePlatformInnerRadius, circlePlatformOuterRadius, circlePlatformDepth);
 scene.add(circularPlatform);
