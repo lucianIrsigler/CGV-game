@@ -4,6 +4,13 @@ import { CurvedPlatform } from './curvedPlatform.js';
 import { CPBoxLamp } from './CPBoxLamp.js';
 import { CircularPlatform } from './circularPlatform.js';
 import { ButtonPlatform } from './buttonPlatform.js';
+import { LoadingManager } from 'three';
+import { door } from './doorPos2.js';
+import { Door } from '../../src/scripts/Objects/Door.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+
+
 
 //SCENE AND RENDERER---------------------------------------------------
 const scene = new THREE.Scene();
@@ -132,7 +139,29 @@ function resetAndStartVerticalAnimation() {
     animatePlatforms = true;
     verticalAnimationClock.start();
 }
+// Load the built-in Helvetiker font
+const loader = new FontLoader();
+loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+    const textGeometry = new TextGeometry('Valid Sequences:\n1, 2, 1 - Floor 1\n3, 2, 3 - Floor 3\n4, 3, 4 - Floor 4', {
+        font: font,
+        size: 0.2,
+        height: 0.01,
+        curveSegments: 12,
+        bevelEnabled: false,
+    });
+    
+    const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
 
+    textMesh.position.set(-2, 2, 20); // Position near the inside of the wall
+    textMesh.rotation.y = 0; // Rotate to face inward
+
+    const textMesh2 = new THREE.Mesh(textGeometry, textMaterial);
+    textMesh2.position.set(-2, 26, 20); // Position near the inside of the wall
+
+    scene.add(textMesh);
+    scene.add(textMesh2);
+});
 function resetAndStartRotationAnimation() {
     rotationAnimationClock.stop();
     rotationAnimationClock = new THREE.Clock();
@@ -168,6 +197,7 @@ for (let i = 0; i <= numberOfPlatforms; i++) {
     } 
     else if(i % 4 === 0) {
         platform = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+        //console.log(platform.getWorldPosition.x, platform.getWorldPosition.y, platform.getWorldPosition.z);
     }
     else {
         platform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);

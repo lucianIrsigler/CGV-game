@@ -75,20 +75,20 @@ export class ButtonPlatform extends CPBoxLamp {
         group.add(button);
 
         // Add text in front of the button
-        const fontLoader = new FontLoader();
-        fontLoader.load('fonts/helvetiker_regular.typeface.json', (font) => {
-            const textGeometry = new TextGeometry(this.text, {
-                font: font,
-                size: 1,
-                height: 0.05,
-                curveSegments: 12,
-                bevelEnabled: false
-            });
-            const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-            textMesh.position.set(0, 0.6, this.innerRadius + (this.outerRadius - this.innerRadius) / 2 + (this.outerRadius - this.innerRadius) / 4);
-            group.add(textMesh);
-        });
+        // const fontLoader = new FontLoader();
+        // fontLoader.load('fonts/helvetiker_regular.typeface.json', (font) => {
+        //     const textGeometry = new TextGeometry(this.text, {
+        //         font: font,
+        //         size: 1,
+        //         height: 0.05,
+        //         curveSegments: 12,
+        //         bevelEnabled: false
+        //     });
+        //     const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        //     const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+        //     textMesh.position.set(0, 0.6, this.innerRadius + (this.outerRadius - this.innerRadius) / 2 + (this.outerRadius - this.innerRadius) / 4);
+        //     group.add(textMesh);
+        // });
 
         return group;
     }
