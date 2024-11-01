@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+//import * as THREE from 'three';
 
 export function generatePlatform(data,scene) {
     if (data.geometry!=undefined && data.material!=undefined){

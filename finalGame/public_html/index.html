@@ -21,6 +21,8 @@
           <label id="progress-label" for="progress-bar">Loading...</label>
           <progress id="progress-bar" value="0" max="100"></progress>
       </div>
+
+
     <div id="doorPrompt" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px;">
         Press 'E' to open the door
     </div>
@@ -45,16 +47,30 @@
         <button class="menu-button" id="exit-button">Exit</button>
     </div>
 
-    <script type="importmap">
-        {
-          "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@<version>/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@<version>/examples/jsm/",
-            "cannon-es":"https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"
-          }
-        }
-      </script>
+    <!-- <script type="importmap"> { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@<version>/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@<version>/examples/jsm/" } } </script> -->
 
-      <script type="module" src="main.js"></script>
+    <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"></script> -->
+    <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/jsm/loaders/GLTFLoader.js"></script> -->
+
+    
+    
+    <script type="importmap"> { "imports": { 
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js", 
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/" } } </script>
+
+    <!-- Import Cannon-ES from CDN -->
+    <script type="module">
+      import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
+      window.CANNON = CANNON; // Makes Cannon-ES globally accessible
+
+      import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
+
+      window.THREE = THREE;
+
+    </script>
+
+
+
+    <script type="module" src="main.js"></script>
 </body>
 </html>

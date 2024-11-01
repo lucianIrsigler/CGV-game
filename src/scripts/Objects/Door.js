@@ -1,4 +1,4 @@
-import { door } from "../../data/doorPos1";
+import { door } from "../../data/doorPos1.js";
 import * as THREE from 'three';
  
 

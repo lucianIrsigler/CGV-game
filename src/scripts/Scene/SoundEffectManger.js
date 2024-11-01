@@ -1,4 +1,4 @@
-import { audioFiles } from "../../data/audio";
+import { audioFiles } from "../../data/audio.js";
 
 
 export class SoundEffectsManager {

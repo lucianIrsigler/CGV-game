@@ -1,5 +1,5 @@
-import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass";
-import * as THREE from 'three';
+import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass.js";
+// //import * as THREE from 'three';
 
 export class CustomScene1 extends SceneBaseClass {
     constructor() {

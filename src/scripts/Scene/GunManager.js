@@ -1,10 +1,9 @@
 import * as THREE from 'three';
 
-import { SoundEffectsManager } from "./SoundEffectManger";
-import { Bullet } from "../Objects/bullet";
-import { Enemy } from "../Objects/Enemy";
+import { SoundEffectsManager } from "./SoundEffectManger.js";
+import { Bullet } from "../Objects/bullet.js";
+import { Enemy } from "../Objects/Enemy.js";
 import { cos } from 'three/webgpu';
-import { Level3 } from '../../scenes/Level3';
 // import * as CANNON from 'cannon-es'; // Import Cannon.js for physics
 
 
