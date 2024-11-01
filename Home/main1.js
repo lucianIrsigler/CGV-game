@@ -1,7 +1,6 @@
-import { CustomScene } from "./src/scenes/testScene";
-import { CustomScene1 } from "./src/scenes/testScene1";
-import { Level1 } from "./src/scenes/Level1";
-import { AnimationManager } from "./src/scripts/Animation/AnimationLoopHandler";
+import { CustomScene1 } from "../src/scenes/testScene1";
+import { Level1 } from "../src/scenes/Level1";
+import { AnimationManager } from "../src/scripts/Animation/AnimationLoopHandler";
 
 const animationManager = new AnimationManager();
 
@@ -98,7 +97,7 @@ document.getElementById("story").addEventListener("click",()=>{
     newText.textContent = text;
     blankDiv.appendChild(newText);
 
-    document.getElementById("health-container").style.display="none";
+    document.getElementById("user-health-bar-container").style.display="none";
     document.getElementById("start-menu").style.display="none";
     onStartScreen = false;
 
@@ -128,7 +127,7 @@ document.getElementById("how-to-play").addEventListener("click",()=>{
     blankDiv.appendChild(newText);
 
 
-    document.getElementById("health-container").style.display="none";
+    document.getElementById("user-health-bar-container").style.display="none";
     document.getElementById("start-menu").style.display="none";
     onStartScreen = false;
 })
@@ -156,7 +155,7 @@ document.getElementById("about").addEventListener("click",()=>{
     newText.textContent = text;
     blankDiv.appendChild(newText);
 
-    document.getElementById("health-container").style.display="none";
+    document.getElementById("user-health-bar-container").style.display="none";
     document.getElementById("start-menu").style.display="none";
     onStartScreen = false;
 })
@@ -184,12 +183,13 @@ window.addEventListener('beforeunload', () => {
     animationManager.stopAnimationLoop();
 });
 
+
 window.addEventListener('keydown', function(event) {
     if (event.key === "Backspace") {
         if (!onStartScreen){
             document.getElementById("blank").innerHTML = '';
             document.getElementById("start-menu").style.display="flex";
-            document.getElementById("health-container").style.display="none";
+            document.getElementById("user-health-bar-container").style.display="none";
             onStartScreen = false;
         }
     }

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as CANNON from "cannon-es"
 import { loadTextures, applyTextureSettings } from '../../src/scripts/util/TextureLoaderUtil';
 
 export class Box extends THREE.Object3D {
@@ -10,6 +11,7 @@ export class Box extends THREE.Object3D {
         this.mesh = this.createMesh();
         this.add(this.mesh);
         this.boundingBox = new THREE.Box3().setFromObject(this.mesh);
+        this.body = this.createBody();
     }
 
     createMesh() {
@@ -44,6 +46,18 @@ export class Box extends THREE.Object3D {
         return new THREE.Mesh(geometry, material);
     }
 
+
+    createBody(){
+        const body = new CANNON.Body({ // Corrected to CANNON.Body
+            mass: 0, // Set mass to 0 for static body
+            position: new CANNON.Vec3(0, 0, 0) // Position can be adjusted as needed
+        });
+        
+        body.addShape(new CANNON.Box(new CANNON.Vec3(this.x / 2, this.y / 2, this.z / 2))); // Half extents for Cannon.js
+
+        return body;
+    }
+
     updateBoundingBox() {
         this.boundingBox.setFromObject(this.mesh);
     }
@@ -53,5 +67,4 @@ export class Box extends THREE.Object3D {
         otherBox.updateBoundingBox();
         return this.boundingBox.intersectsBox(otherBox.boundingBox);
     }
-    
 }

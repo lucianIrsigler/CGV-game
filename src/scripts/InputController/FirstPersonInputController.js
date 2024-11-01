@@ -174,13 +174,13 @@ export class FirstPersonInputController {
     
       // Jump logic
       if (this.keys_[KEYS.space]) {
-        if (this.isGrounded() && !this.alreadyJumped) { // Check if the player is on the ground
+        // if (this.isGrounded() && !this.alreadyJumped) { // Check if the player is on the ground
             this.playerBody.velocity.y = 10; // Set the upward velocity for jumping
             this.alreadyJumped=true;
             soundEffectsManager.playSound("jump");
-        }else if (this.isGrounded()){
-          this.alreadyJumped=false;
-        }
+        // }else if (this.isGrounded()){
+          // this.alreadyJumped=false;
+        // }
       }
 
     }

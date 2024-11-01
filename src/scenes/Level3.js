@@ -26,6 +26,7 @@ const soundEffectsManager = new SoundEffectsManager();
 soundEffectsManager.toggleLoop("ambienceLevel3",true);
 
 
+
 //TODO ADD LIGHT MECHANIC
 //TODO ADD UI ELEMENTS UPDATING
 //TODO MAKE MONSTER TAKE QUICKER/MORE DANGERIOUS
@@ -45,7 +46,13 @@ export class Level3 extends SceneBaseClass{
         this.playerBody; //cannon.js model
         this.target; //player model
 
-        this.enemyBody;
+        this.maxHealth = 100; // Define the maximum health
+        this.health = this.maxHealth;
+        this.loaded = false;
+        this.damageRate = 1; // Define the damage rate
+        this.healingRate = 5; // Define the healing rate
+
+        this.world = new World();
         this.enemyModel;
 
 
@@ -90,13 +97,14 @@ export class Level3 extends SceneBaseClass{
     }
 
 
-    async initScene(){
+    initScene(){
         this.scene.background = new THREE.Color(0x333333);
+
         this.init_eventHandlers_();
         this.init_lighting_();
         this.init_camera_();
-        await this.init_objects_();
-        await this.initManagers();
+        this.init_objects_();
+
     }   
 
 
@@ -110,23 +118,34 @@ export class Level3 extends SceneBaseClass{
                 }
                 if (this.cameraManager.getFirstPerson()){
                   this.cameraManager.toggleThirdPerson()
+                  this.target.visible=true;
 
                 }else{
                     this.cameraManager.toggleFirstPerson()
+                    this.target.visible=false;
 
                 }
                 break;
+
+
+            
             }
 
           })
 
-          document.addEventListener('mousedown', (event) => {
+        document.addEventListener('mousedown', (event) => {
             //TODO add setting thing back
             if (event.button === 0) { // Only shoot if menu is not open
-                this.gunManager.addBulletPlayer(this.cameraManager.getCamera(),0xffffff,this.world);
-                // handlePlayerHit(5); // Handle player hit logic
+                this.gunManager.addBullet(this.cameraManager.getCamera(), 0xffffff, { applyPhysics: false });
+                this.handlePlayerHit(5); // Handle player hit logic
             }
         });
+
+        // document.addEventListener('click', () => {
+        //     this.lockPointer(); // Attempt to lock pointer on click
+        // });
+
+
 
 
         window.addEventListener("click", () => {
@@ -146,6 +165,27 @@ export class Level3 extends SceneBaseClass{
         this.restartButton.addEventListener("click", this.restartGame);
 
     };
+
+    // Handle Player hit
+    handlePlayerHit(dmg) {
+        
+        this.takeDamage(dmg); // Take 10 damage when hit
+    }
+
+    takeDamage(amount) {
+        this.health -= amount;
+        this.health = Math.max(0, this.health); // Ensure health doesn't go below 0
+        // updateCharacterLight(); // Update light when health changes
+        if (this.health <= 0 && !isGamePaused) {
+            youLose(); // Call the lose condition function
+        }
+    }
+
+    updatePlayerHealthBar(){
+        const healthBar = document.getElementById('user-health-bar');
+        const healthPercentage = (this.health / this.maxHealth) * 100; // Calculate percentage
+        healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
+    }
 
     init_lighting_(){
         const enemyLight = new THREE.PointLight(0xff0400, 1, 100); // Color, intensity, distance
@@ -176,8 +216,10 @@ export class Level3 extends SceneBaseClass{
         await this.init_bodies();
         await this.init_player();
         await this.init_monster_();
+
         let res = this.loadLamps();
         let out = this.createObjects();
+
     };
 
     async init_bodies(){
@@ -224,36 +266,61 @@ export class Level3 extends SceneBaseClass{
         this.target = model;
         this.target.visible=false;
 
+        //create cannon.js body for model
+        this.playerBody = new Body({
+            mass: 1, // Dynamic body
+            position: new Vec3(-1, 2.5, -10), // Start position
+        });
+        const boxShape = new Box(new Vec3(0.5, 1, 0.5)); // Box shape for the player
+        this.playerBody.addShape(boxShape);
+        this.world.addBody(this.playerBody);
+
+
         this.cameraManager = new CameraManager(
             this.camera,
             this.target,
             this.playerBody,
             this.scene
         );
+
     }
 
-    async init_monster_() {
-        const gltf = await this.loader.loadModel(this.currentMonster.scene, "monster");
+    async init_monster_(){
+        let currentMonster = getRandomMonster(monsters3);
+
+        const gltf = await this.loader.loadModel(currentMonster.scene,"monster");
         const model = gltf.scene;
         this.addObject(model);
-        model.position.set(this.currentMonster.positionX, this.currentMonster.positionY, this.currentMonster.positionZ - 2);
-        model.scale.set(this.currentMonster.scaleX, this.currentMonster.scaleY, this.currentMonster.scaleZ);
+
+        
+        model.position.set(currentMonster.positionX, currentMonster.positionY, currentMonster.positionZ-2);
+        model.scale.set(currentMonster.scaleX, currentMonster.scaleY, currentMonster.scaleZ);
         model.castShadow = true;
-        this.enemyModel = model;    
+
+        this.enemyModel = model;
+
+        this.enemyBody = new Body({
+            mass: 1, // Dynamic body
+            position: new Vec3(currentMonster.positionX, currentMonster.positionY, currentMonster.positionZ-2), // Start position
+        });
+        const boxShape = new Box(new Vec3(2, 2, 2)); // Box shape for the player
+        this.enemyBody.addShape(boxShape);
+        this.world.addBody(this.enemyBody);
+
+        this.enemy = new Enemy(currentMonster.health,{x:currentMonster.positionX,y:currentMonster.positionY,z:currentMonster.positionZ},this.enemyModel,this.enemyBody,this.enemyLight);
+
+
+        
+        this.gunManager = new GunManager(this.scene,100,this.enemy,this.playerBody,this.world);
+
     }
-    
+
+
 
     async _initGeometries(){
         this.objManager.addGeometry("platform",new THREE.BoxGeometry(100, 1, 100));
         this.objManager.addGeometry("sidewall",new THREE.BoxGeometry(1, 100, 100));
 
-    }
-
-    async initManagers(){
-        console.log(this.enemyModel, this.enemyBody, this.enemyLight)
-        this.enemy = new Enemy(this.currentMonster.health, {x:0,y:0,z:0}, this.enemyModel, this.enemyBody, this.enemyLight);
-    
-        this.gunManager = new GunManager(this.scene, 100, this.enemy, this.playerBody);
     }
 
 
@@ -308,6 +375,11 @@ export class Level3 extends SceneBaseClass{
         const platformMesh = this.objManager.createVisualObject("platform","platform","platform",null,null);
         const platformBody = this.objManager.createPhysicsObject("platform","platform",null,null,0);
         this.objManager.linkObject("platform",platformMesh,platformBody);
+
+
+        const ceilingMesh = this.objManager.createVisualObject("ceiling","platform","platform",{x:0,y:50,z:0},null);
+        const ceilingBody = this.objManager.createPhysicsObject("platform","platform",null,null,0);
+        this.objManager.linkObject("ceiling",ceilingMesh,ceilingBody);
 
 
         const wallsData = [
@@ -425,12 +497,12 @@ export class Level3 extends SceneBaseClass{
     animate=(currentTime)=> {
         this.animationId = requestAnimationFrame(this.animate);
 
-        if (this.cameraManager==undefined||!this.loader.isLoaded() || this.gunManager==undefined){
+        if (this.cameraManager==undefined||!this.loader.isLoaded()){
             return;
         }
 
         this.world.step(1 / 60);
-        // this.debugRenderer.update();
+        this.debugRenderer.update();
 
 
         this.gunManager.updateAllBullets();
@@ -443,14 +515,11 @@ export class Level3 extends SceneBaseClass{
         
         this.updatePlayerHealthBar();
 
-        // this.gunManager.updateBulletsPlayer(this.enemyBody);
+        this.gunManager.updateBulletsPlayer(this.enemyBody);
     
         this.playerLight.position.set(this.playerBody.position.x, this.playerBody.position.y + 1.5, this.playerBody.position.z);
 
-        this.gunManager.checkAndShoot(this.enemyModel,this.target,this.world);
-
-        this.enemyModel.lookAt(this.target.position)
-
+        this.gunManager.checkAndShoot(this.target,this.cameraManager.getCamera());
         this.cameraManager.update(timeElapsedS);
 
         this.renderer.render(this.scene, this.cameraManager.getCamera());
@@ -463,14 +532,6 @@ export class Level3 extends SceneBaseClass{
     stopAnimate=()=> {
         cancelAnimationFrame(this.animationId)
         this.animationId=null;
-    }
-
-
-    updatePlayerHealthBar(){
-        //TODO MOVE TO this variables
-        // const healthBar = document.getElementById('user-health-bar');
-        // const healthPercentage = (health / maxHealth) * 100; // Calculate percentage
-        // healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
     }
 
 

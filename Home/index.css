@@ -5,10 +5,10 @@
 body { 
     margin: 0;
     overflow: hidden;
-    /* cursor: none;  
+    cursor: none;  
     height: 100vh;
-    background: url('Home/dungeon.jpg');
-    background-size: cover;  */
+    background: url('dungeon.jpg');
+    background-size: cover;  
 }
 
 canvas { display: block; }
