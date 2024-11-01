@@ -26,9 +26,6 @@ const soundEffectsManager = new SoundEffectsManager();
 soundEffectsManager.toggleLoop("ambienceLevel3",true);
 
 
-
-//TODO ADD LIGHT MECHANIC
-//TODO ADD UI ELEMENTS UPDATING
 //TODO MAKE MONSTER TAKE QUICKER/MORE DANGERIOUS
 // look at level3ahaha.js to see what i ahvent done yet
 
@@ -42,14 +39,14 @@ export class Level3 extends SceneBaseClass{
         super()
 
         this.world = new World();
-        this.world.gravity.set(0, -9.82, 0);
+        this.world.gravity.set(0, -12, 0);
         this.playerBody; //cannon.js model
         this.target; //player model
 
         this.maxHealth = 100; // Define the maximum health
         this.health = this.maxHealth;
         this.loaded = false;
-        this.damageRate = 1; // Define the damage rate
+        this.damageRate = 0.05; // Define the damage rate
         this.healingRate = 10; // Define the healing rate
 
         this.world = new World();
@@ -143,11 +140,6 @@ export class Level3 extends SceneBaseClass{
             }
         });
 
-        // document.addEventListener('click', () => {
-        //     this.lockPointer(); // Attempt to lock pointer on click
-        // });
-
-
 
 
         window.addEventListener("click", () => {
@@ -210,7 +202,7 @@ export class Level3 extends SceneBaseClass{
                     if (this.calcEuclid(this.playerBody.position.x, this.playerBody.position.z, point.x, point.z)) {
                         valid = true;
                         console.log("Player is near a light source");
-                        this.heal(10);
+                        this.heal(this.healingRate);
                     }
                 });
             }
@@ -541,7 +533,7 @@ export class Level3 extends SceneBaseClass{
 
         
         this.updatePlayerHealthBar();
-        this.takeDamage(0.1);
+        this.takeDamage(this.damageRate);
 
         this.gunManager.updateBulletsPlayer(this.enemyBody);
         this.gunManager.updateBulletsEnemy(this.playerBody);
@@ -553,6 +545,11 @@ export class Level3 extends SceneBaseClass{
         this.cameraManager.update(timeElapsedS);
 
         this.renderer.render(this.scene, this.cameraManager.getCamera());
+
+        // Ensure player body velocity is reset correctly
+        // if (this.playerBody.velocity.y > 0 && !this.cameraManager.input_.isGrounded()) {
+        //     this.playerBody.velocity.y -= this.world.gravity.y * timeElapsedS;
+        // }
 
         if (this.health <= 0) {
             this.youLose(); // Call the lose condition function

@@ -32,7 +32,7 @@ export class ThirdPersonCamera{
     }
 
     calculateIdealOffset_(){
-        const idealOffset =  new THREE.Vector3(-1,2,-2);
+        const idealOffset =  new THREE.Vector3(-1,0,-2);
 
         const qR = new THREE.Quaternion();
         qR.setFromEuler(this.input_.target_.rotation); 
@@ -45,11 +45,10 @@ export class ThirdPersonCamera{
     }
 
     calculateIdealLookAt_(){
-        const idealLookAt = new THREE.Vector3(0,0,4);
+        const idealLookAt = new THREE.Vector3(0, 0, 4);
 
         const qR = new THREE.Quaternion();
-        qR.setFromEuler(this.input_.target_.rotation); 
-
+        qR.copy(this.input_.rotation);
 
         idealLookAt.applyQuaternion(qR);
         idealLookAt.add(this.input_.target_.position);
