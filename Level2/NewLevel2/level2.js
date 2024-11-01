@@ -4,11 +4,11 @@ import { CurvedPlatform } from './curvedPlatform.js';
 import { CPBoxLamp } from './CPBoxLamp.js';
 import { CircularPlatform } from './circularPlatform.js';
 import { ButtonPlatform } from './buttonPlatform.js';
-import { LoadingManager } from 'three';
-import { door } from './doorPos2.js';
-import { Door } from '../../src/scripts/Objects/Door.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+import { GUN } from './gun.js';
+import { MONSTER } from './monster.js';
+import { DOOR } from './door.js';
 
 //SCENE AND RENDERER---------------------------------------------------
 const scene = new THREE.Scene();
@@ -22,6 +22,7 @@ const mouse = new THREE.Vector2();
 let currentSequence = [];
 let buttonPlatforms = [];
 
+
 //CAMERA AND CONTROLS--------------------------------------------------
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(0, 10, 50);
@@ -29,14 +30,18 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.25;
 controls.screenSpacePanning = false;
-
+//ADUIO SETUP---------------------------------------------------------
+const audioLoader = new THREE.AudioLoader();
+const listener = new THREE.AudioListener();
+camera.add(listener);
+const sound = new THREE.Audio(listener);
 //LIGHTING--------------------------------------------------------------
 const ambientLight = new THREE.AmbientLight(0x0f0f0f);
 ambientLight.intensity = 10;
 scene.add(ambientLight);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(0, 10, 10).normalize();
-scene.add(directionalLight);
+// scene.add(directionalLight);
 
 // Helper function to calculate the shortest rotation angle
 function calculateShortestRotation(current, target) {
@@ -103,14 +108,32 @@ function checkSequences() {
     const validSequences = {
         '1,2,1': () => {
             console.log('Triggering vertical animation');
+            audioLoader.load('./concrete-sliding.mp3', function(buffer) {
+                sound.setBuffer(buffer);
+                sound.setLoop(false);
+                sound.setVolume(0.5);
+                sound.play();
+            });
             resetAndStartVerticalAnimation();
         },
         '3,2,3': () => {
             console.log('Triggering rotation animation');
+            audioLoader.load('./concrete-sliding.mp3', function(buffer) {
+                sound.setBuffer(buffer);
+                sound.setLoop(false);
+                sound.setVolume(0.5);
+                sound.play();
+            });
             resetAndStartRotationAnimation();
         },
         '4,3,4': () => {
             console.log('Triggering upper platform animation');
+            audioLoader.load('./concrete-sliding.mp3', function(buffer) {
+                sound.setBuffer(buffer);
+                sound.setLoop(false);
+                sound.setVolume(0.5);
+                sound.play();
+            });
             resetAndStartUpperAnimation();
         }
     };
@@ -125,9 +148,16 @@ function checkSequences() {
         // Reset the sequence
         currentSequence = [];
     } 
-    // If sequence is longer than 3, reset it
-    else if (currentSequence.length >= 3) {
+    // If sequence is longer than 3 or cannot be a valid sequence, reset it
+    else if (currentSequence.length >= 3 || !Object.keys(validSequences).some(seq => seq.startsWith(sequenceString))) {
         currentSequence = [];
+
+        audioLoader.load('./failed-sequence.mp3', function(buffer) {
+            sound.setBuffer(buffer);
+            sound.setLoop(false);
+            sound.setVolume(0.5);
+            sound.play();
+        });
     }
 }
 
@@ -272,6 +302,20 @@ scene.add(ceiling);
 const wall = new CircularPlatform(roomInnerRadius, roomOuterRadius, roomHeight);
 wall.position.y = roomHeight - 1;
 scene.add(wall);
+
+const door1 = new DOOR(0, 0, roomInnerRadius)
+scene.add(door1);
+const door2 = new DOOR(0, 48, roomInnerRadius)
+scene.add(door2);
+const monster = new MONSTER(0, 5, 0)
+// scene.add(monster);
+
+const gun = new GUN(0, 49, roomInnerRadius-2)
+scene.add(gun);
+// Add glow effect to the gun
+const gunGlow = new THREE.PointLight(0x0000ff, 1, 100);
+gunGlow.position.set(0, 49, roomInnerRadius - 2);
+scene.add(gunGlow);
 
 //ANIMATION STATE----------------------------------------------------
 let verticalAnimationClock = new THREE.Clock();
