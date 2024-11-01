@@ -1,8 +1,6 @@
 import { FirstPersonCamera } from "../Camera/FirstPersonCamera"
 import { ThirdPersonCamera } from "../Camera/ThirdPersonCamera"
 import * as THREE from 'three';
-import * as CANNON from "cannon-es"
-import { cameraFar } from "three/webgpu";
 
 
 /**

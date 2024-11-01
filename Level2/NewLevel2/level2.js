@@ -4,18 +4,23 @@ import { CurvedPlatform } from './curvedPlatform.js';
 import { CPBoxLamp } from './CPBoxLamp.js';
 import { CircularPlatform } from './circularPlatform.js';
 import { ButtonPlatform } from './buttonPlatform.js';
+import { LoadingManager } from 'three';
+import { door } from './doorPos2.js';
+import { Door } from '../../src/scripts/Objects/Door.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+
 //SCENE AND RENDERER---------------------------------------------------
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// Simulate key press 4 on load
-window.addEventListener('load', () => {
-    const keyEvent = new KeyboardEvent('keydown', { key: '4' });
-    window.dispatchEvent(keyEvent);
-});
-//----------------------------------------------------------------------
+//RAYCASTER AND MOUSE SETUP-------------------------------------------
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let currentSequence = [];
+let buttonPlatforms = [];
 
 //CAMERA AND CONTROLS--------------------------------------------------
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -24,7 +29,6 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.25;
 controls.screenSpacePanning = false;
-//----------------------------------------------------------------------
 
 //LIGHTING--------------------------------------------------------------
 const ambientLight = new THREE.AmbientLight(0x0f0f0f);
@@ -33,23 +37,21 @@ scene.add(ambientLight);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(0, 10, 10).normalize();
 scene.add(directionalLight);
-//----------------------------------------------------------------------
 
 // Helper function to calculate the shortest rotation angle
 function calculateShortestRotation(current, target) {
     let diff = target - current;
-    // Normalize the difference to be between -π and π
     while (diff > Math.PI) diff -= 2 * Math.PI;
     while (diff < -Math.PI) diff += 2 * Math.PI;
     return diff;
 }
 
 //CONSTANTS------------------------------------------------------------
-const circlePlatformInnerRadius = 0;
-const circlePlatformOuterRadius = 18;
 const circlePlatformDepth = 1;
 const curvedPlatformInnerRadius = 18;
 const curvedPlatformOuterRadius = 25;
+const circlePlatformInnerRadius = 0;
+const circlePlatformOuterRadius = curvedPlatformInnerRadius;
 const curvedPlatformDepth = 1;
 const curvedPlatformHeight = 3;
 const numberOfPlatforms = 16;
@@ -65,31 +67,156 @@ const movingPlatforms = []; // Array for platforms 1-7
 const rotatingPlatforms = []; // Array for platforms 9-11
 const upperMovingPlatforms = []; // Array for platforms 13-15
 
-// Function to handle button clicks
-function handleButtonClick(key) {
-    const keyEvent = new KeyboardEvent('keydown', { key });
-    window.dispatchEvent(keyEvent);
+//SEQUENCE HANDLING FUNCTIONS-----------------------------------------
+function onClick(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(scene.children, true);
+
+    for (const intersect of intersects) {
+        if (intersect.object.userData.isButton) {
+            const buttonPlatform = intersect.object.userData.buttonPlatform;
+            if (buttonPlatform.isClickable) {
+                handleButtonPress(buttonPlatform);
+                break;
+            }
+        }
+    }
 }
 
-//CURVED PLATFORMS
+function handleButtonPress(buttonPlatform) {
+    buttonPlatform.press();
+    
+    // Add the button number to the sequence
+    currentSequence.push(buttonPlatform.sequence[0]);
+    
+    console.log('Current sequence:', currentSequence); // For debugging
+    
+    // Check for valid sequences
+    checkSequences();
+}
+
+function checkSequences() {
+    // Define the valid sequences and their corresponding actions
+    const validSequences = {
+        '1,2,1': () => {
+            console.log('Triggering vertical animation');
+            resetAndStartVerticalAnimation();
+        },
+        '3,2,3': () => {
+            console.log('Triggering rotation animation');
+            resetAndStartRotationAnimation();
+        },
+        '4,3,4': () => {
+            console.log('Triggering upper platform animation');
+            resetAndStartUpperAnimation();
+        }
+    };
+
+    // Convert current sequence to string for comparison
+    const sequenceString = currentSequence.join(',');
+    
+    // Check if current sequence matches any valid sequence
+    if (validSequences[sequenceString]) {
+        // Execute the corresponding animation
+        validSequences[sequenceString]();
+        // Reset the sequence
+        currentSequence = [];
+    } 
+    // If sequence is longer than 3, reset it
+    else if (currentSequence.length >= 3) {
+        currentSequence = [];
+    }
+}
+
+function resetAndStartVerticalAnimation() {
+    verticalAnimationClock.stop();
+    verticalAnimationClock = new THREE.Clock();
+    animatePlatforms = true;
+    verticalAnimationClock.start();
+}
+// Load the built-in Helvetiker font
+const loader = new FontLoader();
+loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+    const textGeometry1 = new TextGeometry('   Sequences:\n      4, 3, 4\n      3, 2, 3\n      1, 2, 1 <--', {
+        font: font,
+        size: 0.2,
+        depth: 0.01,
+        curveSegments: 12,
+        bevelEnabled: false,
+    });
+    const textGeometry2 = new TextGeometry('   Sequences:\n      4, 3, 4\n      3, 2, 3 <--\n      1, 2, 1', {
+        font: font,
+        size: 0.2,
+        depth: 0.01,
+        curveSegments: 12,
+        bevelEnabled: false,
+    });
+    const textGeometry3 = new TextGeometry('   Sequences:\n      4, 3, 4 <--\n      3, 2, 3\n      1, 2, 1', {
+        font: font,
+        size: 0.2,
+        depth: 0.01,
+        curveSegments: 12,
+        bevelEnabled: false,
+    });
+    
+    const textMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    
+    const textMesh = new THREE.Mesh(textGeometry1, textMaterial);
+    textMesh.position.set(-1, 2, 20); // Position near the inside of the wall
+    textMesh.rotation.y = 0; // Rotate to face inward
+    scene.add(textMesh);
+
+    const textMesh2 = new THREE.Mesh(textGeometry2, textMaterial);
+    textMesh2.position.set(-1, 26, 20); // Position near the inside of the wall
+    scene.add(textMesh2);
+
+    const textMesh3 = new THREE.Mesh(textGeometry3, textMaterial);
+    textMesh3.position.set(1, 38, -20); // Position near the inside of the wall
+    textMesh3.rotation.y = Math.PI; // Rotate to face inward
+    scene.add(textMesh3);
+    
+    
+});
+function resetAndStartRotationAnimation() {
+    rotationAnimationClock.stop();
+    rotationAnimationClock = new THREE.Clock();
+    rotatingPlatformsActive = true;
+    reverseRotation = false;
+    rotationAnimationClock.start();
+}
+
+function resetAndStartUpperAnimation() {
+    upperPlatformsClock.stop();
+    upperPlatformsClock = new THREE.Clock();
+    animateUpperPlatforms = true;
+    upperPlatformsDescending = true;
+    upperPlatformsClock.start();
+}
+
+//CURVED PLATFORMS----------------------------------------------------
 for (let i = 0; i <= numberOfPlatforms; i++) {
     let platform;
     
-    if (i % 4 === 0 && i < 13) {
-        platform = new ButtonPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
-        // Add event listener for button clicks
+    if ((i === 0) || (i === 4) || (i === 8) || (i === 12)) {
+        // Create button platforms with proper sequences
         if (i === 0) {
-            platform.isClicked = () => handleButtonClick('1');
+            platform = new ButtonPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth, [1], "1");
+        } else if (i === 4) {
+            platform = new ButtonPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth, [2], "2");
         } else if (i === 8) {
-            platform.isClicked = () => handleButtonClick('3');
+            platform = new ButtonPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth, [3], "3");
         } else if (i === 12) {
-            platform.isClicked = () => handleButtonClick('5');
+            platform = new ButtonPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth, [4], "4");
         }
+        buttonPlatforms.push(platform);
     } 
-    else if(i % 4 === 0){
+    else if(i % 4 === 0) {
         platform = new CPBoxLamp(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
+        //console.log(platform.getWorldPosition.x, platform.getWorldPosition.y, platform.getWorldPosition.z);
     }
-    
     else {
         platform = new CurvedPlatform(curvedPlatformInnerRadius, curvedPlatformOuterRadius, curvedPlatformDepth);
     }
@@ -103,29 +230,25 @@ for (let i = 0; i <= numberOfPlatforms; i++) {
     else if (i >= 9 && i <= 11) {
         platform.position.y = i * curvedPlatformHeight;
         const platformTwelveRotation = 12 * rotation;
-        const finalRotation = i * rotation;  // Their eventual positions after pressing 3
+        const finalRotation = i * rotation;
         
-        // Immediately set the platform to start under platform 12
         platform.rotation.y = platformTwelveRotation;
-        
-        platform.userData.originalRotation = platformTwelveRotation;  // Start under platform 12
-        platform.userData.targetRotation = finalRotation;  // Their respective positions (9,10,11)
+        platform.userData.originalRotation = platformTwelveRotation;
+        platform.userData.targetRotation = finalRotation;
         platform.userData.rotationDiff = calculateShortestRotation(platformTwelveRotation, finalRotation);
         platform.userData.index = i - 9;
         platform.userData.rotationSpeed = 1 + (11 - i) * 0.2;
         rotatingPlatforms.push(platform);
     }
-       
     // Handle platforms 13-15 (upper moving platforms)
     else if (i >= 13 && i <= 15) {
-        platform.position.y = 16 * curvedPlatformHeight; // Start at platform 16's height
+        platform.position.y = 16 * curvedPlatformHeight;
         upperMovingPlatforms.push({ 
             platform, 
             startY: 16 * curvedPlatformHeight,
             targetY: i * curvedPlatformHeight 
         });
     }
-    // Handle all other platforms
     else {
         platform.position.y = i * curvedPlatformHeight;
     }
@@ -151,7 +274,6 @@ wall.position.y = roomHeight - 1;
 scene.add(wall);
 
 //ANIMATION STATE----------------------------------------------------
-// let clock = new THREE.Clock();
 let verticalAnimationClock = new THREE.Clock();
 let rotationAnimationClock = new THREE.Clock();
 let upperPlatformsClock = new THREE.Clock();
@@ -161,6 +283,11 @@ let reverseRotation = false;
 let animateUpperPlatforms = false;
 let upperPlatformsDescending = false;
 
+// Reverse rotation animation on load
+reverseRotation = true;
+rotatingPlatformsActive = true;
+rotationAnimationClock.start();
+
 //WINDOW RESIZE HANDLER----------------------------------------------
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -168,35 +295,36 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+//CLICK EVENT HANDLER-----------------------------------------------
+window.addEventListener('click', onClick);
+
 //ANIMATION FUNCTION------------------------------------------------
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
     
     // Original vertical movement animation
-    let verticalTime = verticalAnimationClock.getElapsedTime();
-    movingPlatforms.forEach(({ platform, targetY }) => {
-        if (animatePlatforms) {
+    if (animatePlatforms) {
+        let verticalTime = verticalAnimationClock.getElapsedTime();
+        movingPlatforms.forEach(({ platform, targetY }) => {
             const duration = 2;
             const progress = Math.min(verticalTime / duration, 1);
             platform.position.y = progress * targetY;
-        } else {
-            const duration = 2;
-            const progress = Math.min(verticalTime / duration, 1);
-            platform.position.y = (1 - progress) * targetY;
-        }
-    });
+            
+            if (progress >= 1) {
+                animatePlatforms = false;
+            }
+        });
+    }
     
     // Rotation animation
-    let rotationTime = rotationAnimationClock.getElapsedTime();
     if (rotatingPlatformsActive) {
+        let rotationTime = rotationAnimationClock.getElapsedTime();
         const duration = reverseRotation ? 4 : 2;
         const progress = Math.min(rotationTime / duration, 1);
         
         rotatingPlatforms.forEach(platform => {
-            // const index = platform.userData.index;
-            const startRotation = platform.userData.originalRotation;  // Starting under platform 12
-            // const targetRotation = platform.userData.targetRotation;   // Their respective positions
+            const startRotation = platform.userData.originalRotation;
             
             if (!reverseRotation) {
                 const easedProgress = Math.pow(progress, 0.8);
@@ -217,28 +345,26 @@ function animate() {
             rotatingPlatformsActive = false;
             if (!reverseRotation) {
                 rotatingPlatforms.forEach(platform => {
-                    platform.rotation.y = platform.userData.targetRotation;  // Final position at their respective spots
+                    platform.rotation.y = platform.userData.targetRotation;
                 });
             } else {
                 rotatingPlatforms.forEach(platform => {
-                    platform.rotation.y = platform.userData.originalRotation;  // Back under platform 12
+                    platform.rotation.y = platform.userData.originalRotation;
                 });
             }
         }
     }
     
-    // Upper platforms animation (13-15)
-    let upperTime = upperPlatformsClock.getElapsedTime();
+    // Upper platforms animation
     if (animateUpperPlatforms) {
+        let upperTime = upperPlatformsClock.getElapsedTime();
         const duration = 2;
         const progress = Math.min(upperTime / duration, 1);
         
         upperMovingPlatforms.forEach(({ platform, startY, targetY }) => {
             if (upperPlatformsDescending) {
-                // Descending animation (key 5)
                 platform.position.y = startY + (targetY - startY) * progress;
             } else {
-                // Rising animation (key 6)
                 platform.position.y = targetY + (startY - targetY) * progress;
             }
         });
@@ -250,40 +376,6 @@ function animate() {
     
     renderer.render(scene, camera);
 }
-
-//KEYBOARD EVENT HANDLERS--------------------------------------------
-window.addEventListener('keydown', (event) => {
-    switch(event.key) {
-        case '1':
-            animatePlatforms = true;
-            verticalAnimationClock.start();
-            break;
-        case '2':
-            animatePlatforms = false;
-            verticalAnimationClock.start();
-            break;
-        case '3':
-            rotatingPlatformsActive = true;
-            reverseRotation = false;
-            rotationAnimationClock.start();
-            break;
-        case '4':
-            rotatingPlatformsActive = true;
-            reverseRotation = true;
-            rotationAnimationClock.start();
-            break;
-        case '5':
-            animateUpperPlatforms = true;
-            upperPlatformsDescending = true;
-            upperPlatformsClock.start();
-            break;
-        case '6':
-            animateUpperPlatforms = true;
-            upperPlatformsDescending = false;
-            upperPlatformsClock.start();
-            break;
-    }
-});
 
 //START ANIMATION----------------------------------------------------
 animate();

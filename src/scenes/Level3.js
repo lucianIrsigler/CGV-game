@@ -368,6 +368,11 @@ export class Level3 extends SceneBaseClass{
         this.objManager.linkObject("platform",platformMesh,platformBody);
 
 
+        const ceilingMesh = this.objManager.createVisualObject("ceiling","platform","platform",{x:0,y:50,z:0},null);
+        const ceilingBody = this.objManager.createPhysicsObject("platform","platform",null,null,0);
+        this.objManager.linkObject("ceiling",ceilingMesh,ceilingBody);
+
+
         const wallsData = [
             {
                 name:"wall1",
