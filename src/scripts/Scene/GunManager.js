@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 
+import { Vector3 } from 'three';
+
 import { SoundEffectsManager } from "./SoundEffectManger.js";
 import { Bullet } from "../Objects/bullet.js";
 import { Enemy } from "../Objects/Enemy.js";
@@ -143,22 +145,39 @@ export class GunManager{
         return bullet.colour == 0xff0000;
     }
 
-    detectCollision(bullet, target) {
-        // Check if bullet and target both exist and have positions
-        if (!bullet || !bullet.mesh || !target || !target.position) {
-            console.warn("Bullet or target position is undefined");
+    detectCollision(bullet, targetBody) {
+        if (!bullet || !bullet.mesh || !targetBody) {
+            console.warn("Bullet or target body is undefined");
             return false;
         }
-        
+    
+        // Get the bullet's position
         const bulletPosition = bullet.mesh.position;
-        const targetPosition = target.position;
     
-        const distance = bulletPosition.distanceTo(targetPosition);
+        // Get the target body's position and dimensions (use half extents for bounding box calculations)
+        const targetPosition = targetBody.position;
+        const boxHalfExtents = targetBody.shapes[0].halfExtents; // Assuming targetBody has one box shape
     
-        // Assuming a collision threshold distance
-        const collisionThreshold = 1.0;
+        // Calculate min and max bounds for the target body's bounding box
+        const minBound = new Vector3(
+            targetPosition.x - boxHalfExtents.x,
+            targetPosition.y - boxHalfExtents.y,
+            targetPosition.z - boxHalfExtents.z
+        );
     
-        return distance < collisionThreshold; // if distance between bullet and target is less than threshold, return true
+        const maxBound = new Vector3(
+            targetPosition.x + boxHalfExtents.x,
+            targetPosition.y + boxHalfExtents.y,
+            targetPosition.z + boxHalfExtents.z
+        );
+    
+        // Check if bullet's position is within the bounding box
+        const isWithinBounds =
+            bulletPosition.x >= minBound.x && bulletPosition.x <= maxBound.x &&
+            bulletPosition.y >= minBound.y && bulletPosition.y <= maxBound.y &&
+            bulletPosition.z >= minBound.z && bulletPosition.z <= maxBound.z;
+    
+        return isWithinBounds;
     }
     
 }
