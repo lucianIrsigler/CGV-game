@@ -5,13 +5,13 @@
 body { 
     margin: 0;
     overflow: hidden;
-    cursor: none;  
     height: 100vh;
     background: url('dungeon.jpg');
-    background-size: cover;  
+    background-size: cover; 
+    cursor: url('icons/cursor.png'), auto; 
 }
 
-canvas { display: block; }
+canvas { display: block;}
 
 #menu {
     position: absolute;
@@ -30,7 +30,7 @@ canvas { display: block; }
     background-color: #333;
     color: white;
     border: none;
-    cursor: pointer;
+    cursor: url('icons/cursor.png'), auto; 
 }
 
 .menu-button:hover {
@@ -129,7 +129,8 @@ label{
     background-color: #333;
     color: white;
     border: none;
-    cursor: pointer;
+    cursor: url('icons/cursor.png'), auto; 
+
 }
 
 .start-menu-button:hover {
