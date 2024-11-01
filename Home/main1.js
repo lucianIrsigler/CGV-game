@@ -19,10 +19,31 @@ let isPlayingWholeGame = false;
 
 //--------------------AUDIO STUFF------------------------------------
 let audio;
+let audio1;
+
 function prepareBackgroundAudio() {
-  audio = new Audio('horror-sound-effect.mp3');
-  audio.volume = 0.5; 
-  audio.loop = false; 
+    audio = new Audio('audio/menu.mp3');
+    audio.volume = 0.9; 
+    audio.loop = true; 
+
+    audio1 = new Audio("audio/menu_click.mp3")
+    audio1.volume = 0.3; 
+
+}
+
+function playMenuClick() {
+    if (audio1) {
+        audio1.currentTime = 0; // Reset to the start of the audio
+        audio1.play().catch(error => {
+            console.error("Error playing audio: ", error);
+        });
+
+        // Stop the audio after 1 second
+        setTimeout(() => {
+            audio1.pause();
+            audio1.currentTime = 0; // Optional: Reset to start for the next play
+        }, 900); // 1000 milliseconds = 1 second
+    }
 }
 
 function playBackgroundAudio() {
@@ -75,7 +96,7 @@ function exitLevel(){
     document.getElementById("user-health-bar-container").style.display="none";
     menuVisible = false;
 
-    document.body.style.cursor = "pointer"; 
+    document.body.style.cursor =  "url('icons/cursor.png'), auto"; 
 
     const menu = document.getElementById('menu');
     menu.style.display = 'none';
@@ -94,7 +115,7 @@ function goToStartMenu(){
     document.getElementById("user-health-bar-container").style.display="none";
     menuVisible = false;
 
-    document.body.style.cursor = "pointer"; 
+    document.body.style.cursor =  "url('icons/cursor.png'), auto"; 
 
     const menu = document.getElementById('menu');
     menu.style.display = 'none';
@@ -142,7 +163,7 @@ function toggleMenu() {
     menuVisible = !menuVisible;
     const menu = document.getElementById('menu');
     if (menuVisible) {
-        document.body.style.cursor = "pointer"; 
+        document.body.style.cursor =  "url('icons/cursor.png'), auto"; 
         menu.style.display = 'block';
         animationManager.pauseAnimation();
     } else {
@@ -156,9 +177,11 @@ function toggleMenu() {
 
 
 document.getElementById("start").addEventListener("click",()=>{
+    playMenuClick();
     addButtons();
 
     document.getElementById('lvl0').addEventListener('click', function() {
+        playMenuClick();
         isPlayingWholeGame = true;
         startLevel();
         animationManager.switchScene(new CustomScene(),0);
@@ -166,16 +189,19 @@ document.getElementById("start").addEventListener("click",()=>{
 
 
     document.getElementById('lvl1').addEventListener('click', function() {
+        playMenuClick();
         startLevel();
         animationManager.switchScene(new CustomScene(),0);
     });
     
     document.getElementById('lvl2').addEventListener('click', function() {
+        playMenuClick();
         startLevel();
         animationManager.switchScene(new CustomScene1(),1);
     });
 
     document.getElementById('lvl3').addEventListener('click', function() {
+        playMenuClick();
         startLevel();
         animationManager.switchScene(new CustomScene2(),2);
     });
@@ -183,6 +209,9 @@ document.getElementById("start").addEventListener("click",()=>{
 
 
 document.getElementById("story").addEventListener("click",()=>{
+    playMenuClick();
+
+
     const blankDiv = document.getElementById("blank");
 
     blankDiv.innerHTML = '';
@@ -212,6 +241,8 @@ document.getElementById("story").addEventListener("click",()=>{
 })
 
 document.getElementById("how-to-play").addEventListener("click",()=>{
+    playMenuClick();
+    
     const blankDiv = document.getElementById("blank");
 
     blankDiv.innerHTML = '';
@@ -241,6 +272,8 @@ document.getElementById("how-to-play").addEventListener("click",()=>{
 })
 
 document.getElementById("about").addEventListener("click",()=>{
+    playMenuClick();
+    
     const blankDiv = document.getElementById("blank");
 
     blankDiv.innerHTML = '';
@@ -269,6 +302,7 @@ document.getElementById("about").addEventListener("click",()=>{
 })
 
 document.getElementById("restart-button").addEventListener("click",(e)=>{
+    playMenuClick();
     animationManager.pauseAnimation();
     animationManager.restartScene();
     animationManager.resumeAnimation();
@@ -276,6 +310,7 @@ document.getElementById("restart-button").addEventListener("click",(e)=>{
 })
 
 document.getElementById("exit-button").addEventListener("click",(e)=>{
+    playMenuClick();
     exitLevel();
 })
 
