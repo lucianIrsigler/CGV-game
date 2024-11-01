@@ -137,7 +137,7 @@ export class Level3 extends SceneBaseClass{
             //TODO add setting thing back
             if (event.button === 0) { // Only shoot if menu is not open
                 this.gunManager.addBullet(this.cameraManager.getCamera(), 0xffffff, { applyPhysics: false });
-                handlePlayerHit(5); // Handle player hit logic
+                this.handlePlayerHit(5); // Handle player hit logic
             }
         });
 
@@ -150,14 +150,14 @@ export class Level3 extends SceneBaseClass{
 
         window.addEventListener("click", () => {
             if (!this.playingAlready){
-                // soundEffectsManager.playSound("ambienceLevel3", 0.3);
+                soundEffectsManager.playSound("ambienceLevel3", 0.3);
                 this.playingAlready=true;
             }
         });
 
         window.addEventListener("keydown", () => {
             if (!this.playingAlready){
-                // soundEffectsManager.playSound("ambienceLevel3", 0.3);
+                soundEffectsManager.playSound("ambienceLevel3", 0.3);
                 this.playingAlready=true;
             }
         });
@@ -169,12 +169,12 @@ export class Level3 extends SceneBaseClass{
     // Handle Player hit
     handlePlayerHit(dmg) {
         
-        takeDamage(dmg); // Take 10 damage when hit
+        this.takeDamage(dmg); // Take 10 damage when hit
     }
 
     takeDamage(amount) {
         this.health -= amount;
-        this.health = Math.max(0, health); // Ensure health doesn't go below 0
+        this.health = Math.max(0, this.health); // Ensure health doesn't go below 0
         // updateCharacterLight(); // Update light when health changes
         if (this.health <= 0 && !isGamePaused) {
             youLose(); // Call the lose condition function
