@@ -85,7 +85,10 @@ orbit.update()
 renderer.setClearColor(0x00fffff)
 
 const textureLoader = new THREE.TextureLoader()
-scene.background = textureLoader.load(halloweenBackgroundUrl)
+// scene.background = textureLoader.load(halloweenBackgroundUrl)
+
+//make the scene have light dark background
+scene.background = new THREE.Color(0x222222)
 
 //#endregion
 
@@ -151,9 +154,9 @@ function oscilateXSpotLight(deltaTime) {
     // If the object is close to the target, pick a new random target
     if (Math.abs(spotLight.position.x - spotLightTargetLastStage.position.x) < 5) {
         if (getRandomNumber(1, 10) <= 5) {
-            spotLightTargetLastStage.position.x = getRandomNumber(grounds[grounds.length - 1].left, grounds[grounds.length - 1].position.x);  // New random target between -10 and 10
+            spotLightTargetLastStage.position.x = getRandomNumber(lastGround.left, lastGround.position.x);  // New random target between -10 and 10
         } else {
-            spotLightTargetLastStage.position.x = getRandomNumber(grounds[grounds.length - 1].position.x, grounds[grounds.length - 1].right);  // New random target between -10 and 10
+            spotLightTargetLastStage.position.x = getRandomNumber(lastGround.position.x, lastGround.right);  // New random target between -10 and 10
         }
     }
 
@@ -480,7 +483,7 @@ let groundWidth = 40;
 let groundDepth = 60;
 
 let lastStageGroundWidth = groundWidth * 4
-let lastStageGroundDepth = groundDepth * 10
+let lastStageGroundDepth = groundDepth * 15
 let lastStageGroundHeight = groundHeight * 2
 
 let groundGap = 15
@@ -778,8 +781,7 @@ const animate = (time) => {
         <ul class="rules-list">
             <li>Well done!</li>
             <li>You are looking quite delicious!</li>
-            <li>Head over to the FINAL FIGHT!</li>
-            <li>The boss could use a good feast!</li>
+            <li>Go on to the boss, he could use a good snack.</li>
             <button class="start-level-button">Take me to him!!!</button>
         </ul>`
 
