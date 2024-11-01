@@ -93,7 +93,7 @@ export class GunManager{
     
             if (isActive && this.detectCollision(bullet, target)) {
                 console.log("ouch")
-                this.level3.takeDamage(30);
+                this.level3.takeDamage(15); // damage player
                 this.level3.updatePlayerHealthBar();
                 this.scene.remove(bullet.mesh);
                 this.scene.remove(bullet.light);
