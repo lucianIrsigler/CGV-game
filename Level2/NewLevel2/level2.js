@@ -140,21 +140,21 @@ function resetAndStartVerticalAnimation() {
 // Load the built-in Helvetiker font
 const loader = new FontLoader();
 loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-    const textGeometry1 = new TextGeometry('   Sequences:\n      4, 3, 4\n      3, 2, 3\n      1, 2, 1 <--', {
+    const textGeometry1 = new TextGeometry('    Sequences:\n        4, 3, 4\n        3, 2, 3\n     > 1, 2, 1 <', {
         font: font,
         size: 0.2,
         depth: 0.01,
         curveSegments: 12,
         bevelEnabled: false,
     });
-    const textGeometry2 = new TextGeometry('   Sequences:\n      4, 3, 4\n      3, 2, 3 <--\n      1, 2, 1', {
+    const textGeometry2 = new TextGeometry('    Sequences:\n        4, 3, 4\n     > 3, 2, 3 <\n        1, 2, 1', {
         font: font,
         size: 0.2,
         depth: 0.01,
         curveSegments: 12,
         bevelEnabled: false,
     });
-    const textGeometry3 = new TextGeometry('   Sequences:\n      4, 3, 4 <--\n      3, 2, 3\n      1, 2, 1', {
+    const textGeometry3 = new TextGeometry('    Sequences:\n      > 4, 3, 4 <\n         3, 2, 3\n         1, 2, 1', {
         font: font,
         size: 0.2,
         depth: 0.01,
