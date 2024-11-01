@@ -312,6 +312,10 @@ const monster = new MONSTER(0, 5, 0)
 
 const gun = new GUN(0, 49, roomInnerRadius-2)
 scene.add(gun);
+// Add glow effect to the gun
+const gunGlow = new THREE.PointLight(0x0000ff, 1, 100);
+gunGlow.position.set(0, 49, roomInnerRadius - 2);
+scene.add(gunGlow);
 
 //ANIMATION STATE----------------------------------------------------
 let verticalAnimationClock = new THREE.Clock();
