@@ -5,7 +5,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 
 //#region NON THREE utilities =========================
-function getRandomNumber(min, max) {
+let getRandomNumber = (min, max) => {
     return Math.random() * (max - min) + min;
 }
 //#endregion NON THREE utilities =========================
