@@ -150,14 +150,14 @@ export class Level3 extends SceneBaseClass{
 
         window.addEventListener("click", () => {
             if (!this.playingAlready){
-                soundEffectsManager.playSound("ambienceLevel3", 0.3);
+                // soundEffectsManager.playSound("ambienceLevel3", 0.3);
                 this.playingAlready=true;
             }
         });
 
         window.addEventListener("keydown", () => {
             if (!this.playingAlready){
-                soundEffectsManager.playSound("ambienceLevel3", 0.3);
+                // soundEffectsManager.playSound("ambienceLevel3", 0.3);
                 this.playingAlready=true;
             }
         });
@@ -177,8 +177,9 @@ export class Level3 extends SceneBaseClass{
         this.health = Math.max(0, this.health); // Ensure health doesn't go below 0
         // updateCharacterLight(); // Update light when health changes
         if (this.health <= 0) {
-            youLose(); // Call the lose condition function
+            this.youLose(); // Call the lose condition function
         }
+        console.log("Player health:", this.health); // Log the player's health
     }
 
     updatePlayerHealthBar(){
@@ -302,7 +303,7 @@ export class Level3 extends SceneBaseClass{
 
 
         
-        this.gunManager = new GunManager(this.scene,100,this.enemy,this.playerBody,this.world);
+        this.gunManager = new GunManager(this.scene, this.health, this.enemy, this.player, this.world, this);
 
     }
 
@@ -469,7 +470,7 @@ export class Level3 extends SceneBaseClass{
     
     // Function to handle loss condition
      youLose() {
-        document.getElementById('header-end').innerText = "You Died!\nYou ran out of light and the darkness consumed you!";
+        document.getElementById('gameOverHeader').innerText = "You Died!\nYou ran out of light and the darkness consumed you!";
         this.enemy.asleep = true;
 
         console.log("You lose!"); // Display lose message if health reaches zero
@@ -478,8 +479,8 @@ export class Level3 extends SceneBaseClass{
         //TODO ADD THIS
         // document.exitPointerLock(); // Exit mouse lock
         // crosshair.hideCrosshair();
-        // document.getElementById('health-bar-container').style.display = 'none';
-        // cubeEnemy.visible = false;
+        document.getElementById('user-health-bar-container').style.display = 'none';
+        document.getElementById('boss-health-bar-container').style.display = 'none';
         this.enemyLight.visible = false;
 
         soundEffectsManager.toggleLoop("ambienceLevel3")
@@ -507,9 +508,10 @@ export class Level3 extends SceneBaseClass{
 
         
         this.updatePlayerHealthBar();
+        // this.takeDamage(0.1);
 
         this.gunManager.updateBulletsPlayer(this.enemyBody);
-        let tmp = this.gunManager.updateBulletsEnemy(this.playerBody);
+        this.gunManager.updateBulletsEnemy(this.playerBody);
     
         this.playerLight.position.set(this.playerBody.position.x, this.playerBody.position.y + 1.5, this.playerBody.position.z);
         this.enemyLight.position.set(this.enemyBody.position.x, this.enemyBody.position.y + 2, this.enemyBody.position.z);

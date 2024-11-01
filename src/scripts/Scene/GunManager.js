@@ -18,7 +18,7 @@ export class GunManager{
      * @param {int} playerHealth 
      * @param {Enemy} enemy 
      */
-    constructor(scene,playerHealth,enemy,player,world){
+    constructor(scene,playerHealth,enemy,player,world,level3){
         this.scene = scene;
         this.playerHealth =playerHealth;
         this.player = player
@@ -28,6 +28,9 @@ export class GunManager{
 
         this.bullets = [];
         this.enemyBullets = [];
+
+        this.level3 = level3; // Create an instance of Level3
+        // this.level3.initScene(); // Initialize the scene if needed
     }
 
 
@@ -89,7 +92,8 @@ export class GunManager{
     
             if (isActive && this.detectCollision(bullet, target)) {
                 console.log("ouch")
-                this.handlePlayerHit(30);
+                this.level3.takeDamage(30);
+                this.level3.updatePlayerHealthBar();
                 this.scene.remove(bullet.mesh);
                 this.scene.remove(bullet.light);
                 return false; // Remove this bullet after collision
@@ -136,17 +140,9 @@ export class GunManager{
         }
     }
 
-
-
-    handlePlayerHit(dmg){
-        this.playerHealth -= dmg;
-        this.updatePlayerHealthBar();
-    }
-
     isPlayerBullet(bullet){
         return bullet.colour == 0xff0000;
     }
-
 
     detectCollision(bullet, target) {
         // Check if bullet and target both exist and have positions
@@ -164,12 +160,6 @@ export class GunManager{
         const collisionThreshold = 1.0;
     
         return distance < collisionThreshold; // if distance between bullet and target is less than threshold, return true
-    }
-
-    updatePlayerHealthBar(){
-        const healthBar = document.getElementById('user-health-bar');
-        const healthPercentage = (this.playerHealth / 100) * 100; // Calculate percentage
-        healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
     }
     
 }
