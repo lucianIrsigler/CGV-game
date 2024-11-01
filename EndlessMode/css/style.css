@@ -1,0 +1,200 @@
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: none;
+    color: white;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Container for the progress bar and text */
+.progress-container {
+    position: relative;
+    width: 300px;
+    border-radius: 0.4rem;
+}
+
+/* Style the progress bar */
+#powerLevel {
+    width: 100%;
+    height: 30px;
+    background-color: #eee;
+    border: 2px solid #000;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Remove native styling from the progress bar */
+#powerLevel::-webkit-progress-bar {
+    background-color: #eee;
+}
+
+#powerLevel::-webkit-progress-value {
+    background-color: #4caf50;
+}
+
+#powerLevel::-moz-progress-bar {
+    background-color: #4caf50;
+}
+
+/* Text inside the progress bar */
+.progress-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: black;
+}
+
+/* header */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+header.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #2c2c2c;
+    border-bottom: 2px solid #444;
+}
+
+.header-left .level-display {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.header-right {
+    display: flex;
+    gap: 10px;
+}
+
+.header-btn {
+    padding: 8px 15px;
+    background-color: #444;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.header-btn:hover {
+    background-color: #555;
+}
+
+.header-btn:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.header-btn:active {
+    background-color: #666;
+}
+
+/* RULES BOARD */
+
+
+.rules-board {
+    background-color: #1e1e1e;
+    border-radius: 15px;
+    box-shadow: 0px 0px 20px rgba(0, 255, 255, 0.2);
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    border: 1px solid #00c3ff;
+    position: absolute;
+    /* Ensures that it's not dependent on parent elements */
+    top: 50%;
+    /* Centers vertically */
+    left: 50%;
+    /* Centers horizontally */
+    transform: translate(-50%, -50%);
+    /* Adjusts the element to be fully centered */
+}
+
+.rules-title {
+    color: #00c3ff;
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 5px rgba(0, 195, 255, 0.7);
+}
+
+.rules-list {
+    list-style: none;
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+.rules-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #333;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+.rules-list li:last-child {
+    border-bottom: none;
+}
+
+.rules-list li:hover {
+    color: #00c3ff;
+    transition: color 0.3s ease;
+}
+
+
+/* 
+ */
+
+.start-level-button {
+    width: 100%;
+    /* Makes the button stretch to fill its container's width */
+    padding: 15px;
+    font-size: 1.2rem;
+    background-color: #00c3ff;
+    color: #1e1e1e;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0px 4px 15px rgba(0, 195, 255, 0.2);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.start-level-button:hover {
+    background-color: #00a6cc;
+    box-shadow: 0px 6px 20px rgba(0, 195, 255, 0.4);
+}
+
+
+/* AUDIO */
+audio {
+    display: none;
+}
