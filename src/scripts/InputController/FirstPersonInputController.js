@@ -263,32 +263,32 @@ export class FirstPersonInputController {
       }
 
 
-    if (rotate){
-        if (isNaN(xh) || isNaN(yh)) {
-          return;  // Stop the function if invalid values are found
-        } 
+      if (rotate){
+          if (isNaN(xh) || isNaN(yh)) {
+            return;  // Stop the function if invalid values are found
+          } 
 
-        if (edge){
-          this.calculateEdge_(mouseX,mouseY,edgeThreshold,halfViewPortW,halfViewPortH)
-        }
-        else{
-            this.phi_ += (-1*xh * 2);
-            this.theta_ = clamp(this.theta_ + -yh * 5, -Math.PI / 3, Math.PI / 3);
-        }
-    
-        const qx = new THREE.Quaternion();
-        qx.setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.phi_);
-    
-        const qz = new THREE.Quaternion();
-        // qz.setFromAxisAngle(new THREE.Vector3(1, 0, 0), this.theta_);
-    
-        const q = new THREE.Quaternion();
-        q.multiplyQuaternions(qx, qz);
+          if (edge){
+            this.calculateEdge_(mouseX,mouseY,edgeThreshold,halfViewPortW,halfViewPortH)
+          }
+          else{
+              this.phi_ += (-1*xh * 2);
+              this.theta_ = clamp(this.theta_ + -yh * 5, -Math.PI / 3, Math.PI / 3);
+          }
+      
+          const qx = new THREE.Quaternion();
+          qx.setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.phi_);
+      
+          const qz = new THREE.Quaternion();
+          // qz.setFromAxisAngle(new THREE.Vector3(1, 0, 0), this.theta_);
+      
+          const q = new THREE.Quaternion();
+          q.multiplyQuaternions(qx, qz);
 
-        this.rotation = q;
-        this.target_.quaternion.copy(q);
-        this.playerBody.quaternion.copy(q);
-    }
+          this.rotation = q;
+          this.target_.quaternion.copy(q);
+          this.playerBody.quaternion.copy(q);
+      }
   }
 
     /**
