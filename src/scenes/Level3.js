@@ -46,7 +46,7 @@ export class Level3 extends SceneBaseClass{
         this.playerBody; //cannon.js model
         this.target; //player model
 
-        this.maxHealth = 100; // Define the maximum health
+        this.maxHealth = 1000; // Define the maximum health
         this.health = this.maxHealth;
         this.loaded = false;
         this.damageRate = 1; // Define the damage rate
@@ -92,7 +92,6 @@ export class Level3 extends SceneBaseClass{
         this.debugRenderer = new CannonDebugger(this.scene, this.world);
 
         this.currentMonster = getRandomMonster(monsters3);
-
 
     }
 
@@ -162,9 +161,11 @@ export class Level3 extends SceneBaseClass{
             }
         });
 
-        this.restartButton.addEventListener("click", this.restartGame);
-
     };
+
+    restartGame() {
+        location.reload(); // Reload the page to restart the game
+    }
 
     // Handle Player hit
     handlePlayerHit(dmg) {
@@ -176,10 +177,7 @@ export class Level3 extends SceneBaseClass{
         this.health -= amount;
         this.health = Math.max(0, this.health); // Ensure health doesn't go below 0
         // updateCharacterLight(); // Update light when health changes
-        if (this.health <= 0) {
-            this.youLose(); // Call the lose condition function
-        }
-        console.log("Player health:", this.health); // Log the player's health
+        // console.log("Player health:", this.health); // Log the player's health
     }
 
     updatePlayerHealthBar(){
@@ -449,40 +447,43 @@ export class Level3 extends SceneBaseClass{
         });
     }
 
-    restartGame() {
-    }
 
-     youWin() {
-        document.getElementById('header-end').innerText = "You Win!\nYou have slain the beast aka your MOM!!! *GASP*\nShe turned into a monster because you didn't do the dishes!";
-        isEnemyAsleep = true;
-        isGamePaused = true; // Pause the game
+    youWin() {
+        //stop animations
+        cancelAnimationFrame(this.animationId);
+
+        document.getElementById('gameOverHeader').innerText = "You Win!\nYou have defeated the monster and escaped the darkness!";
+        this.enemy.asleep = true;
+
         console.log("You win!"); // Display win message if health reaches zero
-        enemyCurrentHealth = 0; // Prevent negative health
-        gameOverScreen.style.display = "block"; // Show game over screen
-        document.exitPointerLock(); // Exit mouse lock
-        document.getElementById('health-bar-container').style.display = 'none';
-        crosshair.hideCrosshair();
-        // cubeEnemy.visible = false;
-        enemyLight.visible = false;
+        this.gameOverScreen.style.display = "block"; // Show game over screen
+
+        document.getElementById('user-health-bar-container').style.display = 'none';
+        document.getElementById('boss-health-bar-container').style.display = 'none';
+        this.enemyLight.visible = false;
+
+        this.restartButton.addEventListener("click", this.restartGame); // Restart the game when the button is clicked
         //stop ambient sound
-        ambientSound.pause();
+        soundEffectsManager.toggleLoop("ambienceLevel3")
     }
     
     // Function to handle loss condition
-     youLose() {
+    youLose() {
+        //stop animations
+        cancelAnimationFrame(this.animationId);
+
         document.getElementById('gameOverHeader').innerText = "You Died!\nYou ran out of light and the darkness consumed you!";
         this.enemy.asleep = true;
 
         console.log("You lose!"); // Display lose message if health reaches zero
         this.gameOverScreen.style.display = "block"; // Show game over screen
 
-        //TODO ADD THIS
-        // document.exitPointerLock(); // Exit mouse lock
-        // crosshair.hideCrosshair();
         document.getElementById('user-health-bar-container').style.display = 'none';
         document.getElementById('boss-health-bar-container').style.display = 'none';
         this.enemyLight.visible = false;
 
+        this.restartButton.addEventListener("click", this.restartGame); // Restart the game when the button is clicked
+        //stop ambient sound
         soundEffectsManager.toggleLoop("ambienceLevel3")
     }
 
@@ -521,6 +522,12 @@ export class Level3 extends SceneBaseClass{
 
         this.renderer.render(this.scene, this.cameraManager.getCamera());
 
+        if (this.health <= 0) {
+            this.youLose(); // Call the lose condition function
+        } 
+        else if (this.enemy.getHealth() <= 0) {
+            this.youWin(); // Call the win condition function
+        }
     }
 
     /**
