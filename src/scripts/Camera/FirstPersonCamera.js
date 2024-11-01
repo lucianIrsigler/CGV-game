@@ -32,8 +32,8 @@ export class FirstPersonCamera {
      * @param {*} _
      */
     updateCamera_(_) {
-        // Copy quaternion from playerBody
-        this.camera_.quaternion.copy(this.playerBody.quaternion);
+        // Copy quaternion from input controller
+        this.camera_.quaternion.copy(this.input_.rotation);
         
         // Optional: Offset the camera position to align with first-person view
         const cameraOffset = new THREE.Vector3(0, 1, 0); // Adjust height as needed

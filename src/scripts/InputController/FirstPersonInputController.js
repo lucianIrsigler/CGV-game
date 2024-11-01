@@ -32,7 +32,7 @@ export class FirstPersonInputController {
         this.playerBody = playerBody;
 
 
-        this.speed_ = 0.5;
+        this.speed_ = 0.1;
         this.phi_ = 0;
         this.theta_ = 0;
         this.rotation = new THREE.Vector3(0,0,0);
@@ -79,6 +79,18 @@ export class FirstPersonInputController {
         document.addEventListener("mousedown", (e) => this.onMouseDown_(e), false);
         document.addEventListener("mouseup", (e) => this.onMouseUp_(e), false);
         document.addEventListener("mousemove", (e) => this.onMouseMove_(e), false);
+
+        document.addEventListener('click', () => {
+            document.body.requestPointerLock();
+        });
+
+        document.addEventListener('pointerlockchange', () => {
+            if (document.pointerLockElement === document.body) {
+                document.addEventListener('mousemove', this.onMouseMove_, false);
+            } else {
+                document.removeEventListener('mousemove', this.onMouseMove_, false);
+            }
+        }, false);
     }
 
     onMouseDown_(e) {
@@ -106,20 +118,34 @@ export class FirstPersonInputController {
     }
     
     onMouseMove_(e) {
-        this.current_.mouseX = e.pageX - window.innerWidth / 2;
-        this.current_.mouseY = e.pageY - window.innerHeight / 2;
+        if (document.pointerLockElement === document.body) {
+            const movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+            const movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
 
-        if (this.previous_ === null) {
-            this.previous_ = { ...this.current_ };
+            this.phi_ -= movementX * 0.002; // Rotate left/right
+            this.theta_ = clamp(this.theta_ + movementY * 0.002, -Math.PI / 3, Math.PI / 3); // Rotate up/down (inverted)
+
+            const qx = new THREE.Quaternion();
+            qx.setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.phi_);
+
+            const qz = new THREE.Quaternion();
+            qz.setFromAxisAngle(new THREE.Vector3(1, 0, 0), this.theta_);
+
+            const q = new THREE.Quaternion();
+            q.multiplyQuaternions(qx, qz);
+
+            this.rotation = q;
+            if (this.target_ && this.playerBody) { // Check if the target and player body exist
+                this.target_.quaternion.copy(q);
+                this.playerBody.quaternion.copy(qx); // Only apply yaw to the player body
+            }
         }
-        this.current_.mouseXDelta = this.current_.mouseX - this.previous_.mouseX;
-        this.current_.mouseYDelta = this.current_.mouseY - this.previous_.mouseY;
     }
 
     onKeyDown_(e) {
         this.keys_[e.keyCode] = true;
     }
-  
+
     onKeyUp_(e) {
         this.keys_[e.keyCode] = false;
     }
@@ -174,13 +200,13 @@ export class FirstPersonInputController {
     
       // Jump logic
       if (this.keys_[KEYS.space]) {
-        // if (this.isGrounded() && !this.alreadyJumped) { // Check if the player is on the ground
+        if (this.isGrounded() && !this.alreadyJumped) { // Check if the player is on the ground
             this.playerBody.velocity.y = 10; // Set the upward velocity for jumping
-            this.alreadyJumped=true;
+            this.alreadyJumped = true;
             soundEffectsManager.playSound("jump");
-        // }else if (this.isGrounded()){
-          // this.alreadyJumped=false;
-        // }
+        } else if (this.isGrounded()) {
+            this.alreadyJumped = false;
+        }
       }
 
     }
