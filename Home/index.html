@@ -44,24 +44,7 @@
         <button class="menu-button" id="restart-button">Restart</button>
         <button class="menu-button" id="exit-button">Exit</button>
     </div>
-    <script>
-        let audio;
-        function prepareBackgroundAudio() {
-          audio = new Audio('horror-sound-effect.mp3');
-          audio.volume = 0.5; 
-          audio.loop = false; 
-        }
-        function playBackgroundAudio() {
-          if (audio) {
-            audio.play().catch(error => {
-              console.error("Error playing audio: ", error);
-            });
-          }
-        }
-    
-        window.onload = prepareBackgroundAudio;
-        document.getElementById('start').addEventListener('click', playBackgroundAudio);
-      </script>
+
     <script type="module" src="main1.js"></script>
 </body>
 </html>

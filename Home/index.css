@@ -5,13 +5,12 @@
 body { 
     margin: 0;
     overflow: hidden;
-    cursor: none;  
     height: 100vh;
     background: url('dungeon.jpg');
     background-size: cover;  
 }
 
-canvas { display: block; }
+canvas { display: block;}
 
 #menu {
     position: absolute;
