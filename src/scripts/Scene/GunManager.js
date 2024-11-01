@@ -4,6 +4,7 @@ import { SoundEffectsManager } from "./SoundEffectManger";
 import { Bullet } from "../Objects/bullet";
 import { Enemy } from "../Objects/Enemy";
 import { cos } from 'three/webgpu';
+import { Level3 } from '../../scenes/Level3';
 // import * as CANNON from 'cannon-es'; // Import Cannon.js for physics
 
 
@@ -43,7 +44,7 @@ export class GunManager{
 
     addBullet(camera,colour){
         const position = camera.position.clone();
-        console.log(position);
+        // console.log(position);
         // position.x -= 1.3;
         soundEffectsManager.playSound("light_bullet_sound",0.5)
 
@@ -53,7 +54,7 @@ export class GunManager{
         const direction = new THREE.Vector3(); // Create a new vector for direction
         camera.getWorldDirection(direction); // Get the direction the camera is facing
 
-        console.log(direction);
+        // console.log(direction);
         
         direction.normalize(); // Normalize the direction vector
 
@@ -72,6 +73,7 @@ export class GunManager{
     
             if (isActive && this.detectCollision(bullet, target)) {
                 this.enemy.handleEnemyHit();
+                console.log("hit")
                 this.scene.remove(bullet.mesh);
                 this.scene.remove(bullet.light);
                 return false; // Remove this bullet after collision
@@ -86,6 +88,7 @@ export class GunManager{
             const isActive = bullet.update(this.scene);
     
             if (isActive && this.detectCollision(bullet, target)) {
+                console.log("ouch")
                 this.handlePlayerHit(30);
                 this.scene.remove(bullet.mesh);
                 this.scene.remove(bullet.light);
@@ -97,40 +100,47 @@ export class GunManager{
     }
     
 
-    enemyShoot(target,camera){
-        if (!this.enemy.enemyShootCooldown){
-            const position = target.position.clone();
-            soundEffectsManager.playSound("dark_bullet_sound",0.3);
+    enemyShoot(player, boss) {
+        if (!this.enemy.enemyShootCooldown) {
+            const position = boss.position.clone();
+            soundEffectsManager.playSound("dark_bullet_sound", 0.3);
 
-            this.addBullet(camera,0xff0000);
+            const bullet = new Bullet(position, 0xff0000, this.world, this.scene);
 
+            const direction = new THREE.Vector3();
+            direction.subVectors(player.position, position).normalize(); // Shoot towards player
+
+            bullet.velocity.copy(direction);
+            this.enemyBullets.push(bullet);
+
+            this.scene.add(bullet.mesh);
+            this.scene.add(bullet.light);
 
             let randomTime = Math.random() * 1000 + 500; // Random time between 0.5 to 1.5 seconds
             this.enemy.enemyShootCooldown = true; // Set cooldown flag
 
             setTimeout(() => {
-                this.enemy.enemyShootCooldown = false; // Reset cooldown flag after 1 second
+                this.enemy.enemyShootCooldown = false; // Reset cooldown flag after random time
             }, randomTime); // milliseconds delay
         }
     }
 
-    checkAndShoot(player,camera){
+    checkAndShoot(player,boss){
          if(!this.enemy.isAsleep() && this.enemy.getHealth()>0){
             this.enemy.updateEnemyMovement();
-            // this.enemyShoot(player,camera);
+            this.enemyShoot(player,boss);
 
-        //     //TODO UNCOMMENT
-        //     // document.getElementById('health-bar-container').style.display = 'block';
-
-        //     //TODO rotate or smth
-        //     // this.model.lookAt(player.position);
+            //TODO UNCOMMENT
+            document.getElementById('boss-health-bar-container').style.display = 'block';            
 
         }
     }
 
 
-    handlePlayerHit(dmg){
 
+    handlePlayerHit(dmg){
+        this.playerHealth -= dmg;
+        this.updatePlayerHealthBar();
     }
 
     isPlayerBullet(bullet){
@@ -153,18 +163,13 @@ export class GunManager{
         // Assuming a collision threshold distance
         const collisionThreshold = 1.0;
     
-        return distance < collisionThreshold;
+        return distance < collisionThreshold; // if distance between bullet and target is less than threshold, return true
+    }
+
+    updatePlayerHealthBar(){
+        const healthBar = document.getElementById('user-health-bar');
+        const healthPercentage = (this.playerHealth / 100) * 100; // Calculate percentage
+        healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
     }
     
-    
-
-
-    takeDamage(amount) {
-        health -= amount;
-        health = Math.max(0, health); // Ensure health doesn't go below 0
-        // updateCharacterLight(); // Update light when health changes
-        if (health <= 0 && !isGamePaused) {
-            youLose(); // Call the lose condition function
-        }
-    }
 }

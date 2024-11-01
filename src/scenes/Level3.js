@@ -14,10 +14,10 @@ import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoader
 import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger';
 import { World, Body, Box,Vec3,Sphere } from 'cannon-es';
 import { Enemy } from '../scripts/Objects/Enemy';
-import { Bullet } from '../scripts/Objects/bullet';
 import {Crosshair} from "../scripts/Objects/Crosshair";
 import { monsters3 } from "../data/monster3";
 import { lamps3 } from "../data/lampPos3";
+import { player } from '../../Level3/player';
 
 
 
@@ -59,7 +59,7 @@ export class Level3 extends SceneBaseClass{
         this.gameOverScreen = document.getElementById("gameOverScreen");
         this.restartButton = document.getElementById("restartButton");
 
-
+        this.isGamePaused = false;
 
         //MANAGERS
         this.cameraManager;
@@ -176,7 +176,7 @@ export class Level3 extends SceneBaseClass{
         this.health -= amount;
         this.health = Math.max(0, this.health); // Ensure health doesn't go below 0
         // updateCharacterLight(); // Update light when health changes
-        if (this.health <= 0 && !isGamePaused) {
+        if (this.health <= 0) {
             youLose(); // Call the lose condition function
         }
     }
@@ -213,7 +213,6 @@ export class Level3 extends SceneBaseClass{
     };
 
     async init_objects_(){
-        await this.init_bodies();
         await this.init_player();
         await this.init_monster_();
 
@@ -221,38 +220,6 @@ export class Level3 extends SceneBaseClass{
         let out = this.createObjects();
 
     };
-
-    async init_bodies(){
-        this.enemyBody = new Body({
-            mass: 1,
-            shape: new Box(new Vec3(2, 6, 2)),
-            position: new Vec3(this.currentMonster.positionX, 10, this.currentMonster.positionZ)
-        });
-
-        this.world.addBody(this.enemyBody);
-
-        // Add collision event listener
-        this.enemyBody.addEventListener('collide', (event) => {
-
-            let obj = this.world.getBodyById(event.body.id);
-            if (this.gunManager.isPlayerBullet(obj)) {
-                this.gunManager.enemy.handleEnemyHit();
-                this.gunManager.removeBulletPlayer(obj);
-            }
-        });
-
-
-        //create cannon.js body for model
-        this.playerBody = new Body({
-            mass: 1, // Dynamic body
-            // position: new Vec3(-1, 2.5, -10), // Start position
-            position: new Vec3(0,2, 0), // Start position
-        });
-        const boxShape = new Box(new Vec3(0.5, 1.2, 0.5)); // Box shape for the player
-        this.playerBody.addShape(boxShape);
-
-        this.world.addBody(this.playerBody);
-    }
 
 
     async init_player(){
@@ -290,6 +257,20 @@ export class Level3 extends SceneBaseClass{
 
         const gltf = await this.loader.loadModel(currentMonster.scene,"monster");
         const model = gltf.scene;
+
+        // Traverse the model and update the material
+        model.traverse((node) => {
+            if (node.isMesh) {
+                node.material = new THREE.MeshStandardMaterial({
+                    color: node.material.color,
+                    map: node.material.map,
+                    normalMap: node.material.normalMap,
+                    roughness: 0.5, // Adjust as needed
+                    metalness: 0.5  // Adjust as needed
+                });
+            }
+        });
+
         this.addObject(model);
 
         
@@ -303,9 +284,19 @@ export class Level3 extends SceneBaseClass{
             mass: 1, // Dynamic body
             position: new Vec3(currentMonster.positionX, currentMonster.positionY, currentMonster.positionZ-2), // Start position
         });
-        const boxShape = new Box(new Vec3(2, 2, 2)); // Box shape for the player
+        const boxShape = new Box(new Vec3(3, 5, 3)); // Box shape for the player
+        this.enemyBody.type = Body.KINEMATIC; // Set the body type to KINEMATIC to not be affected by gravity
+        this.enemyBody.position.set(this.currentMonster.positionX, 4, this.currentMonster.positionZ); // Set the position
         this.enemyBody.addShape(boxShape);
         this.world.addBody(this.enemyBody);
+
+        this.enemyBody.addEventListener('collide', (event) => {
+            let obj = this.world.getBodyById(event.body.id);
+            if (this.gunManager.isPlayerBullet(obj)) {
+                this.gunManager.enemy.handleEnemyHit();
+                this.gunManager.removeBulletPlayer(obj);
+            }
+        });
 
         this.enemy = new Enemy(currentMonster.health,{x:currentMonster.positionX,y:currentMonster.positionY,z:currentMonster.positionZ},this.enemyModel,this.enemyBody,this.enemyLight);
 
@@ -496,6 +487,8 @@ export class Level3 extends SceneBaseClass{
             return;
         }
 
+        this.enemy.updateEnemyRotation(this.playerBody.position);
+
         this.world.step(1 / 60);
         this.debugRenderer.update();
 
@@ -511,10 +504,12 @@ export class Level3 extends SceneBaseClass{
         this.updatePlayerHealthBar();
 
         this.gunManager.updateBulletsPlayer(this.enemyBody);
+        let tmp = this.gunManager.updateBulletsEnemy(this.playerBody);
     
         this.playerLight.position.set(this.playerBody.position.x, this.playerBody.position.y + 1.5, this.playerBody.position.z);
+        this.enemyLight.position.set(this.enemyBody.position.x, this.enemyBody.position.y + 2, this.enemyBody.position.z);
 
-        this.gunManager.checkAndShoot(this.target,this.cameraManager.getCamera());
+        this.gunManager.checkAndShoot(this.playerBody, this.enemyBody);
         this.cameraManager.update(timeElapsedS);
 
         this.renderer.render(this.scene, this.cameraManager.getCamera());
