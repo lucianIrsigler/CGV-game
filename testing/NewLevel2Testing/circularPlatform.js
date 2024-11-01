@@ -52,13 +52,12 @@ export class CircularPlatform extends THREE.Object3D {
                 32    // number of segments
             );
             
-            // Rotate the cylinder to match Three.js orientation
+            // Changed rotation to make it flat like a platform
             const quat = new CANNON.Quaternion();
-            quat.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+            quat.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), 0); // No rotation needed for flat orientation
             body.addShape(shape, new CANNON.Vec3(0, 0, 0), quat);
         } else {
             // For ring-shaped platforms
-            // Create multiple shapes to approximate a ring
             const segments = 16; // Number of segments to approximate the ring
             const angleStep = (2 * Math.PI) / segments;
             const midRadius = (this.innerRadius + this.outerRadius) / 2;
