@@ -1,76 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <title>Abyss walker</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="index.css">
+  <title>Abyss walker</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="index.css">
 </head>
+
 <body>
-    <!-- TODO:remove display none -->
-    <div class="start-menu" id="start-menu">
-        <h1 class="start-menu-title">Abyss walker</h1>
-        <button class="start-menu-button" id="start">Start</button>
-        <button class="start-menu-button" id="story">Story</button>
-        <button class="start-menu-button" id="how-to-play">How to play</button>
-        <button class="start-menu-button" id="endless">Endless</button>
-    </div>
-    <div class="start-menu" id="blank"></div>
+  <!-- TODO:remove display none -->
+  <div class="start-menu" id="start-menu">
+    <h1 class="start-menu-title">Abyss walker</h1>
+    <button class="start-menu-button" id="start">Start</button>
+    <button class="start-menu-button" id="story">Story</button>
+    <button class="start-menu-button" id="how-to-play">How to play</button>
+    <button class="start-menu-button" id="endless">Endless</button>
+  </div>
+  <div class="start-menu" id="blank"></div>
 
-      <div class="progress-bar-container" style="display: none;">
-          <label id="progress-label" for="progress-bar">Loading...</label>
-          <progress id="progress-bar" value="0" max="100"></progress>
-      </div>
+  <div class="progress-bar-container" style="display: none;">
+    <label id="progress-label" for="progress-bar">Loading...</label>
+    <progress id="progress-bar" value="0" max="100"></progress>
+  </div>
 
 
-    <div id="doorPrompt" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px;">
-        Press 'E' to open the door
-    </div>
+  <div id="doorPrompt"
+    style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 24px;">
+    Press 'E' to open the door
+  </div>
 
-    <!-- User health bar -->
-	<div id="user-health-bar-container" style="display: none;">
-		<div id="user-health-bar"></div>
-	</div>
+  <!-- User health bar -->
+  <div id="user-health-bar-container" style="display: none;">
+    <div id="user-health-bar"></div>
+  </div>
 
   <!-- Boss health bar -->
-	<div id="boss-health-bar-container" style="display: none;">
-		<div id="boss-name">Boss Name</div>
-		<div id="boss-health-bar"></div>
-	</div>
+  <div id="boss-health-bar-container" style="display: none;">
+    <div id="boss-name">Boss Name</div>
+    <div id="boss-health-bar"></div>
+  </div>
 
-    <div id="gameOverScreen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); color: white; text-align: center; padding-top: 20%;">
-        <h1>Stay in the light</h1>
-        <button id="restartButton" style="padding: 10px 20px; font-size: 20px;">Restart</button>
-      </div>
-     <div id="menu">
-        <button class="menu-button" id="restart-button">Restart</button>
-        <button class="menu-button" id="exit-button">Exit</button>
-    </div>
+  <div id="gameOverScreen"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); color: white; text-align: center; padding-top: 20%;">
+    <h1>Stay in the light</h1>
+    <button id="restartButton" style="padding: 10px 20px; font-size: 20px;">Restart</button>
+  </div>
+  <div id="menu">
+    <button class="menu-button" id="restart-button">Restart</button>
+    <button class="menu-button" id="exit-button">Exit</button>
+  </div>
 
-    <!-- <script type="importmap"> { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@<version>/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@<version>/examples/jsm/" } } </script> -->
+  <!-- <script type="importmap"> { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@<version>/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@<version>/examples/jsm/" } } </script> -->
 
-    <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"></script> -->
-    <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/jsm/loaders/GLTFLoader.js"></script> -->
+  <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"></script> -->
+  <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/jsm/loaders/GLTFLoader.js"></script> -->
 
-    
-    
-    <script type="importmap"> { "imports": { 
+
+
+  <script type="importmap"> { "imports": { 
       "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js", 
         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/" } } </script>
 
-    <!-- Import Cannon-ES from CDN -->
-    <script type="module">
-      import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
-      window.CANNON = CANNON; // Makes Cannon-ES globally accessible
+  <!-- Import Cannon-ES from CDN -->
+  <script type="module">
+    import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
+    window.CANNON = CANNON; // Makes Cannon-ES globally accessible
 
-      import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
 
-      window.THREE = THREE;
+    window.THREE = THREE;
 
-    </script>
+  </script>
 
 
 
-    <script type="module" src="main.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
+
 </html>
