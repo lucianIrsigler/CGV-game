@@ -115,12 +115,25 @@ export class Level3 extends SceneBaseClass{
         this.init_lighting_();
         this.init_camera_();
         this.init_objects_();
-
+        // this.loadSkybox();
         this.startDamageTimer();
         this.miniMap.init_miniMap_(window,document,this.scene);
     }   
 
+    // loadSkybox() {
+    //     // Load one of the example skyboxes
+    //     const loader = new THREE.CubeTextureLoader();
+    //     const skyboxTexture = loader.load([
+    //         'https://threejs.org/examples/textures/cube/skybox/px.jpg', // +x
+    //         'https://threejs.org/examples/textures/cube/skybox/nx.jpg', // -x
+    //         'https://threejs.org/examples/textures/cube/skybox/py.jpg', // +y
+    //         'https://threejs.org/examples/textures/cube/skybox/ny.jpg', // -y
+    //         'https://threejs.org/examples/textures/cube/skybox/pz.jpg', // +z
+    //         'https://threejs.org/examples/textures/cube/skybox/nz.jpg'  // -z
+    //     ]);
 
+    //     this.scene.background = skyboxTexture;
+    // }
 
     init_eventHandlers_(){
         document.addEventListener("keydown", (e) => {

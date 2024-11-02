@@ -89,9 +89,9 @@ export class MiniMap{
 
     update(scene,target,enemyt){
         const currentTimeMiniMap = Date.now();
-        this.player.position.set(target.position.x,this.yAboveTheScene,target.position.z);
+        this.player.position.set(target.position.x,this.yAboveTheScene+30,target.position.z);
         if (enemyt) {
-            this.enemy.position.set(enemyt.position.x, this.yAboveTheScene, enemyt.position.z);
+            this.enemy.position.set(enemyt.position.x, this.yAboveTheScene+30, enemyt.position.z);
         }
         if (currentTimeMiniMap - this.lastMiniMapRenderTime >= this.miniMapRenderInterval) {
             this.miniMapRenderer.render(scene, this.miniMapCamera);
