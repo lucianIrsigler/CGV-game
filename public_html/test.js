@@ -81,12 +81,14 @@ loadModules('/src'); // Replace 'src' with your actual base directory path if di
 import {CustomScene}  from "./src/scenes/testScene.js";
 import {Level1}  from "./src/scenes/Level1.js";
 import { CustomScene1 } from "./src/scenes/testScene1.js";
-import { CustomScene2 } from "./src/scenes/testScene2.js";
-import { CustomScene3 } from "./src/scenes/testScene3.js";
+// import { CustomScene2 } from "./src/scenes/testScene2.js";
+// import { CustomScene3 } from "./src/scenes/testScene3.js";
 
 import { AnimationManager } from "./src/scripts/Animation/AnimationLoopHandler.js";
 
 const animationManager = new AnimationManager();
+
+// document.getElementById("start-menu").style.display = "none";
 
 animationManager.switchScene(new Level1(),0);
 

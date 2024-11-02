@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import CannonDebugger from 'cannon-es-debugger';
+// import CannonDebugger from 'cannon-es-debugger';
 import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass";
 import { ObjectManager } from "../scripts/Scene/ObjectManager";
 import { LightManager } from "../scripts/Scene/LightManager";
@@ -89,7 +89,7 @@ export class Level3 extends SceneBaseClass{
 
 
         //debug
-        this.debugRenderer = new CannonDebugger(this.scene, this.world);
+        // this.debugRenderer = new CannonDebugger(this.scene, this.world);
 
         this.currentMonster = getRandomMonster(monsters3);
 

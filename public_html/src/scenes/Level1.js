@@ -31,7 +31,7 @@ export class Level1 extends SceneBaseClass {
         
 
         //cannon.js world
-        this.world = CANNON.World();
+        this.world = new  CANNON.World();
         this.world.gravity.set(0, -12, 0);
         this.playerBody; //cannon.js model
         this.target; //player model
