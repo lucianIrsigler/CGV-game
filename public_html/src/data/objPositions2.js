@@ -87,10 +87,10 @@ const baseLamp = {
     scaleZ: 0.1,
     positionX: 0, 
     positionY: 0, 
-    positionZ: 0  
+    positionZ: 0
 };
 export const lampPositions = {
-lampOne: Object.assign({}, baseLamp, { positionX: 0, positionY: 0, positionZ: 0 })
+lampOne: Object.assign({}, baseLamp, { positionX: 0, positionY: 1, positionZ: 0 })
 };
 //END LAMP POSITIONS---------------------------------------------------
 

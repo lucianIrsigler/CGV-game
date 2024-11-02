@@ -83,9 +83,9 @@ export class Level2 extends SceneBaseClass {
         const groundTextures = loadTextures("PavingStones")
         applyTextureSettings(groundTextures, 5, 5);
         const wallTextures = loadTextures("PavingStones")
-        applyTextureSettings(wallTextures, 5, 5);
+        applyTextureSettings(wallTextures, 5, 4);
         const platformTextures = loadTextures("PavingStones")
-        applyTextureSettings(platformTextures, 5, 5);
+        applyTextureSettings(platformTextures, 2, 1);
         const ceilingTextures = loadTextures("PavingStones")
         applyTextureSettings(ceilingTextures, 5, 5);
         return {ceilingTextures, groundTextures, wallTextures, platformTextures}
