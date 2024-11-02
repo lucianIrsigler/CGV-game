@@ -1,22 +1,22 @@
 import * as THREE from 'three';
-
 // import CannonDebugger from 'cannon-es-debugger';
-import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass";
-import { ObjectManager } from "../scripts/Scene/ObjectManager";
-import { LightManager } from "../scripts/Scene/LightManager";
-import { LoadingManagerCustom } from "../scripts/Loaders/Loader";
-import { LightMechanicManager } from "../scripts/Scene/LightMechanicManager";
-import { CameraManager } from "../scripts/Scene/CameraManager";
-import { GunManager } from '../scripts/Scene/GunManager';
+import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass.js";
+import { ObjectManager } from "../scripts/Scene/ObjectManager.js";
+import { LightManager } from "../scripts/Scene/LightManager.js";
+import { LoadingManagerCustom } from "../scripts/Loaders/Loader.js";
+import { LightMechanicManager } from "../scripts/Scene/LightMechanicManager.js";
+import { CameraManager } from "../scripts/Scene/CameraManager.js";
+import { GunManager } from '../scripts/Scene/GunManager.js';
 
-import { getRandomMonster } from "../scripts/util/getRandomMonster";
-import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil';
-import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger';
-// import { World, Body, Box,Vec3,Sphere } from 'cannon-es';
-import { Enemy } from '../scripts/Objects/Enemy';
-import {Crosshair} from "../scripts/Objects/Crosshair";
-import { monsters3 } from "../data/monster3";
-import { lamps3 } from "../data/lampPos3";
+import { getRandomMonster } from "../scripts/util/getRandomMonster.js";
+import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil.js';
+import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger.js';
+import { World, Body, Box, Vec3, Sphere } from 'https://unpkg.com/cannon-es@0.18.0/dist/cannon-es.js';
+
+import { Enemy } from '../scripts/Objects/Enemy.js';
+import {Crosshair} from "../scripts/Objects/Crosshair.js";
+import { monsters3 } from "../data/monster3.js";
+import { lamps3 } from "../data/lampPos3.js";
 import { MiniMap } from '../scripts/Objects/Minimap.js';
 
 
@@ -37,7 +37,7 @@ export class Level3 extends SceneBaseClass{
     constructor(){
         super()
 
-        this.world = CANNON.World();
+        this.world = new CANNON.World();
         this.world.gravity.set(0, -12, 0);
         this.playerBody; //cannon.js model
         this.target; //player model
@@ -48,7 +48,7 @@ export class Level3 extends SceneBaseClass{
         this.damageRate = 0.05; // Define the damage rate
         this.healingRate = 10; // Define the healing rate
 
-        this.world = CANNON.World();
+        // this.world = CANNON.World();
         this.enemyModel;
 
 
@@ -548,7 +548,9 @@ export class Level3 extends SceneBaseClass{
             return;
         }
 
-        this.enemy.updateEnemyRotation(this.playerBody.position);
+        if (this.enemy) {
+            this.enemy.updateEnemyRotation(this.playerBody.position);
+        }
 
         this.world.step(1 / 60);
         // this.debugRenderer.update(); // comment for debugging

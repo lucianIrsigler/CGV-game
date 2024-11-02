@@ -2,6 +2,7 @@ import { SoundEffectsManager } from "./SoundEffectManger.js";
 import { Bullet } from "../Objects/bullet.js";
 import { Enemy } from "../Objects/Enemy.js";
 // import * as CANNON from 'cannon-es'; // Import Cannon.js for physics
+import * as THREE from 'three';
 
 
 const soundEffectsManager = new SoundEffectsManager();
@@ -166,13 +167,13 @@ export class GunManager{
         const boxHalfExtents = targetBody.shapes[0].halfExtents; // Assuming targetBody has one box shape
     
         // Calculate min and max bounds for the target body's bounding box
-        const minBound = new Vector3(
+        const minBound = new THREE.Vector3(
             targetPosition.x - boxHalfExtents.x,
             targetPosition.y - boxHalfExtents.y,
             targetPosition.z - boxHalfExtents.z
         );
     
-        const maxBound = new Vector3(
+        const maxBound = new THREE.Vector3(
             targetPosition.x + boxHalfExtents.x,
             targetPosition.y + boxHalfExtents.y,
             targetPosition.z + boxHalfExtents.z
