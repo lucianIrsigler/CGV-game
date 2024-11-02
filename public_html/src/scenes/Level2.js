@@ -4,14 +4,17 @@ import { CameraManager } from "../scripts/Scene/CameraManager.js";
 import { ObjectManager } from "../scripts/Scene/ObjectManager.js";
 import { LightManager } from "../scripts/Scene/LightManager.js";
 import { LoadingManagerCustom } from "../scripts/Loaders/Loader.js";
-import { CurvedPlatform } from '../scripts/Objects/CurvedPlatform.js';
-// import { World, Body, Box,Vec3 } from 'cannon-es';
+import { World, Body, Box, Vec3, Sphere } from 'https://unpkg.com/cannon-es@0.18.0/dist/cannon-es.js';
 import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil.js';
 import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger.js';
 import { MiniMap } from '../scripts/Objects/Minimap.js';
+import { Door } from '../scripts/Objects/Door.js';
 import { LightMechanicManager } from '../scripts/Scene/LightMechanicManager.js';
-import { lamps } from "../data/lampPos2.js";
-import { lightsConfigLevel2 } from "../data/lightPos2.js";
+import { 
+    ceilingPositions, groundPositions, platformPositions, wallPositions, lampPositions, doorPositions, 
+    lightsConfig, wallDimensions, platformDimensions, groundDimensions, ceilingDimensions 
+} from '../data/objPositions2.js';
+// import CannonDebugger from 'cannon-es-debugger';
 
 const soundEffectsManager = new SoundEffectsManager();
 soundEffectsManager.toggleLoop("creep2",true);
@@ -21,14 +24,15 @@ export class Level2 extends SceneBaseClass {
         super();
         
         //WORLD
-        this.world = CANNON.World();
+        this.world = new World();
         this.world.gravity.set(0, -12, 0);
         this.playerBody; //cannon.js model
         this.target; //player model
 
         //LAMPS
         this.points = [];
-        this.lampsArray=Object.values(lamps);
+        this.lampsArray=Object.values(lampPositions);
+
         this.characterLight;
         
         //MANAGERS
@@ -54,8 +58,9 @@ export class Level2 extends SceneBaseClass {
         this.nextSoundTime = 1000;
         this.playingAlready = false;
 
+        this.doorPositions = new Door(this.loader);
         this.miniMap = new MiniMap(this.scene);
-
+        //this.debugRenderer = new CannonDebugger(this.scene, this.world);
     }
 
     initScene(){
@@ -64,90 +69,31 @@ export class Level2 extends SceneBaseClass {
         this.init_objects_();
         this.init_camera_();
         this.miniMap.init_miniMap_(window,document,this.scene);
+        const currentDoor = doorPositions.doorOne;
+        this.doorPositions.init_door_(this.scene,currentDoor);
         this.animate();
     }//initalizes the scene
-
-    init_eventHandlers_(){
-        document.addEventListener("keydown", (e) => {
-            switch (e.code) {
-              case "KeyR":
-                if (this.cameraManager==undefined){
-                  return;
-                }
-                if (this.cameraManager.getFirstPerson()){
-                  this.cameraManager.toggleThirdPerson()
-                }else{
-                    this.cameraManager.toggleFirstPerson()
-                }
-                break;
-            }
-          })
-
-        // window.addEventListener("click", () => {
-        //     if (!this.playingAlready){
-        //         soundEffectsManager.playSound("creep2", 0.1);
-        //         this.playingAlready=true;
-        //     }
-        // });
-        // window.addEventListener("keydown", () => {
-        //     if (!this.playingAlready){
-        //         soundEffectsManager.playSound("creep2", 0.1);
-        //         this.playingAlready=true;
-        //     }
-        // });
-
-        this.restartButton.addEventListener("click", this.restart.bind(this));
-    }
 
     init_camera_() {
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.set(0,12,20);
     }//initializes the camera
 
-    init_lighting_() {
-
-        let temp = new THREE.AmbientLight(0x101010, 0.75);
-        this.lightManager.addLight("ambient", temp, null);
-
-
-        lightsConfigLevel2.forEach(config => {
-            let light;
-            if (config.type === "SpotLight") {
-                light = new THREE.SpotLight(config.color, config.intensity, config.distance, config.angle, config.penumbra, config.decay);
-            } else if (config.type === "PointLight") {
-                light = new THREE.PointLight(config.color, config.intensity, config.distance);
-            }else if (config.type=="AmbientLight"){
-                light = new THREE.AmbientLight(config.color,config.intensity);
-            }
-        
-            // Store original intensity
-            light.userData.originalIntensity = light.intensity;
-            // Add light to LightManager
-            this.lightManager.addLight(config.name, light, config.position);
-            if (config.type === "SpotLight"){
-                this.points.push(this.lightManager.getLight(config.name))
-            }
-            // If the light has a target (e.g., for SpotLights), create a target object and assign it
-            if (config.target) {
-                const targetObject = new THREE.Object3D();
-                targetObject.position.set(config.target.position.x, config.target.position.y, config.target.position.z);
-                this.addObject(targetObject);
-                this.lightManager.addTarget(config.name, targetObject);
-            }
-        });
-    }
-
     async _init_textures(){
         const groundTextures = loadTextures("PavingStones")
-        applyTextureSettings(groundTextures, 1, 5);
+        applyTextureSettings(groundTextures, 5, 5);
+        const wallTextures = loadTextures("PavingStones")
+        applyTextureSettings(wallTextures, 5, 5);
         const platformTextures = loadTextures("PavingStones")
-        applyTextureSettings(platformTextures, 1, 5);
-        return {groundTextures, platformTextures}
+        applyTextureSettings(platformTextures, 5, 5);
+        const ceilingTextures = loadTextures("PavingStones")
+        applyTextureSettings(ceilingTextures, 5, 5);
+        return {ceilingTextures, groundTextures, wallTextures, platformTextures}
     }//initializes the textures - basically gets the textures
 
     async _initMaterials(){
-        const {groundTextures, platformTextures} = await this._init_textures()//from _init_textures, get the texture/s
-
+        const {ceilingTextures, groundTextures, wallTextures, platformTextures} = await this._init_textures()//from _init_textures, get the texture/s
+        
         this.objManager.addMaterial("character",new THREE.MeshStandardMaterial({ 
             color: 0xff0000, 
             transparent: true, 
@@ -155,6 +101,30 @@ export class Level2 extends SceneBaseClass {
         }));
 
         this.objManager.addMaterial("platform", new THREE.MeshStandardMaterial({
+            map: platformTextures.colorMap,
+            aoMap: platformTextures.aoMap,
+            displacementMap: platformTextures.displacementMap,
+            metalnessMap: platformTextures.metalnessMap,
+            normalMap: platformTextures.normalMapDX, 
+            roughnessMap: platformTextures.roughnessMap,
+            displacementScale: 0,
+            metalness: 0.1,
+            roughness: 0.5
+        }));//add material to specific geometry - anything named myPlatform will have this material
+
+        this.objManager.addMaterial("wall", new THREE.MeshStandardMaterial({
+            map: wallTextures.colorMap,
+            aoMap: wallTextures.aoMap,
+            displacementMap: wallTextures.displacementMap,
+            metalnessMap: wallTextures.metalnessMap,
+            normalMap: wallTextures.normalMapDX, 
+            roughnessMap: wallTextures.roughnessMap,
+            displacementScale: 0,
+            metalness: 0.1,
+            roughness: 0.5
+        }));//add material to specific geometry - anything named myPlatform will have this material
+
+        this.objManager.addMaterial("ground", new THREE.MeshStandardMaterial({
             map: groundTextures.colorMap,
             aoMap: groundTextures.aoMap,
             displacementMap: groundTextures.displacementMap,
@@ -165,52 +135,60 @@ export class Level2 extends SceneBaseClass {
             metalness: 0.1,
             roughness: 0.5
         }));//add material to specific geometry - anything named myPlatform will have this material
-        
-        this.objManager.addMaterial("platforms",new THREE.MeshStandardMaterial({
-            map: platformTextures.colorMap,
-            aoMap: platformTextures.aoMap,
-            displacementMap: platformTextures.displacementMap,
-            metalnessMap: platformTextures.metalnessMap,
-            normalMap: platformTextures.normalMapDX, 
-            roughnessMap: platformTextures.roughnessMap,
+
+        this.objManager.addMaterial("ceiling", new THREE.MeshStandardMaterial({
+            map: ceilingTextures.colorMap,
+            aoMap: ceilingTextures.aoMap,
+            displacementMap: ceilingTextures.displacementMap,
+            metalnessMap: ceilingTextures.metalnessMap,
+            normalMap: ceilingTextures.normalMapDX, 
+            roughnessMap: ceilingTextures.roughnessMap,
             displacementScale: 0,
             metalness: 0.1,
             roughness: 0.5
-        }));
-        this.objManager.addMaterial("ground",new THREE.MeshStandardMaterial({ color: 0x808080 }));//just giving this a color
+        }));//add material to specific geometry - anything named myPlatform will have this material
+        
     }//initializes the materials
 
     async _initGeometries(){
-        this.objManager.addGeometry("platform",new THREE.BoxGeometry(10, 1, 50));
-        this.objManager.addGeometry("ground",new THREE.PlaneGeometry(20, 20));
+        this.objManager.addGeometry("ground",
+            new THREE.BoxGeometry(groundDimensions.width, groundDimensions.height, groundDimensions.depth));//width, height, depth (more like height)
+        this.objManager.addGeometry("wall", 
+            new THREE.BoxGeometry(wallDimensions.width, wallDimensions.height, wallDimensions.depth));
+        this.objManager.addGeometry("platform", 
+            new THREE.BoxGeometry(platformDimensions.width, platformPositions.height, platformDimensions.depth));
+        this.objManager.addGeometry("ceiling", 
+            new THREE.BoxGeometry(ceilingDimensions.width, ceilingDimensions.height, ceilingDimensions.depth));
     }//initializes the geometries - adding platforms and such
 
     async createObjects(){
+
         await this._initGeometries();
         await this._initMaterials();
         //get the geometries and materials
-        const curvedPlatform = new CurvedPlatform(10, 15, 1, Math.PI / 4, Math.PI / 4);
-        this.objManager.createCustomObjectWithPhysics("curvedPlatform", curvedPlatform, { x: 0, y: 0, z: 0 });
 
-        const groundMesh = this.objManager.createVisualObject("ground", "platform", "platform", {x:0,y:-0.5,z:20});
-        //name, geometry, material, position, rotation
-        const groundBody = this.objManager.createPhysicsObject("ground", "platform", {x:0,y:-0.5,z:20}, null, 0);
-        //name, geometry, position, rotation, mass
-        this.objManager.linkObject("ground", groundMesh, groundBody);
-
-        const platformConfigurations = [{
-            name: "myPlatform",
-            geometry: "platform",
-            material: "platform",
-            position: { x: 0, y: 2, z: -5 },
-            rotation: { x: Math.PI / 2, y: 0, z: 0 }
-        }];//creates objects with specific configurations
-
-        
-        platformConfigurations.forEach((platform)=>{
+        platformPositions.forEach((platform)=>{
             const tempMesh = this.objManager.createVisualObject(platform.name,platform.geometry,platform.material,platform.position,platform.rotation);
             const tempBody = this.objManager.createPhysicsObject(platform.name, platform.geometry, platform.position, platform.rotation, 0);
             this.objManager.linkObject(platform.name,tempMesh, tempBody);
+        })
+
+        groundPositions.forEach((ground)=>{
+            const tempMesh = this.objManager.createVisualObject(ground.name,ground.geometry,ground.material,ground.position,ground.rotation);
+            const tempBody = this.objManager.createPhysicsObject(ground.name, ground.geometry, ground.position, ground.rotation, 0);
+            this.objManager.linkObject(ground.name,tempMesh, tempBody);
+        })
+
+        wallPositions.forEach((wall)=>{
+            const tempMesh = this.objManager.createVisualObject(wall.name,wall.geometry,wall.material,wall.position,wall.rotation);
+            const tempBody = this.objManager.createPhysicsObject(wall.name, wall.geometry, wall.position, wall.rotation, 0);
+            this.objManager.linkObject(wall.name,tempMesh, tempBody);
+        })
+
+        ceilingPositions.forEach((ceiling)=>{
+            const tempMesh = this.objManager.createVisualObject(ceiling.name,ceiling.geometry,ceiling.material,ceiling.position,ceiling.rotation);
+            const tempBody = this.objManager.createPhysicsObject(ceiling.name, ceiling.geometry, ceiling.position, ceiling.rotation, 0);
+            this.objManager.linkObject(ceiling.name,tempMesh, tempBody);
         })
 
         this.scene.background = new THREE.Color(0x333333);//add a background color
@@ -222,7 +200,8 @@ export class Level2 extends SceneBaseClass {
         let res = this.loadLamps();
         let out = this.createObjects()
         this.miniMap.addPlayer("#FF0000");
-        this.miniMap.addEndGoal({x:-3,y:20,z:39},"#00FF00")
+        const doorPlatformPos = platformPositions[0].position;
+        this.miniMap.addEndGoal(doorPlatformPos,"#00FF00")
     }//uses createObjects which uses initGeometries and initMaterials - initMaterials uses initTextures... phew, what a rabbt hole
 
     async _init_player(){
@@ -237,11 +216,11 @@ export class Level2 extends SceneBaseClass {
         this.target.visible=false;
 
         //create cannon.js body for model
-        this.playerBody = new CANNON.Body({
+        this.playerBody = new Body({
             mass: 1, // Dynamic body
-            position: new CANNON.Vec3(0, 2, 0), // Start position
+            position: new Vec3(0, 2, 0), // Start position
         });
-        const boxShape = new CANNON.Box(new CANNON.Vec3(0.5, 1, 0.5)); // Box shape for the player
+        const boxShape = new Box(new Vec3(0.5, 1, 0.5)); // Box shape for the player
         this.playerBody.addShape(boxShape);
         this.world.addBody(this.playerBody);
 
@@ -289,6 +268,77 @@ export class Level2 extends SceneBaseClass {
         });
     }
 
+    /**
+     * Loads the door model and animations
+     * @param {THREE.Scene} scene 
+     */
+    async init_door_(scene,currentDoor) {
+        // Door variables
+        let doorMixer;
+    
+        // Load the door model
+        try {
+            // Await the model loading
+            const gltf = await this.loader.loadModel(currentDoor.scene, "Door");
+    
+            // Assign the loaded door model
+            const Door = gltf.scene;
+            this.Door = Door;
+    
+            // Set door properties
+            Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
+            Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
+            Door.castShadow = true;
+    
+            // Create the animation mixer for the door
+            doorMixer = new THREE.AnimationMixer(Door);
+    
+            const animations = gltf.animations;
+            if (animations && animations.length > 0) {
+                this.doorAnimationAction = doorMixer.clipAction(animations[0]);
+            }
+            this.doorMixer = doorMixer;
+    
+            // Add the door object to the scene
+            scene.add(Door);
+        } catch (error) {
+            console.error('An error occurred while loading the door model:', error);
+        }
+
+        this.loadDoorCreakSound();
+    }
+
+    init_lighting_() {
+        let temp = new THREE.AmbientLight(0x101010, 0.75);
+        this.lightManager.addLight("ambient", temp, null);
+
+        lightsConfig.forEach(config => {
+            let light;
+            if (config.type === "SpotLight") {
+                light = new THREE.SpotLight(config.color, config.intensity, config.distance, config.angle, config.penumbra, config.decay);
+            } else if (config.type === "PointLight") {
+                light = new THREE.PointLight(config.color, config.intensity, config.distance);
+            }else if (config.type=="AmbientLight"){
+                light = new THREE.AmbientLight(config.color,config.intensity);
+            }
+        
+            // Store original intensity
+            light.userData.originalIntensity = light.intensity;
+            // Add light to LightManager
+            this.lightManager.addLight(config.name, light, config.position);
+            if (config.type === "SpotLight"){
+                this.points.push(this.lightManager.getLight(config.name))
+            }
+            // If the light has a target (e.g., for SpotLights), create a target object and assign it
+            if (config.target) {
+                const targetObject = new THREE.Object3D();
+                targetObject.position.set(config.target.position.x, config.target.position.y, config.target.position.z);
+                this.addObject(targetObject);
+                this.lightManager.addTarget(config.name, targetObject);
+            }
+        });
+    }
+
     setupCharacterLight() {
         this.characterLight = new THREE.PointLight(0xffffff, 1, 10);
         this.characterLight.position.set(0, 2, 0); // Slightly above the character
@@ -296,6 +346,47 @@ export class Level2 extends SceneBaseClass {
 
         this.lightMechanicManager.characterLight = this.characterLight;
     }
+
+    /**
+     * Light to toggle the intensity to 5 for
+     * @param {THREE.Light} light 
+     */
+    toggleLightIntensity(light) {
+        light.intensity = 5;
+    }
+
+    init_eventHandlers_(){
+        document.addEventListener("keydown", (e) => {
+            switch (e.code) {
+              case "KeyR":
+                if (this.cameraManager==undefined){
+                  return;
+                }
+                if (this.cameraManager.getFirstPerson()){
+                  this.cameraManager.toggleThirdPerson()
+                }else{
+                    this.cameraManager.toggleFirstPerson()
+                }
+                break;
+            }
+          })
+
+        this.restartButton.addEventListener("click", this.restart.bind(this));
+    }
+
+    startDamageTimer(){
+        setInterval(()=>{
+            if (this.loader.isLoaded()){
+                this.lightMechanicManager.damageTimer(this.points,this.target)
+            }
+
+            // console.log(this.lightMechanicManager.getHealth())
+            if (this.lightMechanicManager.getHealth()<=0){
+                this.handleCharacterDeath();
+            }
+        },1000);
+    }
+
     /**
      * Animation function
      * @param {} currentTime 
@@ -303,6 +394,8 @@ export class Level2 extends SceneBaseClass {
      */
     animate=(currentTime)=> {
         this.animationId = requestAnimationFrame(this.animate);
+
+        //this.debugRenderer.update(); 
 
         if (this.cameraManager==undefined||!this.loader.isLoaded() || !this.playerLoaded){
             return;
@@ -315,6 +408,21 @@ export class Level2 extends SceneBaseClass {
         this.lastTime = currentTime;
         
         this.cameraManager.update(timeElapsedSec)
+
+        if (this.doorMixer) {
+            this.doorMixer.update(0.01); // Update the animation mixer
+        }
+    
+        // Check proximity to the door
+        this.doorPositions.checkDoorProximity(this.target);
+    
+        //Handle the 'E' key press to open the door
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'e') {
+                this.doorPositions.checkIfOpen()
+            }
+        });
+
         // Render the scene
         this.renderer.render(this.scene, this.cameraManager.getCamera());
         this.miniMap.update(this.scene,this.target)
@@ -340,27 +448,6 @@ export class Level2 extends SceneBaseClass {
             lampLight.intensity = 0.5; // Reset to original intensity
         });
         document.body.style.cursor = "none"
-    }
-
-    startDamageTimer(){
-        setInterval(()=>{
-            if (this.loader.isLoaded()){
-                this.lightMechanicManager.damageTimer(this.points,this.target)
-            }
-
-            // console.log(this.lightMechanicManager.getHealth())
-            if (this.lightMechanicManager.getHealth()<=0){
-                this.handleCharacterDeath();
-            }
-        },1000);
-    }
-
-    /**
-     * Light to toggle the intensity to 5 for
-     * @param {THREE.Light} light 
-     */
-    toggleLightIntensity(light) {
-        light.intensity = 5;
     }
 
     disposeLevel(){

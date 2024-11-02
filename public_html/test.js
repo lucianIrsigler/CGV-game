@@ -46,7 +46,7 @@ function loadModules(directory) {
 
 
         "scenes/Level1.js",
-        // "scenes/Level2.js",
+        "scenes/Level2.js",
         //"scenes/level3ahah.js",
         //"scenes/Level3_Journey.js",
         "scenes/Level3.js",
@@ -80,7 +80,9 @@ loadModules('/src'); // Replace 'src' with your actual base directory path if di
 // LOAD TEST
 import {CustomScene}  from "./src/scenes/testScene.js";
 import {Level1}  from "./src/scenes/Level1.js";
+import {Level2}  from "./src/scenes/Level2.js";
 import {Level3}  from "./src/scenes/Level3.js";
+
 import { CustomScene1 } from "./src/scenes/testScene1.js";
 // import { CustomScene2 } from "./src/scenes/testScene2.js";
 // import { CustomScene3 } from "./src/scenes/testScene3.js";
@@ -91,5 +93,5 @@ const animationManager = new AnimationManager();
 
 // document.getElementById("start-menu").style.display = "none";
 
-animationManager.switchScene(new Level3(),0);
+animationManager.switchScene(new Level2(),0);
 
