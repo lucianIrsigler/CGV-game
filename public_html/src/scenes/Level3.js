@@ -228,7 +228,7 @@ export class Level3 extends SceneBaseClass{
                 this.points.forEach((point) => {
                     if (this.calcEuclid(this.playerBody.position.x, this.playerBody.position.z, point.x, point.z)) {
                         valid = true;
-                        console.log("Player is near a light source");
+                        // console.log("Player is near a light source");
                         this.heal(this.healingRate);
                     }
                 });
@@ -361,6 +361,7 @@ export class Level3 extends SceneBaseClass{
     async _initGeometries(){
         this.objManager.addGeometry("platform",new THREE.BoxGeometry(100, 1, 100));
         this.objManager.addGeometry("sidewall",new THREE.BoxGeometry(1, 100, 100));
+        this.objManager.addGeometry("ceiling",new THREE.BoxGeometry(100, 1, 100));
 
     }
 
@@ -405,23 +406,31 @@ export class Level3 extends SceneBaseClass{
             roughness: 0.5
         }));
 
+        this.objManager.addMaterial("ceiling",new THREE.MeshStandardMaterial({
+            map: textureLoader.colorMap,
+            aoMap: textureLoader.aoMap,
+            displacementMap: textureLoader.displacementMap,
+            metalnessMap: textureLoader.metalnessMap,
+            normalMap: textureLoader.normalMapDX, 
+            roughnessMap: textureLoader.roughnessMap,
+            displacementScale: 0,
+            metalness: 0.1,
+            roughness: 0.5
+        }));
+
     }
 
     async createObjects(){
         await this._initGeometries();
         await this._initMaterials();
 
-
-
         const platformMesh = this.objManager.createVisualObject("platform","platform","platform",null,null);
         const platformBody = this.objManager.createPhysicsObject("platform","platform",null,null,0);
         this.objManager.linkObject("platform",platformMesh,platformBody);
 
-
-        const ceilingMesh = this.objManager.createVisualObject("ceiling","platform","platform",{x:0,y:50,z:0},null);
-        const ceilingBody = this.objManager.createPhysicsObject("platform","platform",null,null,0);
+        const ceilingMesh = this.objManager.createVisualObject("ceiling","ceiling","ceiling", { x: 0, y: 50, z: 0 }, { x: 0, y: 0, z: 0 });
+        const ceilingBody = this.objManager.createPhysicsObject("ceiling","ceiling", { x: 0, y: 50, z: 0 }, { x: 0, y: 0, z: 0 }, 0);
         this.objManager.linkObject("ceiling",ceilingMesh,ceilingBody);
-
 
         const wallsData = [
             {

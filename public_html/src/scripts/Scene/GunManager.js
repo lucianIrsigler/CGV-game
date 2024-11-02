@@ -88,7 +88,7 @@ export class GunManager{
             const isActive = bullet.update(this.scene);
     
             if (isActive && this.detectCollision(bullet, target)) {
-                console.log("ouch")
+                // console.log("ouch")
                 
                 if(this.enemy.isRageMode()){
                     this.level3.takeDamage(20); // damage player
