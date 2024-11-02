@@ -64,7 +64,7 @@ export class MiniMap{
         let cubeGeometry = new THREE.BoxGeometry(3, 1, 3);
         let cubeMaterial = new THREE.MeshBasicMaterial({ color: colour })
         this.endGoal = new THREE.Mesh(cubeGeometry,cubeMaterial);
-        this.endGoal.position.set(position.x,this.yAboveTheScene,position.z);
+        this.endGoal.position.set(position.x,this.yAboveTheScene+10,position.z);
 
         this.scene.add(this.endGoal);
     }
