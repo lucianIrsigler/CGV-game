@@ -185,6 +185,7 @@ export class Level1 extends SceneBaseClass {
 
         this.setupCharacterLight();
         this.playerLoaded = true;
+        this.miniMap.miniMapCamera.lookAt(0,0,15);
     }
 
     /**

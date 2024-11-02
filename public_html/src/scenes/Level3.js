@@ -292,6 +292,8 @@ export class Level3 extends SceneBaseClass{
             this.playerBody,
             this.scene
         );
+        this.miniMap.miniMapCamera.lookAt(0,0,0);
+        
 
     }
 
