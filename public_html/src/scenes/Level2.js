@@ -514,6 +514,8 @@ export class Level2 extends SceneBaseClass {
             }
         });
 
+        this.playerLight.position.set(this.playerBody.position.x, this.playerBody.position.y + 1.5, this.playerBody.position.z);
+
         // Render the scene
         this.renderer.render(this.scene, this.cameraManager.getCamera());
         this.miniMap.update(this.scene,this.target)
