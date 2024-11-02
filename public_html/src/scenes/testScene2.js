@@ -1,7 +1,7 @@
 import { SceneBaseClass } from "../../src/scripts/Scene/SceneBaseClass.js";
 import * as THREE from 'three';
 // import * as CANNON from 'cannon-es';
-import CannonDebugger from 'cannon-es-debugger';
+// import CannonDebugger from 'cannon-es-debugger';
 import { ObjectManager } from "../scripts/Scene/ObjectManager.js";
 import { LightManager } from "../scripts/Scene/LightManager.js";
 import { LoadingManagerCustom } from "../scripts/Loaders/Loader.js";
@@ -61,7 +61,7 @@ export class CustomScene2 extends SceneBaseClass {
 
 
         //debug
-        this.debugRenderer = new CannonDebugger(this.scene, this.world);
+        // this.debugRenderer = new CannonDebugger(this.scene, this.world);
 
         //this.currentMonster = getRandomMonster(monsters3);
 

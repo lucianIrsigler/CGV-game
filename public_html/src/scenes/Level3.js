@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import CannonDebugger from 'cannon-es-debugger';
+// import CannonDebugger from 'cannon-es-debugger';
 import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass";
 import { ObjectManager } from "../scripts/Scene/ObjectManager";
 import { LightManager } from "../scripts/Scene/LightManager";
@@ -89,7 +89,7 @@ export class Level3 extends SceneBaseClass{
 
 
         //debug
-        this.debugRenderer = new CannonDebugger(this.scene, this.world);
+        // this.debugRenderer = new CannonDebugger(this.scene, this.world);
 
         this.currentMonster = getRandomMonster(monsters3);
 
@@ -260,7 +260,11 @@ export class Level3 extends SceneBaseClass{
         let out = this.createObjects();
         //add stuff for minimap
         this.miniMap.addPlayer("#0000FF"); // Blue marker for the player
-        this.miniMap.addEnemy("#FF0000"); // Red marker for the enemy
+    this.miniMap.addEndGoal({
+        x: this.enemyBody.position.x,
+        y: this.enemyBody.position.y,
+        z: this.enemyBody.position.z
+    }, "#FF0000"); // Red marker for the enemy
     };
 
 

@@ -31,7 +31,7 @@ export class Level1 extends SceneBaseClass {
         
 
         //cannon.js world
-        this.world = CANNON.World();
+        this.world = new  CANNON.World();
         this.world.gravity.set(0, -12, 0);
         this.playerBody; //cannon.js model
         this.target; //player model
@@ -75,7 +75,6 @@ export class Level1 extends SceneBaseClass {
         //sound
         this.nextSoundTime = 1000;
         this.playingAlready = false;
-        this.enemy=null;
     }
 
     /**
@@ -431,7 +430,7 @@ export class Level1 extends SceneBaseClass {
         this.renderer.render(this.scene, this.cameraManager.getCamera());
 
         //update minimap
-        this.miniMap.update(this.scene,this.target,null)
+        this.miniMap.update(this.scene,this.target)
 
     }
 
