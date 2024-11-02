@@ -81,7 +81,7 @@ export class Level2 extends SceneBaseClass {
         this.init_objects_();
         this.init_camera_();
         this.miniMap.init_miniMap_(window,document,this.scene);
-        this.startDamageTimer();
+        // this.startDamageTimer();
         const currentDoor = doorPositions.doorOne;
         this.doorPositions.init_door_(this.scene,currentDoor);
         this.animate();
@@ -359,13 +359,13 @@ export class Level2 extends SceneBaseClass {
         });
     }
 
-    // setupCharacterLight() {
-    //     this.characterLight = new THREE.PointLight(0xffffff, 1, 10);
-    //     this.characterLight.position.set(0, 2, 0); // Slightly above the character
-    //     this.target.add(this.characterLight); // Attach the light to the character
+    setupCharacterLight() {
+        this.characterLight = new THREE.PointLight(0xffffff, 1, 10);
+        this.characterLight.position.set(0, 2, 0); // Slightly above the character
+        this.target.add(this.characterLight); // Attach the light to the character
 
-    //     this.lightMechanicManager.characterLight = this.characterLight;
-    // }
+        this.lightMechanicManager.characterLight = this.characterLight;
+    }
 
     /**
      * Light to toggle the intensity to 5 for
@@ -397,22 +397,14 @@ export class Level2 extends SceneBaseClass {
     startDamageTimer(){
         setInterval(()=>{
             if (this.loader.isLoaded()){
-                let valid = false;
-
-                this.points.forEach((point) => {
-                    if (this.calcEuclid(this.playerBody.position.x, this.playerBody.position.z, point.x, point.z)) {
-                        valid = true;
-                        console.log("Player is near a light source");
-                        this.heal(this.healingRate);
-                    }
-                });
+                this.lightMechanicManager.damageTimer(this.points,this.target)
             }
 
             // console.log(this.lightMechanicManager.getHealth())
             if (this.lightMechanicManager.getHealth()<=0){
-                this.youLose();
+                this.handleCharacterDeath();
             }
-        },200);
+        },1000);
     }
     restartGame() {
         location.reload(); // Reload the page to restart the game
@@ -481,8 +473,8 @@ export class Level2 extends SceneBaseClass {
             }
         });
         this.updatePlayerHealthBar();
-    //    this.takeDamage(this.damageRate);
-    //    this.heal(this.healingRate);
+       this.takeDamage(this.damageRate);
+       this.heal(this.healingRate);
         // this.lightMechanicManager.update();
 
         // Render the scene
