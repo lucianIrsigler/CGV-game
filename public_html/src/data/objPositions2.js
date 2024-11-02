@@ -278,6 +278,8 @@ export const platformPositions = [
     
 ];
 //END PLATFORM POSITIONS------------------------------------------------
+
+//BUTTON POSITIONS-----------------------------------------------------
 export const buttonDimensions = {width: 1, height: 0.2, depth: 1};
 const centreButtonZPositionOffset = groundDimensions.width/10;
 export const buttonPositions = [
@@ -289,6 +291,8 @@ export const buttonPositions = [
         rotation: { x: 0, y: 0, z: 0 }
     }
 ];
+//END BUTTON POSITIONS-------------------------------------------------
+
 //LAMP POSITIONS-------------------------------------------------------
 const baseLamp = {
     height_diff: 150,

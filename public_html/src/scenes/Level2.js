@@ -74,6 +74,8 @@ export class Level2 extends SceneBaseClass {
         this.doorPositions = new Door(this.loader);
         this.miniMap = new MiniMap(this.scene,20);
         this.enemy=null;
+
+        //button
     }
 
     initScene(){
@@ -332,46 +334,6 @@ export class Level2 extends SceneBaseClass {
         this.lampsArray.forEach(lamp => {
             this.points2.push(new CANNON.Vec3(lamp.positionX, lamp.positionY, lamp.positionZ));
         });
-    }
-
-    /**
-     * Loads the door model and animations
-     * @param {THREE.Scene} scene 
-     */
-    async init_door_(scene,currentDoor) {
-        // Door variables
-        let doorMixer;
-    
-        // Load the door model
-        try {
-            // Await the model loading
-            const gltf = await this.loader.loadModel(currentDoor.scene, "Door");
-    
-            // Assign the loaded door model
-            const Door = gltf.scene;
-            this.Door = Door;
-    
-            // Set door properties
-            Door.position.set(currentDoor.positionX, currentDoor.positionY, currentDoor.positionZ);
-            Door.scale.set(currentDoor.scaleX, currentDoor.scaleY, currentDoor.scaleZ);
-            Door.castShadow = true;
-    
-            // Create the animation mixer for the door
-            doorMixer = new THREE.AnimationMixer(Door);
-    
-            const animations = gltf.animations;
-            if (animations && animations.length > 0) {
-                this.doorAnimationAction = doorMixer.clipAction(animations[0]);
-            }
-            this.doorMixer = doorMixer;
-    
-            // Add the door object to the scene
-            scene.add(Door);
-        } catch (error) {
-            console.error('An error occurred while loading the door model:', error);
-        }
-
-        this.loadDoorCreakSound();
     }
 
     init_lighting_() {
