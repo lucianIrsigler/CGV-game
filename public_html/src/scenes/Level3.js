@@ -517,6 +517,8 @@ export class Level3 extends SceneBaseClass{
         //stop animations
         cancelAnimationFrame(this.animationId);
 
+        document.exitPointerLock();
+
         let prev = localStorage.getItem('bestTime') ? parseFloat(localStorage.getItem('bestTime')) : null;
         if(prev === null) {
             prev = "No best time yet!";
@@ -546,6 +548,8 @@ export class Level3 extends SceneBaseClass{
     youLose() {
         //stop animations
         cancelAnimationFrame(this.animationId);
+
+        document.exitPointerLock();
 
         document.getElementById('gameOverHeader').innerText = "You Died!\nYou ran out of light and the darkness consumed you!";
         this.enemy.asleep = true;
