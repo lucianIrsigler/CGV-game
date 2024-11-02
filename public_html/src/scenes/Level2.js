@@ -32,6 +32,7 @@ export class Level2 extends SceneBaseClass {
         this.points = [];
         this.lampsArray=Object.values(lampPositions);
         this.playerLight;
+        this.points2 = [];
         
 
         this.characterLight;
@@ -81,7 +82,7 @@ export class Level2 extends SceneBaseClass {
         this.init_objects_();
         this.init_camera_();
         this.miniMap.init_miniMap_(window,document,this.scene);
-        // this.startDamageTimer();
+        this.startDamageTimer();
         const currentDoor = doorPositions.doorOne;
         this.doorPositions.init_door_(this.scene,currentDoor);
         this.animate();
@@ -303,6 +304,10 @@ export class Level2 extends SceneBaseClass {
             let position = {x:lampLight.position.x,y:lampLight.position.y+2,z:lampLight.position.z};
             this.lightManager.addLight(null, lampLight, position);
         });
+
+        this.lampsArray.forEach(lamp => {
+            this.points2.push(new CANNON.Vec3(lamp.positionX, lamp.positionY, lamp.positionZ));
+        });
     }
 
     /**
@@ -410,6 +415,53 @@ export class Level2 extends SceneBaseClass {
         this.restartButton.addEventListener("click", this.restart.bind(this));
     }
 
+    calcEuclid(x1, z1, x2, z2) {
+        const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
+        return distance <= 4;
+    }
+
+    heal(amount) {
+        this.health += amount;
+        this.health = Math.min(100, this.health); // Cap health at 100
+        // updateCharacterLight(); // Update light when health changes
+    }
+
+    // function to heal player at lamp
+    startDamageTimer(){
+        setInterval(()=>{
+            if (this.loader.isLoaded()){
+                let valid = false;
+
+                this.points2.forEach((point) => {
+                    if (this.calcEuclid(this.playerBody.position.x, this.playerBody.position.z, point.x, point.z)) {
+                        valid = true;
+                        console.log("Player is near a light source");
+                        this.heal(this.healingRate);
+                    }
+                });
+            }
+
+            // console.log(this.lightMechanicManager.getHealth())
+            if (this.lightMechanicManager.getHealth()<=0){
+                // this.youLose();
+                console.log("You lose");
+            }
+        },200);
+    }
+
+    takeDamage(amount) {
+        this.health -= amount;
+        this.health = Math.max(0, this.health); // Ensure health doesn't go below 0
+        // updateCharacterLight(); // Update light when health changes
+        // console.log("Player health:", this.health); // Log the player's health
+    }
+
+    updatePlayerHealthBar(){
+        const healthBar = document.getElementById('user-health-bar');
+        const healthPercentage = (this.health / this.maxHealth) * 100; // Calculate percentage
+        healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
+    }
+
     restartGame() {
         location.reload(); // Reload the page to restart the game
     }
@@ -450,6 +502,9 @@ export class Level2 extends SceneBaseClass {
         // Render the scene
         this.renderer.render(this.scene, this.cameraManager.getCamera());
         this.miniMap.update(this.scene,this.target)
+
+        this.takeDamage(this.damageRate);
+        this.updatePlayerHealthBar();
     }
 
     stopAnimate=()=> {
