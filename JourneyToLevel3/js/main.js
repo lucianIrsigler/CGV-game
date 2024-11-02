@@ -10,8 +10,99 @@ import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 // import { GLTFLoader } from 'https://unpkg.com/three@0.153.0/examples/jsm/loaders/GLTFLoader.js';
 // import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 
+const textureLoader = new THREE.TextureLoader()
+
 let allModelsLoaded = false;
 
+
+
+
+
+const carUrl = new URL('../assets/car.glb', import.meta.url)
+const duckUrl = new URL('../assets/duck.glb', import.meta.url)
+const halloweenBackgroundUrl = new URL('../img/Halloween-Background-Horror-Theme-Graphics.png', import.meta.url)
+// const halloweenBackgroundUrl = new URL('../img/spooky_house.jpg', import.meta.url)
+// const halloweenBackgroundUrl = new URL('../img/spooky_trees.jpg', import.meta.url)
+const bricksTexture = new URL('../img/bricks-texture.jpg', import.meta.url)
+
+
+
+let grounds = []
+let gameStarted = false
+let duckModel
+let lastGround
+
+let followOffset = new THREE.Vector3(0, 6, 20);
+
+/*
+stage 0: Nothing,
+stage 1: 
+    * Light moves forward fast, on its own.
+    * Stay within light.
+stage 2: 
+    * Light now follows you.
+    * Boulders start to fall.
+stage 3: 
+    * Light now follows you. 
+    * Grounds start to descend. 
+    * Boulders continue to fall.
+stage 4: 
+    * Arrive on large solid ground. 
+    * Light moves foward, and randomly left and right.
+    * Stay in the light.
+    * Boulders continue to fall, in larger amounts.
+*/
+let stage = 0
+let spawnBoulders = true
+let lightFollowsDuck = false
+let groundsDescend = false
+let groundsOscilate = false
+let allowHaunting = true
+
+let boulderCanDamage = true
+
+//#region NON THREE utilities =========================
+function getRandomNumber(min, max) {
+    return Math.random() * (max - min) + min;
+}
+//#endregion NON THREE utilities =========================
+
+//#region INITIALIZATION =========================
+
+const renderer = new THREE.WebGLRenderer();
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene()
+
+const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+)
+
+const orbit = new OrbitControls(camera, renderer.domElement)
+
+const axesHelper = new THREE.AxesHelper(6)
+scene.add(axesHelper)
+
+const gridHelper = new THREE.GridHelper(100, 100)
+scene.add(gridHelper)
+
+camera.position.set(-10, 30, 30)
+orbit.update()
+
+renderer.setClearColor(0x00fffff)
+
+// scene.background = textureLoader.load(halloweenBackgroundUrl)
+
+//make the scene have light dark background
+scene.background = new THREE.Color(0x222222)
+
+//#endregion
 
 //#region Model Imports =========================
 const loader = new GLTFLoader();
@@ -185,40 +276,12 @@ loader.load(
         console.error('An error occurred while loading pumpkin halloween:', error);
     }
 );
-let parasiteMask;
-loader.load(
-    'assets/parasite_mask_-_artec_leo_3d_scan/scene.gltf',
-    function (gltf) {
-        // `gltf.scene` is the root of the loaded model
-        parasiteMask = gltf.scene;
-        scene.add(parasiteMask);
-
-        // Optional: Set the model's position, scale, rotation
-        parasiteMask.position.set(0, 12, -15);
-        parasiteMask.scale.set(0.04, 0.04, 0.04);
-        parasiteMask.rotation.set(Math.PI / 2, Math.PI, 0);
-
-        // Optional: Enable shadow casting for the model
-        parasiteMask.traverse((node) => {
-            if (node.isMesh) {
-                node.castShadow = true;
-                node.receiveShadow = true;
-            }
-        });
-
-        parasiteMask.visible = false;
-    },
-    undefined, // Progress function (optional)
-    function (error) {
-        console.error('An error occurred while loading pumpkin halloween:', error);
-    }
-);
 
 let scaryFaces = [] // will add after all are laoded
 let currentScaryFace = 1;
 
 const allFacesLoaded = () => {
-    return horrorMask && pumpkinHalloween && scaryAsianMask && scaryFace && parasiteMask
+    return horrorMask && pumpkinHalloween && scaryAsianMask && scaryFace
 }
 
 
@@ -237,91 +300,46 @@ const allJumpScareAudioLoaded = () => {
 
 //#endregion Model Imports =========================
 
+// Lava
 
-const carUrl = new URL('../assets/car.glb', import.meta.url)
-const duckUrl = new URL('../assets/duck.glb', import.meta.url)
-const halloweenBackgroundUrl = new URL('../img/Halloween-Background-Horror-Theme-Graphics.png', import.meta.url)
-// const halloweenBackgroundUrl = new URL('../img/spooky_house.jpg', import.meta.url)
-// const halloweenBackgroundUrl = new URL('../img/spooky_trees.jpg', import.meta.url)
-const bricksTexture = new URL('../img/bricks-texture.jpg', import.meta.url)
+let lavaWidth = 400;
+let lavaHeight = lavaWidth * 4;
 
-let grounds = []
-let gameStarted = false
-let duckModel
-let lastGround
+const lavaTexture = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_Color.jpg'); // Base color
+const lavaNormal = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_NormalGL.jpg'); // Normal map (OpenGL)
+const lavaDisplacement = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_Displacement.jpg'); // Displacement map
+const lavaEmission = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_Emission.jpg'); // Emission map
+const lavaRoughness = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_Roughness.jpg'); // Roughness map
 
-let followOffset = new THREE.Vector3(0, 6, 20);
+// Set wrapping mode and repeat for each texture
+[lavaTexture, lavaNormal, lavaDisplacement, lavaEmission, lavaRoughness].forEach(texture => {
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(lavaWidth / 8, lavaHeight / 8); // Adjust repeat values as needed
+});
 
-/*
-stage 0: Nothing,
-stage 1: 
-    * Light moves forward fast, on its own.
-    * Stay within light.
-stage 2: 
-    * Light now follows you.
-    * Boulders start to fall.
-stage 3: 
-    * Light now follows you. 
-    * Grounds start to descend. 
-    * Boulders continue to fall.
-stage 4: 
-    * Arrive on large solid ground. 
-    * Light moves foward, and randomly left and right.
-    * Stay in the light.
-    * Boulders continue to fall, in larger amounts.
-*/
-let stage = 0
-let spawnBoulders = true
-let lightFollowsDuck = false
-let groundsDescend = false
-let groundsOscilate = false
-let allowHaunting = true
+const lavaGeometry = new THREE.PlaneGeometry(lavaWidth, lavaHeight); // Large plane
+const lavaMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    map: lavaTexture,
+    normalMap: lavaNormal,
+    displacementMap: lavaDisplacement,
+    displacementScale: 0.1,
+    emissiveMap: lavaEmission,
+    roughnessMap: lavaRoughness,
+    metalness: 0.1,
+    roughness: 0.5
+});
 
-let boulderCanDamage = true
+const lava = new THREE.Mesh(lavaGeometry, lavaMaterial);
+let lavaYPosition = -30;
+lava.rotation.x = -Math.PI / 2; // Position it horizontally
+lava.position.y = lavaYPosition; // Adjust based on ground height
+scene.add(lava);
 
-//#region NON THREE utilities =========================
-function getRandomNumber(min, max) {
-    return Math.random() * (max - min) + min;
-}
-//#endregion NON THREE utilities =========================
-
-//#region INITIALIZATION =========================
-
-const renderer = new THREE.WebGLRenderer();
-
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true
-document.body.appendChild(renderer.domElement);
-
-const scene = new THREE.Scene()
-
-const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-)
-
-const orbit = new OrbitControls(camera, renderer.domElement)
-
-const axesHelper = new THREE.AxesHelper(6)
-scene.add(axesHelper)
-
-const gridHelper = new THREE.GridHelper(100, 100)
-scene.add(gridHelper)
-
-camera.position.set(-10, 30, 30)
-orbit.update()
-
-renderer.setClearColor(0x00fffff)
-
-const textureLoader = new THREE.TextureLoader()
-// scene.background = textureLoader.load(halloweenBackgroundUrl)
-
-//make the scene have light dark background
-scene.background = new THREE.Color(0x222222)
-
-//#endregion
+lavaMaterial.emissive = new THREE.Color(0xff4500); // Intense orange/red glow
+lavaMaterial.emissiveIntensity = 0.5; // Adjust for glow effect
+// END Lava
 
 //#region LIGHTING =========================
 
@@ -594,6 +612,10 @@ class Ground extends Box {
         });
 
         this.material = new THREE.MeshStandardMaterial({ map: textureLoader.load(bricksTexture) });
+        //adjust repeat
+        this.material.map.wrapS = THREE.RepeatWrapping;
+        this.material.map.wrapT = THREE.RepeatWrapping;
+        this.material.map.repeat.set(width / 16, depth / 16);
 
         // Flags and properties to control descent
         this.isDescending = false;
@@ -818,7 +840,7 @@ duckModel = new Box({
     width: 4,
     height: 8,
     depth: 4,
-    color: '#00ff00',
+    color: '#ff0000',
     gravity: -0.02,
     position: { x: 0, y: 20, z: 0 }
 })
@@ -915,7 +937,7 @@ const animate = (time) => {
     if (playerModel && duckModel && manorTorch && horrorMask && allFacesLoaded()) {
         allModelsLoaded = true
         if (scaryFaces.length == 0) {
-            scaryFaces = [horrorMask, pumpkinHalloween, scaryAsianMask, scaryFace, parasiteMask];
+            scaryFaces = [horrorMask, pumpkinHalloween, scaryAsianMask, scaryFace];
 
             scaryFaces.forEach(face => {
                 face.lookAt(playerModel.position);
@@ -923,14 +945,27 @@ const animate = (time) => {
         }
 
         // make each face follow player, keeping their original rotations applied when initially loaded
-        scaryFaces.forEach(face => {
-            face.position.copy(duckModel.position)
-                .add(new THREE.Vector3(15, 8, -20)); // Offset
-            face.lookAt(playerModel.position);
-        })
-        pumpkinHalloween.rotation.set(0, -(Math.PI / 1.5), 0);
-        scaryAsianMask.rotation.set(0, -(Math.PI / 1.5), 0);
-        parasiteMask.rotation.set(Math.PI / 2.5, (Math.PI), 0);
+        if (getRandomNumber(0, 10) < 5) {
+            // face will be to the right
+            scaryFaces.forEach(face => {
+                face.position.copy(duckModel.position)
+                    .add(new THREE.Vector3(15, 8, -20)); // Offset
+                face.lookAt(playerModel.position);
+            })
+            pumpkinHalloween.rotation.set(0, -(Math.PI / 1.5), 0);
+            scaryAsianMask.rotation.set(0, -(Math.PI / 1.5), 0);
+        } else {
+            // face will be to the left
+            scaryFaces.forEach(face => {
+                face.position.copy(duckModel.position)
+                    .add(new THREE.Vector3(-15, 8, -20)); // Offset
+                face.lookAt(playerModel.position);
+            })
+            pumpkinHalloween.rotation.set(0, -(Math.PI / 2.5), 0);
+            scaryAsianMask.rotation.set(0, -(Math.PI / 2.5), 0);
+        }
+
+
     }
 
     if (allJumpScareAudioLoaded) {
@@ -945,6 +980,24 @@ const animate = (time) => {
     } else {
         document.querySelector('.start-level-button').textContent = 'Start the test!!'
         document.querySelector('.start-level-button').disabled = false
+    }
+
+    if (lava) {
+        // Base texture flow
+        lavaTexture.offset.x += 0.01;
+        lavaTexture.offset.y += 0.005;
+
+        // Normal map for dynamic surface appearance
+        lavaNormal.offset.x += 0.015;
+        lavaNormal.offset.y += 0.01;
+
+        // Emission map for glowing movement
+        lavaEmission.offset.x += 0.02;
+        lavaEmission.offset.y += 0.01;
+
+        // make lava move with character
+        lava.position.z = duckModel.position.z
+        lava.position.x = duckModel.position.x
     }
 
     if (gameStarted) {
@@ -1065,7 +1118,7 @@ const animate = (time) => {
             duckMovementSpeed = Math.min(maxDuckMovementSpeed, duckMovementSpeed + (duckAcceleration * deltaTime))
             // console.log(duckMovementSpeed)
         }
-        if (duckModel.position.y <= -100) {
+        if (duckModel.position.y <= lavaYPosition) {
             alert("You are not ready for the boss fight! :(")
             renderer.setAnimationLoop(null)
         }
@@ -1076,7 +1129,7 @@ const animate = (time) => {
         <ul class="rules-list">
             <li>Well done!</li>
             <li>You are looking quite delicious!</li>
-            <li>Go on to the boss, he could use a good snack.</li>
+            <li>Now gerrara here, the boss could use a good snack.</li>
             <button class="start-level-button">Take me to him!!!</button>
         </ul>`
 
@@ -1125,7 +1178,6 @@ const animate = (time) => {
         }
         //#endregion DUCK =======================
 
-
         //#region BOULDERS =======================
         boulders.forEach(boulder => {
             boulder.update(deltaTime)
@@ -1141,10 +1193,10 @@ const animate = (time) => {
             if (boxCollision({ box1: boulder, box2: duckModel }) && boulderCanDamage) {
                 console.log('hit enemy')
 
-                // when hit, then red for only 500 milliseconds
-                duckModel.material.color.set(0xff0000)
+                // when hit, make playerModel red
+                duckModel.visible = true
                 setTimeout(() => {
-                    duckModel.material.color.set(0x00ff00)
+                    duckModel.visible = false
                 }, 500)
 
                 // just decrease hp by 10

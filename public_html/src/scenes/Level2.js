@@ -11,8 +11,8 @@ import { MiniMap } from '../scripts/Objects/Minimap.js';
 import { Door } from '../scripts/Objects/Door.js';
 import { LightMechanicManager } from '../scripts/Scene/LightMechanicManager.js';
 import { 
-    ceilingPositions, groundPositions, platformPositions, wallPositions, lampPositions, doorPositions, 
-    lightsConfig, wallDimensions, platformDimensions, groundDimensions, ceilingDimensions 
+    smallGroundPositions, ceilingPositions, groundPositions, platformPositions, wallPositions, lampPositions, doorPositions, 
+    lightsConfig, smallGroundDimensions, wallDimensions, platformDimensions, groundDimensions, ceilingDimensions 
 } from '../data/objPositions2.js';
 
 const soundEffectsManager = new SoundEffectsManager();
@@ -81,7 +81,7 @@ export class Level2 extends SceneBaseClass {
         this.init_objects_();
         this.init_camera_();
         this.miniMap.init_miniMap_(window,document,this.scene);
-        this.startDamageTimer();
+        // this.startDamageTimer();
         const currentDoor = doorPositions.doorOne;
         this.doorPositions.init_door_(this.scene,currentDoor);
         this.animate();
@@ -101,11 +101,13 @@ export class Level2 extends SceneBaseClass {
         applyTextureSettings(platformTextures, 1, 0.5);
         const ceilingTextures = loadTextures("PavingStones")
         applyTextureSettings(ceilingTextures, 5, 5);
-        return {ceilingTextures, groundTextures, wallTextures, platformTextures}
+        const smallGroundTextures = loadTextures("PavingStones")
+        applyTextureSettings(smallGroundTextures, 3, 3);
+        return {ceilingTextures, groundTextures, wallTextures, platformTextures, smallGroundTextures}
     }//initializes the textures - basically gets the textures
 
     async _initMaterials(){
-        const {ceilingTextures, groundTextures, wallTextures, platformTextures} = await this._init_textures()//from _init_textures, get the texture/s
+        const {smallGroundTextures, ceilingTextures, groundTextures, wallTextures, platformTextures} = await this._init_textures()//from _init_textures, get the texture/s
         
         this.objManager.addMaterial("character",new THREE.MeshStandardMaterial({ 
             color: 0xff0000, 
@@ -160,6 +162,18 @@ export class Level2 extends SceneBaseClass {
             metalness: 0.1,
             roughness: 0.5
         }));//add material to specific geometry - anything named myPlatform will have this material
+
+        this.objManager.addMaterial("smallGround", new THREE.MeshStandardMaterial({
+            map: smallGroundTextures.colorMap,
+            aoMap: smallGroundTextures.aoMap,
+            displacementMap: smallGroundTextures.displacementMap,
+            metalnessMap: smallGroundTextures.metalnessMap,
+            normalMap: smallGroundTextures.normalMapDX, 
+            roughnessMap: smallGroundTextures.roughnessMap,
+            displacementScale: 0,
+            metalness: 0.1,
+            roughness: 0.5
+        }));//add material to specific geometry - anything named myPlatform will have this material
         
     }//initializes the materials
 
@@ -172,6 +186,8 @@ export class Level2 extends SceneBaseClass {
             new THREE.BoxGeometry(platformDimensions.width, platformPositions.height, platformDimensions.depth));
         this.objManager.addGeometry("ceiling", 
             new THREE.BoxGeometry(ceilingDimensions.width, ceilingDimensions.height, ceilingDimensions.depth));
+        this.objManager.addGeometry("smallGround", 
+            new THREE.BoxGeometry(smallGroundDimensions.width, smallGroundDimensions.height, smallGroundDimensions.depth));
     }//initializes the geometries - adding platforms and such
 
     async createObjects(){
@@ -202,6 +218,12 @@ export class Level2 extends SceneBaseClass {
             const tempMesh = this.objManager.createVisualObject(ceiling.name,ceiling.geometry,ceiling.material,ceiling.position,ceiling.rotation);
             const tempBody = this.objManager.createPhysicsObject(ceiling.name, ceiling.geometry, ceiling.position, ceiling.rotation, 0);
             this.objManager.linkObject(ceiling.name,tempMesh, tempBody);
+        })
+
+        smallGroundPositions.forEach((smallGround)=>{
+            const tempMesh = this.objManager.createVisualObject(smallGround.name,smallGround.geometry,smallGround.material,smallGround.position,smallGround.rotation);
+            const tempBody = this.objManager.createPhysicsObject(smallGround.name, smallGround.geometry, smallGround.position, smallGround.rotation, 0);
+            this.objManager.linkObject(smallGround.name,tempMesh, tempBody);
         })
 
         this.scene.background = new THREE.Color(0x333333);//add a background color
@@ -359,13 +381,7 @@ export class Level2 extends SceneBaseClass {
         });
     }
 
-    // setupCharacterLight() {
-    //     this.characterLight = new THREE.PointLight(0xffffff, 1, 10);
-    //     this.characterLight.position.set(0, 2, 0); // Slightly above the character
-    //     this.target.add(this.characterLight); // Attach the light to the character
-
-    //     this.lightMechanicManager.characterLight = this.characterLight;
-    // }
+    
 
     /**
      * Light to toggle the intensity to 5 for
@@ -394,58 +410,8 @@ export class Level2 extends SceneBaseClass {
         this.restartButton.addEventListener("click", this.restart.bind(this));
     }
 
-    startDamageTimer(){
-        setInterval(()=>{
-            if (this.loader.isLoaded()){
-                let valid = false;
-
-                this.points.forEach((point) => {
-                    if (this.calcEuclid(this.playerBody.position.x, this.playerBody.position.z, point.x, point.z)) {
-                        valid = true;
-                        console.log("Player is near a light source");
-                        this.heal(this.healingRate);
-                    }
-                });
-            }
-
-            // console.log(this.lightMechanicManager.getHealth())
-            if (this.lightMechanicManager.getHealth()<=0){
-                this.youLose();
-            }
-        },200);
-    }
     restartGame() {
         location.reload(); // Reload the page to restart the game
-    }
-
-    // Handle Player hit
-    handlePlayerHit(dmg) {
-        
-        this.takeDamage(dmg); // Take 10 damage when hit
-    }
-
-    takeDamage(amount) {
-        this.health -= amount;
-        this.health = Math.max(0, this.health); // Ensure health doesn't go below 0
-        // updateCharacterLight(); // Update light when health changes
-        // console.log("Player health:", this.health); // Log the player's health
-    }
-
-    updatePlayerHealthBar(){
-        const healthBar = document.getElementById('user-health-bar');
-        const healthPercentage = (this.health / this.maxHealth) * 100; // Calculate percentage
-        healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
-    }
-
-    heal(amount) {
-        this.health += amount;
-        this.health = Math.min(100, this.health); // Cap health at 100
-        // updateCharacterLight(); // Update light when health changes
-    }
-
-    calcEuclid(x1, z1, x2, z2) {
-        const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
-        return distance <= 4;
     }
     /**
      * Animation function
@@ -480,10 +446,6 @@ export class Level2 extends SceneBaseClass {
                 this.doorPositions.checkIfOpen()
             }
         });
-        this.updatePlayerHealthBar();
-    //    this.takeDamage(this.damageRate);
-    //    this.heal(this.healingRate);
-        // this.lightMechanicManager.update();
 
         // Render the scene
         this.renderer.render(this.scene, this.cameraManager.getCamera());
@@ -495,12 +457,6 @@ export class Level2 extends SceneBaseClass {
         this.animationId=null;
     }
 
-    handleCharacterDeath() {
-        this.lightMechanicManager.resetHealth();
-        this.gameOverScreen.style.display = "block";
-        document.body.style.cursor = "pointer"
-        this.playerBody.position.set(0,0.5,0);
-    }
 
     restart() {
         this.gameOverScreen.style.display = "none";
