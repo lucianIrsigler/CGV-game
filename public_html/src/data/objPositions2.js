@@ -278,13 +278,14 @@ export const platformPositions = [
     
 ];
 //END PLATFORM POSITIONS------------------------------------------------
-export const buttonDimensions = {width: 1, height: 1, depth: 0.2};
+export const buttonDimensions = {width: 1, height: 0.2, depth: 1};
+const centreButtonZPositionOffset = groundDimensions.width/10;
 export const buttonPositions = [
     {
         name: "centreButton",
         geometry: "button",
         material: "button",
-        position: { x: 0, y: 2, z: 0 },
+        position: { x: 0, y: 1.75, z: -centreButtonZPositionOffset },
         rotation: { x: 0, y: 0, z: 0 }
     }
 ];

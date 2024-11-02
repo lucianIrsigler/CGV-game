@@ -13,7 +13,7 @@ import { LightMechanicManager } from '../scripts/Scene/LightMechanicManager.js';
 import { 
     smallGroundPositions, ceilingPositions, groundPositions, platformPositions, wallPositions, lampPositions, doorPositions, 
     lightsConfig, smallGroundDimensions, wallDimensions, platformDimensions, groundDimensions, ceilingDimensions, 
-    buttonDimensions
+    buttonDimensions, buttonPositions
 } from '../data/objPositions2.js';
 
 const soundEffectsManager = new SoundEffectsManager();
@@ -107,7 +107,7 @@ export class Level2 extends SceneBaseClass {
         const smallGroundTextures = loadTextures("PavingStones")
         applyTextureSettings(smallGroundTextures, 3, 3);
         const buttonTextures = loadTextures("Planks")
-        applyTextureSettings(smallGroundTextures, 2, 2);
+        applyTextureSettings(buttonTextures, 2, 2);
         return {ceilingTextures, groundTextures, wallTextures, platformTextures, smallGroundTextures, buttonTextures}
     }//initializes the textures - basically gets the textures
 
@@ -409,8 +409,6 @@ export class Level2 extends SceneBaseClass {
             }
         });
     }
-
-    
 
     /**
      * Light to toggle the intensity to 5 for
