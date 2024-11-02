@@ -435,10 +435,10 @@ export class Level2 extends SceneBaseClass {
             }
 
             // console.log(this.lightMechanicManager.getHealth())
-            if (this.lightMechanicManager.getHealth()<=0){
-                // this.youLose();
-                console.log("You lose");
-            }
+            // if (this.lightMechanicManager.getHealth()<=0){
+            //     // this.youLose();
+            //     console.log("You lose");
+            // }
         },200);
     }
 
