@@ -14,7 +14,6 @@ import {
     ceilingPositions, groundPositions, platformPositions, wallPositions, lampPositions, doorPositions, 
     lightsConfig, wallDimensions, platformDimensions, groundDimensions, ceilingDimensions 
 } from '../data/objPositions2.js';
-// import CannonDebugger from 'cannon-es-debugger';
 
 const soundEffectsManager = new SoundEffectsManager();
 soundEffectsManager.toggleLoop("creep2",true);
@@ -60,7 +59,6 @@ export class Level2 extends SceneBaseClass {
 
         this.doorPositions = new Door(this.loader);
         this.miniMap = new MiniMap(this.scene,20);
-        //this.debugRenderer = new CannonDebugger(this.scene, this.world);
     }
 
     initScene(){
@@ -395,8 +393,6 @@ export class Level2 extends SceneBaseClass {
      */
     animate=(currentTime)=> {
         this.animationId = requestAnimationFrame(this.animate);
-
-        //this.debugRenderer.update(); 
 
         if (this.cameraManager==undefined||!this.loader.isLoaded() || !this.playerLoaded){
             return;
