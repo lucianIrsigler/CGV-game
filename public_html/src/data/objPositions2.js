@@ -89,7 +89,28 @@ export const platformPositions = [
         material: "platform",
         position: { x: leftPlatformPositionOnWall, y: doorPlatformHeight, z: 0 },
         rotation: { x: 0, y: rightAngle, z: 0 }
-    }
+    },
+    // {
+    //     name: "tplat",
+    //     geometry: "platform",
+    //     material: "platform",
+    //     position: { x: 0, y: 4, z: 2 },
+    //     rotation: { x: 0, y: rightAngle, z: 0 }
+    // },
+    // {
+    //     name: "tplat2",
+    //     geometry: "platform",
+    //     material: "platform",
+    //     position: { x: 0, y: 8, z: 6 },
+    //     rotation: { x: 0, y: rightAngle, z: 0}
+    // },
+    // {
+    //     name: "tplat3",
+    //     geometry: "platform",
+    //     material: "platform",
+    //     position: { x: 0, y: 12, z: 10 },
+    //     rotation: { x: 0, y: rightAngle, z: 0 }
+    // }
     
 ]
 //END PLATFORM POSITIONS------------------------------------------------
