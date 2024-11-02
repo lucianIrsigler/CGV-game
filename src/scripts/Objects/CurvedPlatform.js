@@ -25,7 +25,32 @@ export class CurvedPlatform extends THREE.Object3D {
 
         const extrudeSettings = { depth: this.depth, bevelEnabled: false };
         const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        //GET TEXTURES FROM "PavingStones"
+        const textureLoader = new THREE.TextureLoader();
+        const colorMap = textureLoader.load('../textures/PavingStones/Color.jpg');
+        const aoMap = textureLoader.load('../textures/PavingStones/AmbientOcclusion.jpg');
+        const displacementMap = textureLoader.load('../textures/PavingStones/Displacement.jpg');
+        const metalnessMap = textureLoader.load('../textures/PavingStones/Metalness.jpg');
+        const normalMapDX = textureLoader.load('../textures/PavingStones/NormalDX.jpg');
+        const roughnessMap = textureLoader.load('../textures/PavingStones/Roughness.jpg');
+        
+        [colorMap, aoMap, displacementMap, metalnessMap, normalMapDX, roughnessMap].forEach(texture => {
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(0.2, 0.2);
+        });
+        colorMap.encoding = THREE.sRGBEncoding;
+        const material = new THREE.MeshStandardMaterial({
+            map: colorMap,
+            aoMap: aoMap,
+            displacementMap: displacementMap,
+            metalnessMap: metalnessMap,
+            normalMap: normalMapDX, 
+            roughnessMap: roughnessMap,
+            displacementScale: 0,
+            metalness: 0.1,
+            roughness: 0.5
+        });
+
         const mesh = new THREE.Mesh(geometry, material);
         return mesh;
     }
