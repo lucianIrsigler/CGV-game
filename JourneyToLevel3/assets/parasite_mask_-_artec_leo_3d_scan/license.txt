@@ -1,0 +1,11 @@
+Model Information:
+* title:	Parasite Mask - Artec Leo 3D Scan
+* source:	https://sketchfab.com/3d-models/parasite-mask-artec-leo-3d-scan-6ee5dd579cbe4bbf84a1555d116e61f6
+* author:	Void (https://sketchfab.com/halofannatic)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Parasite Mask - Artec Leo 3D Scan" (https://sketchfab.com/3d-models/parasite-mask-artec-leo-3d-scan-6ee5dd579cbe4bbf84a1555d116e61f6) by Void (https://sketchfab.com/halofannatic) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

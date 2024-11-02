@@ -13,6 +13,7 @@ import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 let allModelsLoaded = false;
 
 
+//#region Model Imports =========================
 const loader = new GLTFLoader();
 
 let playerModel;
@@ -72,7 +73,169 @@ loader.load(
         console.error('An error occurred while loading manor torch:', error);
     }
 );
-// Importing hallow night
+
+// Scary faces
+let horrorMask;
+loader.load(
+    'assets/horror_mask/scene.gltf',
+    function (gltf) {
+        // `gltf.scene` is the root of the loaded model
+        horrorMask = gltf.scene;
+        scene.add(horrorMask);
+
+        // Optional: Set the model's position, scale, rotation
+        horrorMask.position.set(0, 10, -15);
+        horrorMask.scale.set(80, 60, 80);
+
+        // Optional: Enable shadow casting for the model
+        horrorMask.traverse((node) => {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
+
+        horrorMask.visible = false;
+    },
+    undefined, // Progress function (optional)
+    function (error) {
+        console.error('An error occurred while loading horror mask:', error);
+    }
+);
+let pumpkinHalloween;
+loader.load(
+    'assets/pumpkin_halloween_face/scene.gltf',
+    function (gltf) {
+        // `gltf.scene` is the root of the loaded model
+        pumpkinHalloween = gltf.scene;
+        scene.add(pumpkinHalloween);
+
+        // Optional: Set the model's position, scale, rotation
+        pumpkinHalloween.position.set(0, 12, -15);
+        pumpkinHalloween.scale.set(30, 30, 30);
+        pumpkinHalloween.rotation.set(0, -Math.PI / 2, 0);
+
+        // Optional: Enable shadow casting for the model
+        pumpkinHalloween.traverse((node) => {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
+
+        pumpkinHalloween.visible = false;
+    },
+    undefined, // Progress function (optional)
+    function (error) {
+        console.error('An error occurred while loading pumpkin halloween:', error);
+    }
+);
+let scaryAsianMask;
+loader.load(
+    'assets/scary_asian_mask/scene.gltf',
+    function (gltf) {
+        // `gltf.scene` is the root of the loaded model
+        scaryAsianMask = gltf.scene;
+        scene.add(scaryAsianMask);
+
+        // Optional: Set the model's position, scale, rotation
+        scaryAsianMask.position.set(0, 12, -15);
+        scaryAsianMask.scale.set(30, 30, 30);
+        scaryAsianMask.rotation.set(0, -Math.PI / 2, 0);
+
+        // Optional: Enable shadow casting for the model
+        scaryAsianMask.traverse((node) => {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
+
+        scaryAsianMask.visible = false;
+    },
+    undefined, // Progress function (optional)
+    function (error) {
+        console.error('An error occurred while loading pumpkin halloween:', error);
+    }
+);
+let scaryFace;
+loader.load(
+    'assets/scary_face/scene.gltf',
+    function (gltf) {
+        // `gltf.scene` is the root of the loaded model
+        scaryFace = gltf.scene;
+        scene.add(scaryFace);
+
+        // Optional: Set the model's position, scale, rotation
+        scaryFace.position.set(0, 14, -15);
+        scaryFace.scale.set(600, 600, 600);
+
+        // Optional: Enable shadow casting for the model
+        scaryFace.traverse((node) => {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
+
+        scaryFace.visible = false;
+    },
+    undefined, // Progress function (optional)
+    function (error) {
+        console.error('An error occurred while loading pumpkin halloween:', error);
+    }
+);
+let parasiteMask;
+loader.load(
+    'assets/parasite_mask_-_artec_leo_3d_scan/scene.gltf',
+    function (gltf) {
+        // `gltf.scene` is the root of the loaded model
+        parasiteMask = gltf.scene;
+        scene.add(parasiteMask);
+
+        // Optional: Set the model's position, scale, rotation
+        parasiteMask.position.set(0, 12, -15);
+        parasiteMask.scale.set(0.04, 0.04, 0.04);
+        parasiteMask.rotation.set(Math.PI / 2, Math.PI, 0);
+
+        // Optional: Enable shadow casting for the model
+        parasiteMask.traverse((node) => {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
+
+        parasiteMask.visible = false;
+    },
+    undefined, // Progress function (optional)
+    function (error) {
+        console.error('An error occurred while loading pumpkin halloween:', error);
+    }
+);
+
+let scaryFaces = [] // will add after all are laoded
+let currentScaryFace = 1;
+
+const allFacesLoaded = () => {
+    return horrorMask && pumpkinHalloween && scaryAsianMask && scaryFace && parasiteMask
+}
+
+
+//audio
+
+const cryOutrage = new Audio('../assets/jumpscare_sounds/cryo_outage-94622.mp3');
+const echoJumpscare = new Audio('../assets/jumpscare_sounds/echo-jumpscare-80933.mp3');
+const fuzzyJumpscare = new Audio('../assets/jumpscare_sounds/fuzzy-jumpscare-80560.mp3');
+const jumpscareSound = new Audio('../assets/jumpscare_sounds/jumpscare_sound-95043.mp3');
+const squeakyJumpscare = new Audio('../assets/jumpscare_sounds/squeaky-jumpscare-2-102254.mp3');
+let jumpScareSounds = [];
+
+const allJumpScareAudioLoaded = () => {
+    return jumpScareSounds.every(sound => sound.readyState == 4);
+}
+
+//#endregion Model Imports =========================
 
 
 const carUrl = new URL('../assets/car.glb', import.meta.url)
@@ -112,6 +275,7 @@ let spawnBoulders = true
 let lightFollowsDuck = false
 let groundsDescend = false
 let groundsOscilate = false
+let allowHaunting = true
 
 let boulderCanDamage = true
 
@@ -560,7 +724,7 @@ let groundZLocationTracker = groundDepth / 2;
 
 let numGroundsTracker = 0
 
-let maxGroundsAllowed = 10;
+let maxGroundsAllowed = 5;
 
 let previousGroundX = 0
 let previousGroundY = groundYDisplacement
@@ -607,13 +771,13 @@ const createGrounds = (numGrounds = 10) => {
 
         // if last ground
         if (numGroundsTracker == maxGroundsAllowed && i == numGrounds - 1) {
-            // ground.material = new THREE.MeshStandardMaterial({ color: '#FFFF00' });
-
-
 
             const platformTexture = loadTextures('PavingStones');
-            applyTextureSettings(platformTexture, 6, 3);
-            applyTextureSettings(platformTexture, 6, 6); // 6,6 works well
+            applyTextureSettings(
+                platformTexture,
+                lastStageGroundWidth / lastStageGroundWidth,
+                lastStageGroundDepth / lastStageGroundWidth
+            );
 
             const platformMaterial = new THREE.MeshStandardMaterial({
                 map: platformTexture.colorMap,
@@ -630,8 +794,8 @@ const createGrounds = (numGrounds = 10) => {
 
 
             lastGround = ground
-            // lastGround.material = platformMaterial
-            lastGround.material = new THREE.MeshStandardMaterial({ color: '#FFFF00' });
+            lastGround.material = platformMaterial
+            // lastGround.material = new THREE.MeshStandardMaterial({ color: '#FFFF00' });
         }
 
         scene.add(ground)
@@ -676,7 +840,7 @@ const options = {
     penumbra: 0,
     intensity: 4000,
     firstPerson: false,
-    followDuck: false,
+    followDuck: true,
 
 }
 
@@ -736,8 +900,11 @@ let maxDuckMovementSpeed = 400 // 40000 is max speed
 let duckAcceleration = 10
 let duckMovementSpeed = originalDuckMovementSpeed
 
-let levelInterval = 5000
+let stageDuration = 5000
 let previousLevelTime = 0
+
+let jumpScareDuration = 2000
+let previousJumpScareTime = 0
 
 let spotLightFollowSpeed = 50
 
@@ -745,9 +912,32 @@ const clock = new THREE.Clock()
 
 const animate = (time) => {
 
-    if (playerModel && duckModel && manorTorch) {
+    if (playerModel && duckModel && manorTorch && horrorMask && allFacesLoaded()) {
         allModelsLoaded = true
+        if (scaryFaces.length == 0) {
+            scaryFaces = [horrorMask, pumpkinHalloween, scaryAsianMask, scaryFace, parasiteMask];
+
+            scaryFaces.forEach(face => {
+                face.lookAt(playerModel.position);
+            })
+        }
+
+        // make each face follow player, keeping their original rotations applied when initially loaded
+        scaryFaces.forEach(face => {
+            face.position.copy(duckModel.position)
+                .add(new THREE.Vector3(15, 8, -20)); // Offset
+            face.lookAt(playerModel.position);
+        })
+        pumpkinHalloween.rotation.set(0, -(Math.PI / 1.5), 0);
+        scaryAsianMask.rotation.set(0, -(Math.PI / 1.5), 0);
+        parasiteMask.rotation.set(Math.PI / 2.5, (Math.PI), 0);
     }
+
+    if (allJumpScareAudioLoaded) {
+        jumpScareSounds = [cryOutrage, echoJumpscare, fuzzyJumpscare, jumpscareSound, squeakyJumpscare];
+    }
+
+
 
     if (!allModelsLoaded) {
         document.querySelector('.start-level-button').textContent = 'Waiting for models to load...'
@@ -761,9 +951,20 @@ const animate = (time) => {
 
         // Ensure playerModel and duckModel are loaded before accessing their properties
         if (playerModel && duckModel) {
-            playerModel.position.copy(duckModel.position).add(new THREE.Vector3(0, playerModel.scale.x / 2, 0)); // Offset by 5 units up
+            playerModel.position.copy(duckModel.position).add(new THREE.Vector3(0, playerModel.scale.x / 2, 0)); // Offset 
             playerModel.rotation.copy(duckModel.rotation);
             playerModel.rotation.y = Math.PI; // Ensure it faces away
+
+            // if (scaryFaces[currentScaryFace]) {
+            //     // make the scary face follow the duck 
+            //     scaryFaces[currentScaryFace].position.copy(duckModel.position)
+            //         .add(new THREE.Vector3(10, 0, -20)); // Offset
+
+            //     // horror mask must still face player while being offset on x axis
+            //     scaryFaces[currentScaryFace].lookAt(playerModel.position);
+            // }
+
+
         }
 
         // Ensure manorTorch is loaded and follow light
@@ -1026,6 +1227,46 @@ const animate = (time) => {
 
             lastDescendingGround = (lastDescendingGround + 1);
         }
+
+        if (time - previousJumpScareTime > jumpScareDuration && stage >= 2) {
+
+            if (allFacesLoaded() && scaryFaces.length != 0 && allowHaunting) {
+                previousJumpScareTime = time;
+
+
+                let faceWasShown = false;
+
+                // hide any face that is visible, then next time, show one face, and repeat
+                scaryFaces.forEach(face => {
+                    if (face.visible) {
+                        faceWasShown = true
+                    }
+                    face.visible = false
+                })
+
+                if (!faceWasShown) {
+                    currentScaryFace = getRandomNumber(0, scaryFaces.length - 1).toFixed(0) // 0 to 4
+                    console.log('currentScaryFace', currentScaryFace)
+                    console.log('scaryFaces', scaryFaces)
+                    scaryFaces[currentScaryFace].visible = true
+
+                    // play random jump scare sound
+                    if (jumpScareSounds.length != 0) {
+                        const randomJumpScareSound = jumpScareSounds[getRandomNumber(0, jumpScareSounds.length - 1).toFixed(0)]
+                        randomJumpScareSound.volume = 0.5;
+                        randomJumpScareSound.loop = false;
+                        randomJumpScareSound.play();
+                    }
+                }
+
+                jumpScareDuration = getRandomNumber(1000, 4000);
+
+
+
+
+            }
+
+        }
         //#endregion TIMING =======================
 
 
@@ -1037,7 +1278,7 @@ const animate = (time) => {
             console.log('ON THE LAST GROUND')
         }
 
-        if (time - previousLevelTime > levelInterval) {
+        if (time - previousLevelTime > stageDuration) {
             previousLevelTime = time;
 
             if (stage != 4) {
@@ -1045,7 +1286,7 @@ const animate = (time) => {
             }
 
 
-            console.log(`Stage Change After ${levelInterval} milliseconds, stage ${stage}`);
+            console.log(`Stage Change After ${stageDuration} milliseconds, stage ${stage}`);
         }
 
         switch (stage) {
@@ -1203,7 +1444,6 @@ document.querySelector('.start-level-button').addEventListener('click', (event) 
 
 
 // AUDIO =========================
-
 //ambient sound
 const ambientSound = new Audio('../assets/alexander-nakarada-chase(chosic.com).mp3');
 ambientSound.volume = 0.3;
