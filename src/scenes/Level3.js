@@ -17,7 +17,6 @@ import { Enemy } from '../scripts/Objects/Enemy';
 import {Crosshair} from "../scripts/Objects/Crosshair";
 import { monsters3 } from "../data/monster3";
 import { lamps3 } from "../data/lampPos3";
-import { player } from '../../Level3/player';
 import { MiniMap } from '../scripts/Objects/Minimap.js';
 
 
@@ -49,7 +48,6 @@ export class Level3 extends SceneBaseClass{
         this.damageRate = 0.05; // Define the damage rate
         this.healingRate = 10; // Define the healing rate
 
-        this.world = new World();
         this.enemyModel;
 
 
@@ -110,7 +108,7 @@ export class Level3 extends SceneBaseClass{
 
 
     initScene(){
-        this.scene.background = new THREE.Color(0x000000);
+        this.scene.background = new THREE.Color(0x333333);
 
         this.init_eventHandlers_();
         this.init_lighting_();
@@ -579,12 +577,9 @@ export class Level3 extends SceneBaseClass{
 
         this.renderer.render(this.scene, this.cameraManager.getCamera());
 
-        // Ensure player body velocity is reset correctly
-        // if (this.playerBody.velocity.y > 0 && !this.cameraManager.input_.isGrounded()) {
-        //     this.playerBody.velocity.y -= this.world.gravity.y * timeElapsedS;
-        // }
-        //update minimap
-        this.miniMap.update(this.scene,this.target,this.enemyModel);
+        // Update minimap
+        this.miniMap.update(this.scene, this.target, this.enemyModel);
+
         if (this.health <= 0) {
             this.youLose(); // Call the lose condition function
         } 
@@ -592,8 +587,8 @@ export class Level3 extends SceneBaseClass{
             this.youWin(); // Call the win condition function
         }
 
-        // start timer only when boss is awake
-        if (!this.enemy.isAsleep() && this.enemy.getHealth()>0) {
+        // Start timer only when boss is awake
+        if (!this.enemy.isAsleep() && this.enemy.getHealth() > 0) {
             this.timer += timeElapsedS;
         }
 
