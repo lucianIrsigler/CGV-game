@@ -107,11 +107,22 @@ export class Enemy{
 
 
     handleEnemyHit(){
-        if (this.isAsleep && this.getHealth()>100){
+        if (this.isAsleep && this.enemyHits==0){
             soundEffectsManager.playSound("monster_moan",0.4);
         }
 
+        let healthPercentage = (this.health / this.maxHealth) * 100; // Calculate percentage
+
+        if(healthPercentage <= 30 && healthPercentage > 10){
+            soundEffectsManager.playSound("monster_roar",0.5);
+        }
+        else if(healthPercentage > 30){
+            soundEffectsManager.playSound("monster_moan",0.5);
+        }
+
+
         this.setAsleep(false);
+        
 
         if (!this.enemyHitCooldown){
             this.enemyHits+=1;
@@ -120,21 +131,18 @@ export class Enemy{
 
             if (this.getHealth()<=0){
                 if (this.alive){
-                    soundEffectsManager.playSound("monster_moan",0.4);
+                    soundEffectsManager.playSound("monster_death",0.1);
                 }
 
                 this.alive=false;
                 this.enemyLight.intensity=0;
                 this.asleep=true;
-                //TODO go to you win screen
             }else{
                 this.enemyHitCooldown=true;
 
                 setTimeout(()=>{
-                    //TODO update
-                    // this.model.material.color.set(0x040405);
                     this.enemyHitCooldown = false; // Reset cooldown flag
-                },50)
+                },50) 
             }
         }
     }

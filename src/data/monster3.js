@@ -17,7 +17,7 @@ export const monsters3 = {
         positionX:10,
         positionY:0,
         positionZ:5,
-        health:200
+        health:800
     },
     // "toon_spike":{
     //    scene:"src/models/toon_spike/scene.gltf",

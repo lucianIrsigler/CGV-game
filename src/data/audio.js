@@ -44,4 +44,12 @@ export const audioFiles = [
         name: "monster_moan",
         file: "monster_moan.mp3"
     },
+    {
+        name: "monster_roar",
+        file: "monster_roar.mp3"
+    },
+    {
+        name: "monster_death",
+        file: "monster_death.mp3"
+    }
 ];

@@ -44,7 +44,7 @@ export class SoundEffectsManager {
      * @param {string} name - The name of the sound effect to play (e.g., "doorCreak")
      * @param {number} [volume=1.0] - The volume level (between 0.0 and 1.0)
      */
-    playSound(name, volume = 1.0) {
+    playSound(name, volume = 1.0) { 
         const soundBuffer = this.soundBuffers[name];
         if (soundBuffer) {
             soundBuffer.volume = volume; // Set the volume level

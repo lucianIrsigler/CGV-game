@@ -91,11 +91,13 @@ export class Level3 extends SceneBaseClass{
 
         this.currentMonster = getRandomMonster(monsters3);
 
+        // timer for comp 
+        this.timer = 0;
     }
 
 
     initScene(){
-        this.scene.background = new THREE.Color(0x333333);
+        this.scene.background = new THREE.Color(0x000000);
 
         this.init_eventHandlers_();
         this.init_lighting_();
@@ -144,14 +146,14 @@ export class Level3 extends SceneBaseClass{
 
         window.addEventListener("click", () => {
             if (!this.playingAlready){
-                // soundEffectsManager.playSound("ambienceLevel3", 0.3);
+                soundEffectsManager.playSound("ambienceLevel3", 0.3);
                 this.playingAlready=true;
             }
         });
 
         window.addEventListener("keydown", () => {
             if (!this.playingAlready){
-                // soundEffectsManager.playSound("ambienceLevel3", 0.3);
+                soundEffectsManager.playSound("ambienceLevel3", 0.3);
                 this.playingAlready=true;
             }
         });
@@ -476,7 +478,7 @@ export class Level3 extends SceneBaseClass{
         //stop animations
         cancelAnimationFrame(this.animationId);
 
-        document.getElementById('gameOverHeader').innerText = "You Win!\nYou have defeated the monster and escaped the darkness!";
+        document.getElementById('gameOverHeader').innerText = "You Win!\nYou have defeated the monster and escaped the darkness!\nTime taken to defeat boss: " + this.timer.toFixed(2) + " seconds";
         this.enemy.asleep = true;
 
         console.log("You win!"); // Display win message if health reaches zero
@@ -521,7 +523,7 @@ export class Level3 extends SceneBaseClass{
         this.enemy.updateEnemyRotation(this.playerBody.position);
 
         this.world.step(1 / 60);
-        this.debugRenderer.update();
+        // this.debugRenderer.update(); // comment for debugging
 
 
         this.gunManager.updateAllBullets();
@@ -529,7 +531,7 @@ export class Level3 extends SceneBaseClass{
         this.objManager.update();
 
         const timeElapsedS = (currentTime - this.lastTime) / 1000;
-        // this.lastTime = currentTime;
+        this.lastTime = currentTime;
 
         
         this.updatePlayerHealthBar();
@@ -557,6 +559,12 @@ export class Level3 extends SceneBaseClass{
         else if (this.enemy.getHealth() <= 0) {
             this.youWin(); // Call the win condition function
         }
+
+        // start timer only when boss is awake
+        if (!this.enemy.isAsleep() && this.enemy.getHealth()>0) {
+            this.timer += timeElapsedS;
+        }
+
     }
 
     /**
