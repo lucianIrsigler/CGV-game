@@ -10,6 +10,9 @@ import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 // import { GLTFLoader } from 'https://unpkg.com/three@0.153.0/examples/jsm/loaders/GLTFLoader.js';
 // import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 
+let allModelsLoaded = false;
+
+
 const loader = new GLTFLoader();
 
 let playerModel;
@@ -41,7 +44,34 @@ loader.load(
     }
 );
 
+let manorTorch
+loader.load(
+    'assets/manor_torch/scene.gltf',
+    function (gltf) {
+        // `gltf.scene` is the root of the loaded model
+        manorTorch = gltf.scene;
+        scene.add(manorTorch);
 
+        // Optional: Set the model's position, scale, rotation
+        manorTorch.position.set(0, 0, 0);
+        manorTorch.scale.set(0.4, 0.4, 0.4);
+
+        // Optional: Enable shadow casting for the model
+        manorTorch.traverse((node) => {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
+
+
+
+    },
+    undefined, // Progress function (optional)
+    function (error) {
+        console.error('An error occurred while loading manor torch:', error);
+    }
+);
 // Importing hallow night
 
 
@@ -715,14 +745,34 @@ const clock = new THREE.Clock()
 
 const animate = (time) => {
 
+    if (playerModel && duckModel && manorTorch) {
+        allModelsLoaded = true
+    }
+
+    if (!allModelsLoaded) {
+        document.querySelector('.start-level-button').textContent = 'Waiting for models to load...'
+        document.querySelector('.start-level-button').disabled = true
+    } else {
+        document.querySelector('.start-level-button').textContent = 'Start the test!!'
+        document.querySelector('.start-level-button').disabled = false
+    }
+
     if (gameStarted) {
 
         // Ensure playerModel and duckModel are loaded before accessing their properties
         if (playerModel && duckModel) {
             playerModel.position.copy(duckModel.position).add(new THREE.Vector3(0, playerModel.scale.x / 2, 0)); // Offset by 5 units up
             playerModel.rotation.copy(duckModel.rotation);
-            playerModel.rotation.y += Math.PI; // Ensure it faces away
+            playerModel.rotation.y = Math.PI; // Ensure it faces away
         }
+
+        // Ensure manorTorch is loaded and follow light
+        if (manorTorch) {
+            manorTorch.position.copy(spotLight.position);
+            manorTorch.position.y += 5; // Offset by 5 units up
+            manorTorch.rotation.z = Math.PI; // ensure it faces down
+        }
+
         step += options.speed
         const deltaTime = clock.getDelta()
 
