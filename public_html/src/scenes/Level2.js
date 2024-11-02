@@ -83,9 +83,9 @@ export class Level2 extends SceneBaseClass {
         const groundTextures = loadTextures("PavingStones")
         applyTextureSettings(groundTextures, 5, 5);
         const wallTextures = loadTextures("PavingStones")
-        applyTextureSettings(wallTextures, 5, 4);
+        applyTextureSettings(wallTextures, 4, 2);
         const platformTextures = loadTextures("PavingStones")
-        applyTextureSettings(platformTextures, 2, 1);
+        applyTextureSettings(platformTextures, 1, 0.5);
         const ceilingTextures = loadTextures("PavingStones")
         applyTextureSettings(ceilingTextures, 5, 5);
         return {ceilingTextures, groundTextures, wallTextures, platformTextures}
@@ -255,7 +255,7 @@ export class Level2 extends SceneBaseClass {
             clone.position.set(lamp.positionX, lamp.positionY, lamp.positionZ);
             clone.scale.set(lamp.scaleX, lamp.scaleY, lamp.scaleZ);
             clone.castShadow = true;
-    
+            
             // Add the cloned lamp object to the scene
             this.addObject(clone);
     
