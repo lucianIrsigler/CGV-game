@@ -93,5 +93,5 @@ const animationManager = new AnimationManager();
 
 // document.getElementById("start-menu").style.display = "none";
 
-animationManager.switchScene(new Level3(),0);
+animationManager.switchScene(new Level2(),0);
 
