@@ -31,6 +31,8 @@ export class Level2 extends SceneBaseClass {
         //LAMPS
         this.points = [];
         this.lampsArray=Object.values(lampPositions);
+        this.playerLight;
+        
 
         this.characterLight;
         
@@ -45,13 +47,23 @@ export class Level2 extends SceneBaseClass {
         this.gameOverScreen = document.getElementById("gameOverScreen");
         this.restartButton = document.getElementById("restartButton");
 
+        this.isGamePaused = false;
+
         //ANIMATION
         this.lastTime = 0;
         this.animationId = null;
 
+        //health
+        this.maxHealth = 100; // Define the maximum health
+        this.health = this.maxHealth;
+        this.loaded = false;
+        this.damageRate = 0.05; // Define the damage rate
+        this.healingRate = 10; // Define the healing rate
+
         //FLAGS
         this.playerLoaded = false;
         this.objectsLoaded = false;
+        this.playingAlready = false
 
         //SOUND
         this.nextSoundTime = 1000;
@@ -59,14 +71,17 @@ export class Level2 extends SceneBaseClass {
 
         this.doorPositions = new Door(this.loader);
         this.miniMap = new MiniMap(this.scene,20);
+        this.enemy=null;
     }
 
     initScene(){
+        this.scene.background = new THREE.Color(0x333333);
         this.init_lighting_();
         this.init_eventHandlers_();
         this.init_objects_();
         this.init_camera_();
         this.miniMap.init_miniMap_(window,document,this.scene);
+        // this.startDamageTimer();
         const currentDoor = doorPositions.doorOne;
         this.doorPositions.init_door_(this.scene,currentDoor);
         this.animate();
@@ -197,13 +212,14 @@ export class Level2 extends SceneBaseClass {
         const player = this._init_player()
         let res = this.loadLamps();
         let out = this.createObjects()
-        this.miniMap.addPlayer("#FF0000");
+        this.miniMap.addPlayer("#0000FF");
         const doorPlatformPos = platformPositions[0].position;
         this.miniMap.addEndGoal(doorPlatformPos,"#00FF00")
     }//uses createObjects which uses initGeometries and initMaterials - initMaterials uses initTextures... phew, what a rabbt hole
 
     async _init_player(){
         const gltf = await this.loader.loadModel('src/models/cute_alien_character/scene.gltf', 'player');
+        document.getElementById('user-health-bar-container').style.display = 'block'; // Show the health bar
         const model = gltf.scene; // Get the loaded model
         this.addObject(model); // Add the model to the scene
         model.rotation.set(0, 0, 0); // Rotate the model
@@ -241,8 +257,8 @@ export class Level2 extends SceneBaseClass {
     
         // Predefine light properties
         const lightColor = 0xA96CC3;
-        const lightIntensity = 0.5;
-        const lightDistance = 2;
+        const lightIntensity = 30;
+        const lightDistance = 50;
     
         // Iterate through each lamp in the lampsArray
         this.lampsArray.forEach(lamp => {
@@ -310,7 +326,12 @@ export class Level2 extends SceneBaseClass {
     init_lighting_() {
         let temp = new THREE.AmbientLight(0x101010, 0.75);
         this.lightManager.addLight("ambient", temp, null);
+        const playerLight = new THREE.PointLight(0xffffff, 1, 50); // Color, intensity, distance
+        this.lightManager.addLight("playerLight",playerLight,{x:0,y:1.5,z:0})
 
+
+        
+        this.playerLight = this.lightManager.getLight("playerLight");
         lightsConfig.forEach(config => {
             let light;
             if (config.type === "SpotLight") {
@@ -338,21 +359,21 @@ export class Level2 extends SceneBaseClass {
         });
     }
 
-    setupCharacterLight() {
-        this.characterLight = new THREE.PointLight(0xffffff, 1, 10);
-        this.characterLight.position.set(0, 2, 0); // Slightly above the character
-        this.target.add(this.characterLight); // Attach the light to the character
+    // setupCharacterLight() {
+    //     this.characterLight = new THREE.PointLight(0xffffff, 1, 10);
+    //     this.characterLight.position.set(0, 2, 0); // Slightly above the character
+    //     this.target.add(this.characterLight); // Attach the light to the character
 
-        this.lightMechanicManager.characterLight = this.characterLight;
-    }
+    //     this.lightMechanicManager.characterLight = this.characterLight;
+    // }
 
     /**
      * Light to toggle the intensity to 5 for
      * @param {THREE.Light} light 
      */
-    toggleLightIntensity(light) {
-        light.intensity = 5;
-    }
+    // toggleLightIntensity(light) {
+    //     light.intensity = 5;
+    // }
 
     init_eventHandlers_(){
         document.addEventListener("keydown", (e) => {
@@ -376,16 +397,56 @@ export class Level2 extends SceneBaseClass {
     startDamageTimer(){
         setInterval(()=>{
             if (this.loader.isLoaded()){
-                this.lightMechanicManager.damageTimer(this.points,this.target)
+                let valid = false;
+
+                this.points.forEach((point) => {
+                    if (this.calcEuclid(this.playerBody.position.x, this.playerBody.position.z, point.x, point.z)) {
+                        valid = true;
+                        console.log("Player is near a light source");
+                        this.heal(this.healingRate);
+                    }
+                });
             }
 
             // console.log(this.lightMechanicManager.getHealth())
             if (this.lightMechanicManager.getHealth()<=0){
-                this.handleCharacterDeath();
+                this.youLose();
             }
-        },1000);
+        },200);
+    }
+    restartGame() {
+        location.reload(); // Reload the page to restart the game
     }
 
+    // Handle Player hit
+    handlePlayerHit(dmg) {
+        
+        this.takeDamage(dmg); // Take 10 damage when hit
+    }
+
+    takeDamage(amount) {
+        this.health -= amount;
+        this.health = Math.max(0, this.health); // Ensure health doesn't go below 0
+        // updateCharacterLight(); // Update light when health changes
+        // console.log("Player health:", this.health); // Log the player's health
+    }
+
+    updatePlayerHealthBar(){
+        const healthBar = document.getElementById('user-health-bar');
+        const healthPercentage = (this.health / this.maxHealth) * 100; // Calculate percentage
+        healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
+    }
+
+    heal(amount) {
+        this.health += amount;
+        this.health = Math.min(100, this.health); // Cap health at 100
+        // updateCharacterLight(); // Update light when health changes
+    }
+
+    calcEuclid(x1, z1, x2, z2) {
+        const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
+        return distance <= 4;
+    }
     /**
      * Animation function
      * @param {} currentTime 
