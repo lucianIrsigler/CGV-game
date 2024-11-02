@@ -260,7 +260,11 @@ export class Level3 extends SceneBaseClass{
         let out = this.createObjects();
         //add stuff for minimap
         this.miniMap.addPlayer("#0000FF"); // Blue marker for the player
-        this.miniMap.addEnemy("#FF0000"); // Red marker for the enemy
+    this.miniMap.addEndGoal({
+        x: this.enemyBody.position.x,
+        y: this.enemyBody.position.y,
+        z: this.enemyBody.position.z
+    }, "#FF0000"); // Red marker for the enemy
     };
 
 
