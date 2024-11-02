@@ -67,18 +67,6 @@ export class Level2 extends SceneBaseClass {
             roughness: 0.5
         }));//add matreial to specific geometry - anything named myPlatform will have this material
         
-        this.objManager.addMaterial("platforms",new THREE.MeshStandardMaterial({
-            map: platformTextures.colorMap,
-            aoMap: platformTextures.aoMap,
-            displacementMap: platformTextures.displacementMap,
-            metalnessMap: platformTextures.metalnessMap,
-            normalMap: platformTextures.normalMapDX, 
-            roughnessMap: platformTextures.roughnessMap,
-            displacementScale: 0,
-            metalness: 0.1,
-            roughness: 0.5
-        }));
-        
         this.objManager.addMaterial("ground",new THREE.MeshStandardMaterial({ color: 0x808080 }));//just giving this a color
     }//initializes the materials
 
@@ -91,13 +79,14 @@ export class Level2 extends SceneBaseClass {
         await this._initGeometries();
         await this._initMaterials();
         //get the geometries and materials
+        const curvedPlatform = new CurvedPlatform(10, 15, 1, Math.PI / 4, Math.PI / 4);
+        this.objManager.createCustomObject("curvedPlatform", curvedPlatform, { x: 0, y: 0, z: 0 });
 
         const groundMesh = this.objManager.createVisualObject("ground", "platform", "platform", {x:0,y:-0.5,z:20});
         //name, geometry, material, position, rotation
         const groundBody = this.objManager.createPhysicsObject("ground", "platform", {x:0,y:-0.5,z:20}, null, 0);
         //name, geometry, position, rotation, mass
         this.objManager.linkObject("ground", groundMesh, groundBody);
-        //
 
         const platformConfigurations = [{
             name: "myPlatform",

@@ -1,46 +1,41 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 
-const angle = Math.PI / 4;
-const sectorAngle = Math.PI / 4;
-
 export class CurvedPlatform extends THREE.Object3D {
-    constructor(innerRadius, outerRadius, depth) {
+    constructor(innerRadius, outerRadius, depth, angle = Math.PI / 4, sectorAngle = Math.PI / 4) {
         super();
         this.innerRadius = innerRadius;
         this.outerRadius = outerRadius;
         this.depth = depth;
+        this.angle = angle;
+        this.sectorAngle = sectorAngle;
         this.mesh = this.createMesh();
         this.add(this.mesh);
-
         this.numSegments = 8;
         this.body = this.createCompoundBody(innerRadius, outerRadius, depth, this.numSegments);
     }
 
     createMesh() {
         const shape = new THREE.Shape();
-        shape.moveTo(Math.cos(angle) * this.innerRadius, Math.sin(angle) * this.innerRadius);
-        shape.lineTo(Math.cos(angle) * this.outerRadius, Math.sin(angle) * this.outerRadius);
-        shape.absarc(0, 0, this.outerRadius, angle, angle + sectorAngle, false);
-        shape.lineTo(Math.cos(angle + sectorAngle) * this.innerRadius, Math.sin(angle + sectorAngle) * this.innerRadius);
-        shape.absarc(0, 0, this.innerRadius, angle + sectorAngle, angle, true);
+        shape.moveTo(Math.cos(this.angle) * this.innerRadius, Math.sin(this.angle) * this.innerRadius);
+        shape.lineTo(Math.cos(this.angle) * this.outerRadius, Math.sin(this.angle) * this.outerRadius);
+        shape.absarc(0, 0, this.outerRadius, this.angle, this.angle + this.sectorAngle, false);
+        shape.lineTo(Math.cos(this.angle + this.sectorAngle) * this.innerRadius, Math.sin(this.angle + this.sectorAngle) * this.innerRadius);
+        shape.absarc(0, 0, this.innerRadius, this.angle + this.sectorAngle, this.angle, true);
 
         const extrudeSettings = { depth: this.depth, bevelEnabled: false };
         const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-        
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         const mesh = new THREE.Mesh(geometry, material);
-        mesh.rotateX(Math.PI / 2);
-        mesh.rotateZ(angle / 2);
         return mesh;
     }
 
     createCompoundBody(innerRadius, outerRadius, depth, numSegments) {
         const body = new CANNON.Body({ mass: 0 }); // Static body (mass = 0)
-        const segmentAngle = sectorAngle / numSegments;
+        const segmentAngle = this.sectorAngle / numSegments;
         
         for (let i = 0; i < numSegments; i++) {
-            const angleStart = angle + i * segmentAngle;
+            const angleStart = this.angle + i * segmentAngle;
             const angleEnd = angleStart + segmentAngle;
             const middleAngle = (angleStart + angleEnd) / 2;
 
