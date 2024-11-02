@@ -1,6 +1,6 @@
 const rightAngle = Math.PI / 2;
 //GROUND POSITIONS-----------------------------------------------------
-export const groundDimensions = {width: 50, height: 1, depth: 50}
+export const groundDimensions = {width: 60, height: 1, depth: 60}
 export const groundPositions = [
     {
         name: "mainFloor",
@@ -10,12 +10,43 @@ export const groundPositions = [
         rotation: { x:0, y:0, z:0 }
     }
 ]
+export const smallGroundDimensions = {width: 25, height: 1, depth: 25}
+export const smallGroundPositions = [
+    {
+        name: "smallFloor1",
+        geometry: "smallGround",
+        material: "smallGround",
+        position: { x:17.5, y:1.25, z:17.5 },
+        rotation: { x:0, y:2*rightAngle, z:0 }
+    },
+    {
+        name: "smallFloor2",
+        geometry: "smallGround",
+        material: "smallGround",
+        position: { x:-17.5, y:1.25, z:17.5 },
+        rotation: { x:0, y:2*rightAngle, z:0 }
+    },
+    {
+        name: "smallFloor3",
+        geometry: "smallGround",
+        material: "smallGround",
+        position: { x:17.5, y:1.25, z:-17.5 },
+        rotation: { x:0, y:2*rightAngle, z:0 }
+    },
+    {
+        name: "smallFloor4",
+        geometry: "smallGround",
+        material: "smallGround",
+        position: { x:-17.5, y:1.25, z:-17.5 },
+        rotation: { x:0, y:2*rightAngle, z:0 }
+    }
+]
 //END GROUND POSITIONS-------------------------------------------------
 
 //WALL POSITIONS-------------------------------------------------------
-export const wallDimensions = {width: 50, height: 1, depth: 20}
+export const wallDimensions = {width: 60, height: 1, depth: 20}
 const wallHeight = wallDimensions.depth/2;
-const wallSide = wallDimensions.width/2;
+const wallSide = groundDimensions.width/2 + wallDimensions.height/2;
 export const wallPositions = [
     {
         name: "backWall",
@@ -64,7 +95,7 @@ export const ceilingPositions = [
 
 //PLATFORM POSITIONS---------------------------------------------------
 export const platformDimensions = {width: 10, height: 1, depth: 5}
-const doorPlatformHeight = wallDimensions.depth - wallDimensions.depth/4 - 0.5;
+const doorPlatformHeight = wallDimensions.depth - wallDimensions.depth/3 - 0.5;
 const doorPlatformPositionOnWall = wallPositions[3].position.z - wallDimensions.height/2 - platformDimensions.depth/2;
 const leftPlatformPositionOnWall = wallPositions[1].position.x + wallDimensions.height/2 + platformDimensions.depth/2;
 const rightPlatformPositionOnWall = wallPositions[2].position.x - wallDimensions.height/2 - platformDimensions.depth/2;
@@ -90,27 +121,160 @@ export const platformPositions = [
         position: { x: leftPlatformPositionOnWall, y: doorPlatformHeight, z: 0 },
         rotation: { x: 0, y: rightAngle, z: 0 }
     },
-    // {
-    //     name: "tplat",
-    //     geometry: "platform",
-    //     material: "platform",
-    //     position: { x: 0, y: 4, z: 2 },
-    //     rotation: { x: 0, y: rightAngle, z: 0 }
-    // },
-    // {
-    //     name: "tplat2",
-    //     geometry: "platform",
-    //     material: "platform",
-    //     position: { x: 0, y: 8, z: 6 },
-    //     rotation: { x: 0, y: rightAngle, z: 0}
-    // },
-    // {
-    //     name: "tplat3",
-    //     geometry: "platform",
-    //     material: "platform",
-    //     position: { x: 0, y: 12, z: 10 },
-    //     rotation: { x: 0, y: rightAngle, z: 0 }
-    // }
+    {
+        name: "leftCentrePlatform",
+        geometry: "platform",
+        material: "platform",
+        position: { x: -2.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: rightAngle, z: 0 }
+    },
+    {
+        name: "rightCentrePlatform",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 2.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: -rightAngle, z: 0 }
+    },
+    {
+        name: "leftFromCentrePlatform1",
+        geometry: "platform",
+        material: "platform",
+        position: { x: -7.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: rightAngle, z: 0 }
+    },
+    {
+        name: "leftFromCentrePlatform2",
+        geometry: "platform",
+        material: "platform",
+        position: { x: -12.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: rightAngle, z: 0 }
+    },
+    {
+        name: "leftFromCentrePlatform3",
+        geometry: "platform",
+        material: "platform",
+        position: { x: -17.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: rightAngle, z: 0 }
+    },
+    {
+        name: "leftFromCentrePlatform4",
+        geometry: "platform",
+        material: "platform",
+        position: { x: -22.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: rightAngle, z: 0 }
+    },
+    {
+        name: "leftFromCentrePlatform5",
+        geometry: "platform",
+        material: "platform",
+        position: { x: -27.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: rightAngle, z: 0 }
+    },
+    {
+        name: "rightFromCentrePlatform1",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 7.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: -rightAngle, z: 0 }
+    },
+    {
+        name: "rightFromCentrePlatform2",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 12.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: -rightAngle, z: 0 }
+    },
+    {
+        name: "rightFromCentrePlatform3",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 17.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: -rightAngle, z: 0 }
+    },
+    {
+        name: "rightFromCentrePlatform4",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 22.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: -rightAngle, z: 0 }
+    },
+    {
+        name: "rightFromCentrePlatform5",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 27.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: -rightAngle, z: 0 }
+    },
+    {
+        name: "frontFromCentrePlatform1",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 0, y: 1.25, z: -7.5 },
+        rotation: { x: 0, y: 2*rightAngle, z: 0 }
+    },
+    {
+        name: "frontFromCentrePlatform2",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 0, y: 1.25, z: -12.5 },
+        rotation: { x: 0, y: 2*rightAngle, z: 0 }
+    },
+    {
+        name: "frontFromCentrePlatform3",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 0, y: 1.25, z: -17.5 },
+        rotation: { x: 0, y: 2*rightAngle, z: 0 }
+    },
+    {
+        name: "frontFromCentrePlatform4",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 0, y: 1.25, z: -22.5 },
+        rotation: { x: 0, y: 2*rightAngle, z: 0 }
+    },
+    {
+        name: "frontFromCentrePlatform5",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 0, y: 1.25, z: -27.5 },
+        rotation: { x: 0, y: 2*rightAngle, z: 0 }
+    },
+    {
+        name: "backFromCentrePlatform1",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 0, y: 1.25, z: 7.5 },
+        rotation: { x: 0, y: 2*rightAngle, z: 0 }
+    },
+    {
+        name: "backFromCentrePlatform2",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 0, y: 1.25, z: 12.5 },
+        rotation: { x: 0, y: 2*rightAngle, z: 0 }
+    },
+    {
+        name: "backFromCentrePlatform3",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 0, y: 1.25, z: 17.5 },
+        rotation: { x: 0, y: 2*rightAngle, z: 0 }
+    },
+    {
+        name: "backFromCentrePlatform4",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 0, y: 1.25, z: 22.5 },
+        rotation: { x: 0, y: 2*rightAngle, z: 0 }
+    },
+    {
+        name: "backFromCentrePlatform5",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 0, y: 1.25, z: 27.5 },
+        rotation: { x: 0, y: 2*rightAngle, z: 0 }
+    },
     
 ]
 //END PLATFORM POSITIONS------------------------------------------------
@@ -132,7 +296,7 @@ export const lampPositions = {
     doorLamp: Object.assign({}, baseLamp, { positionX: platformDimensions.width/5, positionY: doorPlatformHeight, positionZ: doorPlatformPositionOnWall}),
     leftLamp: Object.assign({}, baseLamp, { positionX: rightPlatformPositionOnWall, positionY: doorPlatformHeight, positionZ: -platformDimensions.width/5 }),
     rightLamp: Object.assign({}, baseLamp, { positionX: leftPlatformPositionOnWall, positionY: doorPlatformHeight, positionZ: platformDimensions.width/5 }),
-    centreLamp: Object.assign({}, baseLamp, { positionX: centreLampXPositionOffset, positionY: 1, positionZ: -centreLampZPositionOffset })
+    centreLamp: Object.assign({}, baseLamp, { positionX: centreLampXPositionOffset, positionY: 1.75, positionZ: -centreLampZPositionOffset })
 };
 //END LAMP POSITIONS---------------------------------------------------
 
@@ -145,7 +309,7 @@ export const doorPositions = {
         scaleY:0.005,
         scaleZ:0.005,
         positionX:0, 
-        positionY:wallDimensions.depth - wallDimensions.depth/4,
+        positionY:wallDimensions.depth - wallDimensions.depth/3,
         positionZ:wallPositions[3].position.z - wallDimensions.height/2,
     }
 }

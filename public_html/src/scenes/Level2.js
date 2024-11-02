@@ -11,8 +11,8 @@ import { MiniMap } from '../scripts/Objects/Minimap.js';
 import { Door } from '../scripts/Objects/Door.js';
 import { LightMechanicManager } from '../scripts/Scene/LightMechanicManager.js';
 import { 
-    ceilingPositions, groundPositions, platformPositions, wallPositions, lampPositions, doorPositions, 
-    lightsConfig, wallDimensions, platformDimensions, groundDimensions, ceilingDimensions 
+    smallGroundPositions, ceilingPositions, groundPositions, platformPositions, wallPositions, lampPositions, doorPositions, 
+    lightsConfig, smallGroundDimensions, wallDimensions, platformDimensions, groundDimensions, ceilingDimensions 
 } from '../data/objPositions2.js';
 
 const soundEffectsManager = new SoundEffectsManager();
@@ -101,11 +101,13 @@ export class Level2 extends SceneBaseClass {
         applyTextureSettings(platformTextures, 1, 0.5);
         const ceilingTextures = loadTextures("PavingStones")
         applyTextureSettings(ceilingTextures, 5, 5);
-        return {ceilingTextures, groundTextures, wallTextures, platformTextures}
+        const smallGroundTextures = loadTextures("PavingStones")
+        applyTextureSettings(smallGroundTextures, 3, 3);
+        return {ceilingTextures, groundTextures, wallTextures, platformTextures, smallGroundTextures}
     }//initializes the textures - basically gets the textures
 
     async _initMaterials(){
-        const {ceilingTextures, groundTextures, wallTextures, platformTextures} = await this._init_textures()//from _init_textures, get the texture/s
+        const {smallGroundTextures, ceilingTextures, groundTextures, wallTextures, platformTextures} = await this._init_textures()//from _init_textures, get the texture/s
         
         this.objManager.addMaterial("character",new THREE.MeshStandardMaterial({ 
             color: 0xff0000, 
@@ -160,6 +162,18 @@ export class Level2 extends SceneBaseClass {
             metalness: 0.1,
             roughness: 0.5
         }));//add material to specific geometry - anything named myPlatform will have this material
+
+        this.objManager.addMaterial("smallGround", new THREE.MeshStandardMaterial({
+            map: smallGroundTextures.colorMap,
+            aoMap: smallGroundTextures.aoMap,
+            displacementMap: smallGroundTextures.displacementMap,
+            metalnessMap: smallGroundTextures.metalnessMap,
+            normalMap: smallGroundTextures.normalMapDX, 
+            roughnessMap: smallGroundTextures.roughnessMap,
+            displacementScale: 0,
+            metalness: 0.1,
+            roughness: 0.5
+        }));//add material to specific geometry - anything named myPlatform will have this material
         
     }//initializes the materials
 
@@ -172,6 +186,8 @@ export class Level2 extends SceneBaseClass {
             new THREE.BoxGeometry(platformDimensions.width, platformPositions.height, platformDimensions.depth));
         this.objManager.addGeometry("ceiling", 
             new THREE.BoxGeometry(ceilingDimensions.width, ceilingDimensions.height, ceilingDimensions.depth));
+        this.objManager.addGeometry("smallGround", 
+            new THREE.BoxGeometry(smallGroundDimensions.width, smallGroundDimensions.height, smallGroundDimensions.depth));
     }//initializes the geometries - adding platforms and such
 
     async createObjects(){
@@ -202,6 +218,12 @@ export class Level2 extends SceneBaseClass {
             const tempMesh = this.objManager.createVisualObject(ceiling.name,ceiling.geometry,ceiling.material,ceiling.position,ceiling.rotation);
             const tempBody = this.objManager.createPhysicsObject(ceiling.name, ceiling.geometry, ceiling.position, ceiling.rotation, 0);
             this.objManager.linkObject(ceiling.name,tempMesh, tempBody);
+        })
+
+        smallGroundPositions.forEach((smallGround)=>{
+            const tempMesh = this.objManager.createVisualObject(smallGround.name,smallGround.geometry,smallGround.material,smallGround.position,smallGround.rotation);
+            const tempBody = this.objManager.createPhysicsObject(smallGround.name, smallGround.geometry, smallGround.position, smallGround.rotation, 0);
+            this.objManager.linkObject(smallGround.name,tempMesh, tempBody);
         })
 
         this.scene.background = new THREE.Color(0x333333);//add a background color
