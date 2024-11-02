@@ -167,24 +167,25 @@ export class Level2 extends SceneBaseClass {
         await this._initMaterials();
         //get the geometries and materials
 
+        //ADD PLATFORMS
         platformPositions.forEach((platform)=>{
             const tempMesh = this.objManager.createVisualObject(platform.name,platform.geometry,platform.material,platform.position,platform.rotation);
             const tempBody = this.objManager.createPhysicsObject(platform.name, platform.geometry, platform.position, platform.rotation, 0);
             this.objManager.linkObject(platform.name,tempMesh, tempBody);
         })
-
+        //ADD GROUNDS
         groundPositions.forEach((ground)=>{
             const tempMesh = this.objManager.createVisualObject(ground.name,ground.geometry,ground.material,ground.position,ground.rotation);
             const tempBody = this.objManager.createPhysicsObject(ground.name, ground.geometry, ground.position, ground.rotation, 0);
             this.objManager.linkObject(ground.name,tempMesh, tempBody);
         })
-
+        //ADD WALLS
         wallPositions.forEach((wall)=>{
             const tempMesh = this.objManager.createVisualObject(wall.name,wall.geometry,wall.material,wall.position,wall.rotation);
             const tempBody = this.objManager.createPhysicsObject(wall.name, wall.geometry, wall.position, wall.rotation, 0);
             this.objManager.linkObject(wall.name,tempMesh, tempBody);
         })
-
+        //ADD CEILINGS
         ceilingPositions.forEach((ceiling)=>{
             const tempMesh = this.objManager.createVisualObject(ceiling.name,ceiling.geometry,ceiling.material,ceiling.position,ceiling.rotation);
             const tempBody = this.objManager.createPhysicsObject(ceiling.name, ceiling.geometry, ceiling.position, ceiling.rotation, 0);
