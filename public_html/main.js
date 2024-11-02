@@ -77,9 +77,7 @@ loadModules('/src'); // Replace 'src' with your actual base directory path if di
 
 
 
-
-
-
+// LOAD TEST
 import {CustomScene}  from "./src/scenes/testScene.js";
 import {Level1}  from "./src/scenes/Level1.js";
 import { CustomScene1 } from "./src/scenes/testScene1.js";
