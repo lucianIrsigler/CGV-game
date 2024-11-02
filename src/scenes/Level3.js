@@ -18,7 +18,7 @@ import {Crosshair} from "../scripts/Objects/Crosshair";
 import { monsters3 } from "../data/monster3";
 import { lamps3 } from "../data/lampPos3";
 import { player } from '../../Level3/player';
-
+import { MiniMap } from '../scripts/Objects/Minimap.js';
 
 
 const soundEffectsManager = new SoundEffectsManager();
@@ -68,6 +68,9 @@ export class Level3 extends SceneBaseClass{
         //flags
         this.playingAlready = false
 
+        //map
+        this.miniMap = new MiniMap(this.scene);
+
         //lights
         this.points = [];
         this.lampsArray = Object.values(lamps3);
@@ -115,7 +118,7 @@ export class Level3 extends SceneBaseClass{
         this.init_objects_();
 
         this.startDamageTimer();
-
+        this.miniMap.init_miniMap_(window,document,this.scene);
     }   
 
 
@@ -256,7 +259,9 @@ export class Level3 extends SceneBaseClass{
 
         let res = this.loadLamps();
         let out = this.createObjects();
-
+        //add stuff for minimap
+        this.miniMap.addPlayer("#FF0000");
+        this.miniMap.addEndGoal({x:-3,y:20,z:39},"#00FF00")
     };
 
 
@@ -578,7 +583,8 @@ export class Level3 extends SceneBaseClass{
         // if (this.playerBody.velocity.y > 0 && !this.cameraManager.input_.isGrounded()) {
         //     this.playerBody.velocity.y -= this.world.gravity.y * timeElapsedS;
         // }
-
+        //update minimap
+        this.miniMap.update(this.scene,this.target,this.enemyModel);
         if (this.health <= 0) {
             this.youLose(); // Call the lose condition function
         } 
