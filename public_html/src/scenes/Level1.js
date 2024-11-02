@@ -75,6 +75,7 @@ export class Level1 extends SceneBaseClass {
         //sound
         this.nextSoundTime = 1000;
         this.playingAlready = false;
+        this.enemy=null;
     }
 
     /**
@@ -155,6 +156,7 @@ export class Level1 extends SceneBaseClass {
      */
     async _init_player(){
         const gltf = await this.loader.loadModel('src/models/cute_alien_character/scene.gltf', 'player');
+        document.getElementById('user-health-bar-container').style.display = 'block'; // Show the health bar
         const model = gltf.scene; // Get the loaded model
         this.addObject(model); // Add the model to the scene
         model.rotation.set(0, 0, 0); // Rotate the model
@@ -183,6 +185,7 @@ export class Level1 extends SceneBaseClass {
 
         this.setupCharacterLight();
         this.playerLoaded = true;
+        this.miniMap.miniMapCamera.lookAt(0,0,15);
     }
 
     /**
@@ -430,7 +433,7 @@ export class Level1 extends SceneBaseClass {
         this.renderer.render(this.scene, this.cameraManager.getCamera());
 
         //update minimap
-        this.miniMap.update(this.scene,this.target)
+        this.miniMap.update(this.scene,this.target,null)
 
     }
 

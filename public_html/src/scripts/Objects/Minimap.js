@@ -24,7 +24,7 @@ export class MiniMap{
 
         this.player;
         this.endGoal;
-
+        this.enemy=null;
         this.yAboveTheScene = yAboveScene
 
     }
@@ -41,7 +41,7 @@ export class MiniMap{
             0.1, 1000
         );
         this.miniMapCamera.position.set(0, 100, 0); // Position the mini-map camera above the scene
-        this.miniMapCamera.lookAt(0,0,15); // Look at the center of the scene
+        //this.miniMapCamera.lookAt(0,0,15); // Look at the center of the scene
 
         // Set the zoom factor
         this.miniMapCamera.zoom = 12.5; // Increase this value to zoom in
@@ -74,17 +74,25 @@ export class MiniMap{
      * @param {string} colour 
      */
     addPlayer(colour){
-        let cubeGeometry = new THREE.BoxGeometry(3, 1, 3);
+        let cubeGeometry = new THREE.BoxGeometry(3, 5, 3);
         let cubeMaterial = new THREE.MeshBasicMaterial({ color: colour })
         this.player = new THREE.Mesh(cubeGeometry,cubeMaterial);
         this.scene.add(this.player);
     }
+    addEnemy(colour){
+        let cubeGeometry = new THREE.BoxGeometry(3, 5, 3);
+        let cubeMaterial = new THREE.MeshBasicMaterial({ color: colour })
+        this.enemy = new THREE.Mesh(cubeGeometry,cubeMaterial);
+        this.scene.add(this.enemy);
+    }
 
 
-    update(scene,target){
+    update(scene,target,enemyt){
         const currentTimeMiniMap = Date.now();
-        this.player.position.set(target.position.x,this.yAboveTheScene,target.position.z);
-
+        this.player.position.set(target.position.x,this.yAboveTheScene+30,target.position.z);
+        if (enemyt) {
+            this.enemy.position.set(enemyt.position.x, this.yAboveTheScene+30, enemyt.position.z);
+        }
         if (currentTimeMiniMap - this.lastMiniMapRenderTime >= this.miniMapRenderInterval) {
             this.miniMapRenderer.render(scene, this.miniMapCamera);
             this.lastMiniMapRenderTime = currentTimeMiniMap; // Update the time of last render
