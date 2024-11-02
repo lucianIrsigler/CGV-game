@@ -193,58 +193,6 @@ export class ObjectManager {
     }
 
     /**
-     * Creates both visual and physics components for custom objects that provide their own physics body
-     * @param {string} name Name of the new object
-     * @param {THREE.Object3D} customObject Custom object instance
-     * @param {JSON} position {x:num,y:num,z:num} position of the object
-     * @param {JSON} rotation {x:num,y:num,z:num} rotation of the object
-     * @returns {Object} Object containing both mesh and physics body
-     */
-    createCustomObjectWithPhysics(name, customObject, position = null, rotation = null) {
-        // Check if the custom object has both mesh and body properties
-        if (!customObject || !customObject.mesh || !customObject.body) {
-            console.error("Custom object must have both mesh and body properties");
-            return null;
-        }
-
-        // Position and rotate the visual object
-        if (position) {
-            customObject.position.set(position.x, position.y, position.z);
-            customObject.mesh.position.set(0, 0, 0); // Reset mesh position relative to parent
-        }
-        
-        if (rotation) {
-            customObject.rotation.set(rotation.x, rotation.y, rotation.z);
-            customObject.mesh.rotation.set(0, 0, 0); // Reset mesh rotation relative to parent
-        }
-
-        // Position and rotate the physics body
-        if (position) {
-            customObject.body.position.set(position.x, position.y, position.z);
-        }
-        
-        if (rotation) {
-            customObject.body.quaternion.setFromEuler(rotation.x, rotation.y, rotation.z);
-        }
-
-        // Add to scene and physics world
-        customObject.name = name;
-        this.scene.add(customObject);
-        this.physicsWorld.addBody(customObject.body);
-        
-        // Store in our collections
-        this.objects.push(customObject);
-        this.bodies.push(customObject.body);
-        this.bodiesMapping.push({ name: name, id: this.lastId++ });
-
-        // Link the object
-        this.linkObject(name, customObject, customObject.body);
-
-        return customObject;
-    }
-    
-
-    /**
      * Links a threejs object to its corresponding cannon.js object. This is need for the
      * update function to work properly
      * @param {string} name 
@@ -277,15 +225,10 @@ export class ObjectManager {
      * Updates the three.js objects to match its corresponding physics body
      */
     update() {
-        this.objects.forEach((obj) => {
-            if (obj instanceof THREE.Object3D && obj.body) {
-                // Handle custom objects that have their own body property
-                obj.position.copy(obj.body.position);
-                obj.quaternion.copy(obj.body.quaternion);
-            } else if (obj.mesh && obj.body) {
-                // Handle standard linked objects
-                obj.mesh.position.copy(obj.body.position);
-                obj.mesh.quaternion.copy(obj.body.quaternion);
+        this.objects.forEach(({ mesh, body }) => {
+            if (mesh && body){
+                mesh.position.copy(body.position);
+                mesh.quaternion.copy(body.quaternion);
             }
         });
     }
