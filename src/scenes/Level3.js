@@ -542,6 +542,11 @@ export class Level3 extends SceneBaseClass{
     
         this.playerLight.position.set(this.playerBody.position.x, this.playerBody.position.y + 1.5, this.playerBody.position.z);
         this.enemyLight.position.set(this.enemyBody.position.x, this.enemyBody.position.y + 2, this.enemyBody.position.z);
+        if(this.enemy.isRageMode()){
+            this.enemyLight.intensity = 10;
+        }else{
+            this.enemyLight.intensity = 1;
+        }
 
         this.gunManager.checkAndShoot(this.playerBody, this.enemyBody);
         this.cameraManager.update(timeElapsedS);

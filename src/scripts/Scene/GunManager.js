@@ -93,7 +93,13 @@ export class GunManager{
     
             if (isActive && this.detectCollision(bullet, target)) {
                 console.log("ouch")
-                this.level3.takeDamage(15); // damage player
+                
+                if(this.enemy.isRageMode()){
+                    this.level3.takeDamage(20); // damage player
+                }else{
+                    this.level3.takeDamage(10); // damage player
+                }
+
                 this.level3.updatePlayerHealthBar();
                 this.scene.remove(bullet.mesh);
                 this.scene.remove(bullet.light);
@@ -111,6 +117,12 @@ export class GunManager{
             soundEffectsManager.playSound("dark_bullet_sound", 0.3);
 
             const bullet = new Bullet(position, 0xff0000, this.world, this.scene);
+
+            if(this.enemy.isRageMode()){
+                // bigger bullet
+                bullet.mesh.scale.set(6,6,6);
+                bullet.light.intensity = 10;
+            }
 
             const direction = new THREE.Vector3();
             direction.subVectors(player.position, position).normalize(); // Shoot towards player

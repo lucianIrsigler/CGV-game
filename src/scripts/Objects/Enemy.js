@@ -37,6 +37,9 @@ export class Enemy{
     this.enemyDirection = new THREE.Vector3(); // Current movement direction
     this.changeDirectionTimer = 0; // Timer for changing direction
     this.enemyMovementRange = 1; // Range of movement in any direction
+
+    // hehe
+    this.rageMode = false;
     }
 
     // Function to update the enemy's position
@@ -79,6 +82,13 @@ export class Enemy{
         // Optional: Add bounds to keep the enemy within a certain area
         this.enemyBody.position.x = THREE.MathUtils.clamp(this.enemyBody.position.x, -40, 40); // Adjust bounds as necessary
         this.enemyBody.position.z = THREE.MathUtils.clamp(this.enemyBody.position.z, -40, 40); // Adjust bounds as necessary
+
+        // Check if rage mode is active
+        if (this.rageMode) {
+            this.enemyMovementSpeed = 0.2; // Increase speed in rage mode
+        } else {
+            this.enemyMovementSpeed = 0.1; // Normal speed
+        }
     }
 
     updateEnemyRotation(playerPosition) {
@@ -111,10 +121,11 @@ export class Enemy{
             soundEffectsManager.playSound("monster_moan",0.4);
         }
 
-        let healthPercentage = (this.health / this.maxHealth) * 100; // Calculate percentage
+        let healthPercentage = this.getHealthPercentage();
 
         if(healthPercentage <= 30 && healthPercentage > 10){
             soundEffectsManager.playSound("monster_roar",0.5);
+            this.rageMode = true; // Activate rage mode
         }
         else if(healthPercentage > 30){
             soundEffectsManager.playSound("monster_moan",0.5);
@@ -164,6 +175,10 @@ export class Enemy{
     getHealth(){
         return this.health;
     }
+    
+    getHealthPercentage(){
+        return (this.health / this.maxHealth) * 100;
+    }
 
     isAsleep(){
         return this.asleep;
@@ -171,6 +186,10 @@ export class Enemy{
 
     setAsleep(value){
         this.asleep=value;
+    }
+
+    isRageMode(){
+        return this.rageMode;
     }
 
 }
