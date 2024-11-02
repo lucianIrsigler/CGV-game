@@ -292,10 +292,10 @@ export const buttonPositions = [
 //LAMP POSITIONS-------------------------------------------------------
 const baseLamp = {
     height_diff: 150,
-    scene: "src/models/street_lamp/scene.gltf",
-    scaleX: 0.1,
-    scaleY: 0.1,
-    scaleZ: 0.1,
+    scene: "src/models/old_english_street_lamp/scene.gltf",
+    scaleX: 0.5,
+    scaleY: 0.5,
+    scaleZ: 0.5,
     positionX: 0, 
     positionY: 0, 
     positionZ: 0
