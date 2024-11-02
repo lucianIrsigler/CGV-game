@@ -93,6 +93,16 @@ export class Level3 extends SceneBaseClass{
 
         // timer for comp 
         this.timer = 0;
+        // Retrieve the previous best time from local storage
+        this.previousBestTime = localStorage.getItem('bestTime') ? parseFloat(localStorage.getItem('bestTime')) : null;
+
+        // Function to update the best time in local storage
+        this.updateBestTime = (newTime) => {
+            if (this.previousBestTime === null || newTime < this.previousBestTime) {
+            localStorage.setItem('bestTime', newTime);
+            this.previousBestTime = newTime;
+            }
+        };
     }
 
 
@@ -478,8 +488,18 @@ export class Level3 extends SceneBaseClass{
         //stop animations
         cancelAnimationFrame(this.animationId);
 
-        document.getElementById('gameOverHeader').innerText = "You Win!\nYou have defeated the monster and escaped the darkness!\nTime taken to defeat boss: " + this.timer.toFixed(2) + " seconds";
+        let prev = localStorage.getItem('bestTime') ? parseFloat(localStorage.getItem('bestTime')) : null;
+        if(prev === null) {
+            prev = "No best time yet!";
+        } else {
+            prev = prev.toFixed(2) + " seconds";
+        }
+        
+        document.getElementById('gameOverHeader').innerText = "You Win!\nYou have defeated the monster and escaped the darkness!\n\nTime taken to defeat boss: " 
+            + this.timer.toFixed(2) + " seconds\nPrevious best time: " + prev;
         this.enemy.asleep = true;
+
+        this.updateBestTime(this.timer); // Update the best time in local storage
 
         console.log("You win!"); // Display win message if health reaches zero
         this.gameOverScreen.style.display = "block"; // Show game over screen
@@ -542,6 +562,7 @@ export class Level3 extends SceneBaseClass{
     
         this.playerLight.position.set(this.playerBody.position.x, this.playerBody.position.y + 1.5, this.playerBody.position.z);
         this.enemyLight.position.set(this.enemyBody.position.x, this.enemyBody.position.y + 2, this.enemyBody.position.z);
+
         if(this.enemy.isRageMode()){
             this.enemyLight.intensity = 10;
         }else{
