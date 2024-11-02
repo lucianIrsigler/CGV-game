@@ -1,12 +1,49 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 
+// import * as THREE from 'https://unpkg.com/three@0.153.0/build/three.module.js';
+// import { OrbitControls } from 'https://unpkg.com/three@0.153.0/examples/jsm/controls/OrbitControls.js';
+// import * as dat from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js';
+// import { GLTFLoader } from 'https://unpkg.com/three@0.153.0/examples/jsm/loaders/GLTFLoader.js';
+// import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 
-// hallow night
-const hallowURL = new URL('../assets/HallowKnight.glb', import.meta.url)
+const loader = new GLTFLoader();
+
+let playerModel;
+loader.load(
+    'js/cute_alien_character/scene.gltf',
+    function (gltf) {
+        // `gltf.scene` is the root of the loaded model
+        playerModel = gltf.scene;
+        scene.add(playerModel);
+
+        // Optional: Set the model's position, scale, rotation
+        playerModel.position.set(0, 0, 0);
+        playerModel.scale.set(5, 5, 5);
+
+        // Optional: Enable shadow casting for the model
+        playerModel.traverse((node) => {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
+
+
+
+    },
+    undefined, // Progress function (optional)
+    function (error) {
+        console.error('An error occurred while loading the model:', error);
+    }
+);
+
+
+// Importing hallow night
+
 
 const carUrl = new URL('../assets/car.glb', import.meta.url)
 const duckUrl = new URL('../assets/duck.glb', import.meta.url)
@@ -85,7 +122,10 @@ orbit.update()
 renderer.setClearColor(0x00fffff)
 
 const textureLoader = new THREE.TextureLoader()
-scene.background = textureLoader.load(halloweenBackgroundUrl)
+// scene.background = textureLoader.load(halloweenBackgroundUrl)
+
+//make the scene have light dark background
+scene.background = new THREE.Color(0x222222)
 
 //#endregion
 
@@ -151,9 +191,9 @@ function oscilateXSpotLight(deltaTime) {
     // If the object is close to the target, pick a new random target
     if (Math.abs(spotLight.position.x - spotLightTargetLastStage.position.x) < 5) {
         if (getRandomNumber(1, 10) <= 5) {
-            spotLightTargetLastStage.position.x = getRandomNumber(grounds[grounds.length - 1].left, grounds[grounds.length - 1].position.x);  // New random target between -10 and 10
+            spotLightTargetLastStage.position.x = getRandomNumber(lastGround.left, lastGround.position.x);  // New random target between -10 and 10
         } else {
-            spotLightTargetLastStage.position.x = getRandomNumber(grounds[grounds.length - 1].position.x, grounds[grounds.length - 1].right);  // New random target between -10 and 10
+            spotLightTargetLastStage.position.x = getRandomNumber(lastGround.position.x, lastGround.right);  // New random target between -10 and 10
         }
     }
 
@@ -480,7 +520,7 @@ let groundWidth = 40;
 let groundDepth = 60;
 
 let lastStageGroundWidth = groundWidth * 4
-let lastStageGroundDepth = groundDepth * 10
+let lastStageGroundDepth = lastStageGroundWidth * 2
 let lastStageGroundHeight = groundHeight * 2
 
 let groundGap = 15
@@ -490,7 +530,7 @@ let groundZLocationTracker = groundDepth / 2;
 
 let numGroundsTracker = 0
 
-let maxGroundsAllowed = 200;
+let maxGroundsAllowed = 10;
 
 let previousGroundX = 0
 let previousGroundY = groundYDisplacement
@@ -515,18 +555,18 @@ const createGrounds = (numGrounds = 10) => {
 
         //  if last ground
         if (numGroundsTracker == maxGroundsAllowed && i == numGrounds - 1) {
-            groundWidth = lastStageGroundWidth
-            groundDepth = lastStageGroundDepth
-            groundHeight = lastStageGroundHeight
+            // groundWidth = lastStageGroundWidth
+            // groundDepth = lastStageGroundDepth
+            // groundHeight = lastStageGroundHeight
 
             // make sure to position it at the end of the last ground
             currentZ = grounds[grounds.length - 1].back - ((lastStageGroundDepth / 2) + groundGap)
         }
 
         const ground = new Ground({
-            width: groundWidth,
-            height: groundHeight,
-            depth: groundDepth,
+            width: (numGroundsTracker == maxGroundsAllowed && i == numGrounds - 1) ? lastStageGroundWidth : groundWidth,
+            height: (numGroundsTracker == maxGroundsAllowed && i == numGrounds - 1) ? lastStageGroundHeight : groundHeight,
+            depth: (numGroundsTracker == maxGroundsAllowed && i == numGrounds - 1) ? lastStageGroundDepth : groundDepth,
             color: '#ffffff',
             position: {
                 x: i == 0 ? 0 : currentX,
@@ -538,11 +578,8 @@ const createGrounds = (numGrounds = 10) => {
         // if last ground
         if (numGroundsTracker == maxGroundsAllowed && i == numGrounds - 1) {
             // ground.material = new THREE.MeshStandardMaterial({ color: '#FFFF00' });
-
-
-
             const platformTexture = loadTextures('PavingStones');
-            // applyTextureSettings(platformTexture, 6, 3);
+            applyTextureSettings(platformTexture, 6, 3);
             applyTextureSettings(platformTexture, 6, 6); // 6,6 works well
 
             const platformMaterial = new THREE.MeshStandardMaterial({
@@ -560,8 +597,8 @@ const createGrounds = (numGrounds = 10) => {
 
 
             lastGround = ground
-            // lastGround.material = platformMaterial
-            lastGround.material = new THREE.MeshStandardMaterial({ color: '#FFFF00' });
+            lastGround.material = platformMaterial
+            // lastGround.material = new THREE.MeshStandardMaterial({ color: '#FFFF00' });
         }
 
         scene.add(ground)
@@ -589,6 +626,7 @@ duckModel = new Box({
     position: { x: 0, y: 20, z: 0 }
 })
 scene.add(duckModel)
+duckModel.visible = false
 
 
 //#endregion OBJECTS =========================
@@ -665,7 +703,7 @@ let maxDuckMovementSpeed = 400 // 40000 is max speed
 let duckAcceleration = 10
 let duckMovementSpeed = originalDuckMovementSpeed
 
-let levelInterval = 5000
+let stageLength = 2000
 let previousLevelTime = 0
 
 let spotLightFollowSpeed = 50
@@ -676,6 +714,12 @@ const animate = (time) => {
 
     if (gameStarted) {
 
+        // Ensure playerModel and duckModel are loaded before accessing their properties
+        if (playerModel && duckModel) {
+            playerModel.position.copy(duckModel.position).add(new THREE.Vector3(0, playerModel.scale.x / 2, 0)); // Offset by 5 units up
+            playerModel.rotation.copy(duckModel.rotation);
+            playerModel.rotation.y += Math.PI; // Ensure it faces away
+        }
         step += options.speed
         const deltaTime = clock.getDelta()
 
@@ -771,24 +815,28 @@ const animate = (time) => {
             alert("You are not ready for the boss fight! :(")
             renderer.setAnimationLoop(null)
         }
-        if (duckModel.position.z <= grounds[grounds.length - 1].position.z - lastStageGroundDepth / 2) {
+        if (duckModel.position.z <= grounds[grounds.length - 1].position.z) {
 
-            const rulesBoardInnerHtml = `
-        <h1 class="rules-title">You are a legend!</h1>
-        <ul class="rules-list">
-            <li>Well done!</li>
-            <li>You are looking quite delicious!</li>
-            <li>Head over to the FINAL FIGHT!</li>
-            <li>The boss could use a good feast!</li>
-            <button class="start-level-button">Take me to him!!!</button>
-        </ul>`
+            // For endless mode:
+            groundZLocationTracker -= lastStageGroundDepth / 2
+            numGroundsTracker = 0
+            stage = 0;
 
-            document.querySelector('.rules-board').innerHTML = rulesBoardInnerHtml
-            document.querySelector('.rules-board').style.display = 'block'
 
-            // stop animation
-            renderer.setAnimationLoop(null)
-            // document.location.href = '../../Level3/index.html'
+            // For normal mode:
+            // const rulesBoardInnerHtml = `
+            // <h1 class="rules-title">You are a legend!</h1>
+            // <ul class="rules-list">
+            //     <li>Well done!</li>
+            //     <li>You are looking quite delicious!</li>
+            //     <li>Go on to the boss, he could use a good snack.</li>
+            //     <button class="start-level-button">Take me to him!!!</button>
+            // </ul>`
+
+            // document.querySelector('.rules-board').innerHTML = rulesBoardInnerHtml
+            // document.querySelector('.rules-board').style.display = 'block'
+
+            // renderer.setAnimationLoop(null)
         }
 
 
@@ -906,7 +954,7 @@ const animate = (time) => {
         grounds.forEach(ground => {
             ground.update(deltaTime)
 
-            if (ground.position.z > duckModel.position.z + 100 && ground != grounds[grounds.length - 1]) {
+            if (ground.position.z > duckModel.position.z + 100 && ground != lastGround) {
                 scene.remove(ground)
                 // grounds.splice(grounds.indexOf(ground), 1)
             }
@@ -941,7 +989,7 @@ const animate = (time) => {
             console.log('ON THE LAST GROUND')
         }
 
-        if (time - previousLevelTime > levelInterval) {
+        if (time - previousLevelTime > stageLength) {
             previousLevelTime = time;
 
             if (stage != 4) {
@@ -949,7 +997,7 @@ const animate = (time) => {
             }
 
 
-            console.log(`Stage Change After ${levelInterval} milliseconds, stage ${stage}`);
+            console.log(`Stage Change After ${stageLength} milliseconds, stage ${stage}`);
         }
 
         switch (stage) {
