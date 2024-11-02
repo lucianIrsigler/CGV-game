@@ -8,7 +8,7 @@ export class MiniMap{
      * @param {THREE.Scene} scene 
      * @param {int} yAboveScene 
      */
-    constructor(scene,yAboveScene=20){
+    constructor(scene,yAboveScene){
         this.scene = scene;
 
         this.miniMapCamera = null;

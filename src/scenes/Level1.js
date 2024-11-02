@@ -62,7 +62,7 @@ export class Level1 extends SceneBaseClass {
 
         //DOOR
         this.door = new Door(this.loader);
-        this.miniMap = new MiniMap(this.scene);
+        this.miniMap = new MiniMap(this.scene,20);
 
         //for animation
         this.lastTime = 0;
@@ -330,7 +330,7 @@ export class Level1 extends SceneBaseClass {
         let out = this.createObjects()
 
         //add stuff for minimap
-        this.miniMap.addPlayer("#FF0000");
+        this.miniMap.addPlayer("#0000FF");
         this.miniMap.addEndGoal({x:-3,y:20,z:39},"#00FF00")
 
     }

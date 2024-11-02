@@ -69,7 +69,7 @@ export class Level3 extends SceneBaseClass{
         this.playingAlready = false
 
         //map
-        this.miniMap = new MiniMap(this.scene);
+        this.miniMap = new MiniMap(this.scene,50);
 
         //lights
         this.points = [];
@@ -260,8 +260,12 @@ export class Level3 extends SceneBaseClass{
         let res = this.loadLamps();
         let out = this.createObjects();
         //add stuff for minimap
-        this.miniMap.addPlayer("#FF0000");
-        this.miniMap.addEndGoal({x:-3,y:20,z:39},"#00FF00")
+        this.miniMap.addPlayer("#0000FF"); // Blue marker for the player
+    this.miniMap.addEndGoal({
+        x: this.enemyBody.position.x,
+        y: this.enemyBody.position.y,
+        z: this.enemyBody.position.z
+    }, "#FF0000"); // Red marker for the enemy
     };
 
 
@@ -584,7 +588,8 @@ export class Level3 extends SceneBaseClass{
         //     this.playerBody.velocity.y -= this.world.gravity.y * timeElapsedS;
         // }
         //update minimap
-        this.miniMap.update(this.scene,this.target,this.enemyModel);
+        this.miniMap.update(this.scene, this.target, this.enemyModel);
+
         if (this.health <= 0) {
             this.youLose(); // Call the lose condition function
         } 
