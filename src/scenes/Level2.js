@@ -80,7 +80,7 @@ export class Level2 extends SceneBaseClass {
         await this._initMaterials();
         //get the geometries and materials
         const curvedPlatform = new CurvedPlatform(10, 15, 1, Math.PI / 4, Math.PI / 4);
-        this.objManager.createCustomObject("curvedPlatform", curvedPlatform, { x: 0, y: 0, z: 0 });
+        this.objManager.createCustomObjectWithPhysics("curvedPlatform", curvedPlatform, { x: 0, y: 0, z: 0 });
 
         const groundMesh = this.objManager.createVisualObject("ground", "platform", "platform", {x:0,y:-0.5,z:20});
         //name, geometry, material, position, rotation
