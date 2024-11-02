@@ -192,6 +192,22 @@ export class ObjectManager {
         return body;
     }
 
+    createCustomObject(name, customObject, position = null, rotation = null) {
+        if (!(customObject instanceof THREE.Object3D)) {
+            console.error("customObject must be an instance of THREE.Object3D.");
+            return;
+        }
+    
+        if (position) customObject.position.set(position.x, position.y, position.z);
+        if (rotation) customObject.rotation.set(rotation.x, rotation.y, rotation.z);
+    
+        customObject.name = name;
+        this.scene.add(customObject);
+        this.objects.push(customObject);
+        return customObject;
+    }
+    
+
     /**
      * Links a threejs object to its corresponding cannon.js object. This is need for the
      * update function to work properly

@@ -27,16 +27,36 @@ export class LightMechanicManager {
     /**
      * Update the character's light intensity and distance based on current health
      */
+    // updateCharacterLight() {
+    //     if (this.characterLight) {
+    //         // Calculate light intensity and distance based on health
+    //         const maxIntensity = 1;
+    //         const maxDistance = 5;
+    //         const minIntensity = 0.2;
+    //         const minDistance = 1;
+    //         const healthPercentage = this.health / 100;
+    //         this.characterLight.intensity = minIntensity + (maxIntensity - minIntensity) * healthPercentage;
+    //         this.characterLight.distance = minDistance + (maxDistance - minDistance) * healthPercentage;
+    //     }
+    // }
+
     updateCharacterLight() {
         if (this.characterLight) {
             // Calculate light intensity and distance based on health
-            const maxIntensity = 1;
-            const maxDistance = 5;
-            const minIntensity = 0.2;
-            const minDistance = 1;
+            const maxIntensity = 1.5;      
+            const maxDistance = 7;       
+            const minIntensity = 0.1;    
+            const minDistance = 0.5;     
+            
             const healthPercentage = this.health / 100;
-            this.characterLight.intensity = minIntensity + (maxIntensity - minIntensity) * healthPercentage;
-            this.characterLight.distance = minDistance + (maxDistance - minDistance) * healthPercentage;
+            
+            // Apply exponential curve to make changes more dramatic
+            // Math.pow(healthPercentage, 1.5) creates a curve that drops off more quickly at lower health
+            const lightFactor = Math.pow(healthPercentage, 1.5);
+            
+            // Update light properties
+            this.characterLight.intensity = minIntensity + (maxIntensity - minIntensity) * lightFactor;
+            this.characterLight.distance = minDistance + (maxDistance - minDistance) * lightFactor;
         }
     }
 
