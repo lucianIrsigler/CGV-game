@@ -81,7 +81,7 @@ export class Level2 extends SceneBaseClass {
         this.init_objects_();
         this.init_camera_();
         this.miniMap.init_miniMap_(window,document,this.scene);
-        // this.startDamageTimer();
+        this.startDamageTimer();
         const currentDoor = doorPositions.doorOne;
         this.doorPositions.init_door_(this.scene,currentDoor);
         this.animate();
@@ -480,6 +480,10 @@ export class Level2 extends SceneBaseClass {
                 this.doorPositions.checkIfOpen()
             }
         });
+        this.updatePlayerHealthBar();
+    //    this.takeDamage(this.damageRate);
+    //    this.heal(this.healingRate);
+        // this.lightMechanicManager.update();
 
         // Render the scene
         this.renderer.render(this.scene, this.cameraManager.getCamera());
