@@ -4,7 +4,7 @@ import { CameraManager } from "../scripts/Scene/CameraManager.js";
 import { ObjectManager } from "../scripts/Scene/ObjectManager.js";
 import { LightManager } from "../scripts/Scene/LightManager.js";
 import { LoadingManagerCustom } from "../scripts/Loaders/Loader.js";
-import { World, Body, Box,Vec3 } from 'cannon-es';
+import { World, Body, Box, Vec3 } from 'cannon-es';
 import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil.js';
 import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger.js';
 import { MiniMap } from '../scripts/Objects/Minimap.js';
@@ -24,7 +24,7 @@ export class Level2 extends SceneBaseClass {
         super();
         
         //WORLD
-        this.world = CANNON.World();
+        this.world = World();
         this.world.gravity.set(0, -12, 0);
         this.playerBody; //cannon.js model
         this.target; //player model
@@ -216,11 +216,11 @@ export class Level2 extends SceneBaseClass {
         this.target.visible=false;
 
         //create cannon.js body for model
-        this.playerBody = new CANNON.Body({
+        this.playerBody = new Body({
             mass: 1, // Dynamic body
-            position: new CANNON.Vec3(0, 2, 0), // Start position
+            position: new Vec3(0, 2, 0), // Start position
         });
-        const boxShape = new CANNON.Box(new CANNON.Vec3(0.5, 1, 0.5)); // Box shape for the player
+        const boxShape = new Box(new Vec3(0.5, 1, 0.5)); // Box shape for the player
         this.playerBody.addShape(boxShape);
         this.world.addBody(this.playerBody);
 
