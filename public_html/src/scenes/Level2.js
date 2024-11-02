@@ -12,7 +12,8 @@ import { Door } from '../scripts/Objects/Door.js';
 import { LightMechanicManager } from '../scripts/Scene/LightMechanicManager.js';
 import { 
     smallGroundPositions, ceilingPositions, groundPositions, platformPositions, wallPositions, lampPositions, doorPositions, 
-    lightsConfig, smallGroundDimensions, wallDimensions, platformDimensions, groundDimensions, ceilingDimensions 
+    lightsConfig, smallGroundDimensions, wallDimensions, platformDimensions, groundDimensions, ceilingDimensions, 
+    buttonDimensions
 } from '../data/objPositions2.js';
 
 const soundEffectsManager = new SoundEffectsManager();
@@ -103,11 +104,13 @@ export class Level2 extends SceneBaseClass {
         applyTextureSettings(ceilingTextures, 5, 5);
         const smallGroundTextures = loadTextures("PavingStones")
         applyTextureSettings(smallGroundTextures, 3, 3);
-        return {ceilingTextures, groundTextures, wallTextures, platformTextures, smallGroundTextures}
+        const buttonTextures = loadTextures("Planks")
+        applyTextureSettings(smallGroundTextures, 2, 2);
+        return {ceilingTextures, groundTextures, wallTextures, platformTextures, smallGroundTextures, buttonTextures}
     }//initializes the textures - basically gets the textures
 
     async _initMaterials(){
-        const {smallGroundTextures, ceilingTextures, groundTextures, wallTextures, platformTextures} = await this._init_textures()//from _init_textures, get the texture/s
+        const {smallGroundTextures, ceilingTextures, groundTextures, wallTextures, platformTextures, buttonTextures} = await this._init_textures()//from _init_textures, get the texture/s
         
         this.objManager.addMaterial("character",new THREE.MeshStandardMaterial({ 
             color: 0xff0000, 
@@ -174,6 +177,18 @@ export class Level2 extends SceneBaseClass {
             metalness: 0.1,
             roughness: 0.5
         }));//add material to specific geometry - anything named myPlatform will have this material
+
+        this.objManager.addMaterial("button", new THREE.MeshStandardMaterial({
+            map: buttonTextures.colorMap,
+            aoMap: buttonTextures.aoMap,
+            displacementMap: buttonTextures.displacementMap,
+            metalnessMap: buttonTextures.metalnessMap,
+            normalMap: buttonTextures.normalMapDX, 
+            roughnessMap: buttonTextures.roughnessMap,
+            displacementScale: 0,
+            metalness: 0.1,
+            roughness: 0.5
+        }));//add material to specific geometry - anything named myPlatform will have this material
         
     }//initializes the materials
 
@@ -188,6 +203,8 @@ export class Level2 extends SceneBaseClass {
             new THREE.BoxGeometry(ceilingDimensions.width, ceilingDimensions.height, ceilingDimensions.depth));
         this.objManager.addGeometry("smallGround", 
             new THREE.BoxGeometry(smallGroundDimensions.width, smallGroundDimensions.height, smallGroundDimensions.depth));
+        this.objManager.addGeometry("button", 
+            new THREE.BoxGeometry(buttonDimensions.width, buttonDimensions.height, buttonDimensions.depth));
     }//initializes the geometries - adding platforms and such
 
     async createObjects(){
@@ -224,6 +241,12 @@ export class Level2 extends SceneBaseClass {
             const tempMesh = this.objManager.createVisualObject(smallGround.name,smallGround.geometry,smallGround.material,smallGround.position,smallGround.rotation);
             const tempBody = this.objManager.createPhysicsObject(smallGround.name, smallGround.geometry, smallGround.position, smallGround.rotation, 0);
             this.objManager.linkObject(smallGround.name,tempMesh, tempBody);
+        })
+
+        buttonPositions.forEach((button)=>{
+            const tempMesh = this.objManager.createVisualObject(button.name,button.geometry,button.material,button.position,button.rotation);
+            const tempBody = this.objManager.createPhysicsObject(button.name, button.geometry, button.position, button.rotation, 0);
+            this.objManager.linkObject(button.name,tempMesh, tempBody);
         })
 
         this.scene.background = new THREE.Color(0x333333);//add a background color

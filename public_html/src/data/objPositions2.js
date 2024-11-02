@@ -1,6 +1,6 @@
 const rightAngle = Math.PI / 2;
 //GROUND POSITIONS-----------------------------------------------------
-export const groundDimensions = {width: 60, height: 1, depth: 60}
+export const groundDimensions = {width: 60, height: 1, depth: 60};
 export const groundPositions = [
     {
         name: "mainFloor",
@@ -9,8 +9,8 @@ export const groundPositions = [
         position: { x:0, y:0, z:0 },
         rotation: { x:0, y:0, z:0 }
     }
-]
-export const smallGroundDimensions = {width: 25, height: 1, depth: 25}
+];
+export const smallGroundDimensions = {width: 25, height: 1, depth: 25};
 export const smallGroundPositions = [
     {
         name: "smallFloor1",
@@ -40,11 +40,11 @@ export const smallGroundPositions = [
         position: { x:-17.5, y:1.25, z:-17.5 },
         rotation: { x:0, y:2*rightAngle, z:0 }
     }
-]
+];
 //END GROUND POSITIONS-------------------------------------------------
 
 //WALL POSITIONS-------------------------------------------------------
-export const wallDimensions = {width: 60, height: 1, depth: 20}
+export const wallDimensions = {width: 60, height: 1, depth: 20};
 const wallHeight = wallDimensions.depth/2;
 const wallSide = groundDimensions.width/2 + wallDimensions.height/2;
 export const wallPositions = [
@@ -80,21 +80,21 @@ export const wallPositions = [
 //END WALL POSITIONS---------------------------------------------------
 
 //CEILING POSITIONS----------------------------------------------------
-export const ceilingDimensions = {width: 50, height: 1, depth: 50}
+export const ceilingDimensions = {width: 60, height: 1, depth: 60};
 const ceilingHeight = wallDimensions.depth;
 export const ceilingPositions = [
-    // {
-    //     name: "mainCeiling",
-    //     geometry: "ceiling",
-    //     material: "ceiling",
-    //     position: { x: 0, y: ceilingHeight, z: 0 },
-    //     rotation: { x: 0, y: 0, z: 0 }
-    // }
-]
+    {
+        name: "mainCeiling",
+        geometry: "ceiling",
+        material: "ceiling",
+        position: { x: 0, y: ceilingHeight, z: 0 },
+        rotation: { x: 0, y: 0, z: 0 }
+    }
+];
 //END CEILING POSITIONS------------------------------------------------
 
 //PLATFORM POSITIONS---------------------------------------------------
-export const platformDimensions = {width: 10, height: 1, depth: 5}
+export const platformDimensions = {width: 10, height: 1, depth: 5};
 const doorPlatformHeight = wallDimensions.depth - wallDimensions.depth/3 - 0.5;
 const doorPlatformPositionOnWall = wallPositions[3].position.z - wallDimensions.height/2 - platformDimensions.depth/2;
 const leftPlatformPositionOnWall = wallPositions[1].position.x + wallDimensions.height/2 + platformDimensions.depth/2;
@@ -276,9 +276,18 @@ export const platformPositions = [
         rotation: { x: 0, y: 2*rightAngle, z: 0 }
     },
     
-]
+];
 //END PLATFORM POSITIONS------------------------------------------------
-
+export const buttonDimensions = {width: 1, height: 1, depth: 0.2};
+export const buttonPositions = [
+    {
+        name: "centreButton",
+        geometry: "button",
+        material: "button",
+        position: { x: 0, y: 2, z: 0 },
+        rotation: { x: 0, y: 0, z: 0 }
+    }
+];
 //LAMP POSITIONS-------------------------------------------------------
 const baseLamp = {
     height_diff: 150,
@@ -312,16 +321,16 @@ export const doorPositions = {
         positionY:wallDimensions.depth - wallDimensions.depth/3,
         positionZ:wallPositions[3].position.z - wallDimensions.height/2,
     }
-}
+};
 //END DOOR POSITIONS---------------------------------------------------
 
 //LIGHTS CONFIG-------------------------------------------------------
 export const lightsConfig = [
-    {
-        name: "ambientLight",
-        type: "AmbientLight",
-        color: 0xffffff,
-        intensity: 5
-    }
+    // {
+    //     name: "ambientLight",
+    //     type: "AmbientLight",
+    //     color: 0xffffff,
+    //     intensity: 5
+    // }
 ];
 //END LIGHTS CONFIG---------------------------------------------------
