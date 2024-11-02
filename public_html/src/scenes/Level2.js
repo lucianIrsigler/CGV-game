@@ -11,9 +11,8 @@ import { MiniMap } from '../scripts/Objects/Minimap.js';
 import { Door } from '../scripts/Objects/Door.js';
 import { LightMechanicManager } from '../scripts/Scene/LightMechanicManager.js';
 import { 
-    smallGroundPositions, ceilingPositions, groundPositions, platformPositions, wallPositions, lampPositions, doorPositions, 
-    lightsConfig, smallGroundDimensions, wallDimensions, platformDimensions, groundDimensions, ceilingDimensions, 
-    buttonDimensions, buttonPositions
+    smallGroundPositions, ceilingPositions, groundPositions, platformPositions, wallPositions, lampPositions, doorPositions, buttonPositions, 
+    lightsConfig, smallGroundDimensions, wallDimensions, platformDimensions, groundDimensions, ceilingDimensions, buttonDimensions
 } from '../data/objPositions2.js';
 
 const soundEffectsManager = new SoundEffectsManager();
@@ -341,9 +340,6 @@ export class Level2 extends SceneBaseClass {
         this.lightManager.addLight("ambient", temp, null);
         const playerLight = new THREE.PointLight(0xffffff, 1, 50); // Color, intensity, distance
         this.lightManager.addLight("playerLight",playerLight,{x:0,y:1.5,z:0})
-
-
-        
         this.playerLight = this.lightManager.getLight("playerLight");
         lightsConfig.forEach(config => {
             let light;
@@ -395,6 +391,19 @@ export class Level2 extends SceneBaseClass {
                 break;
             }
           })
+
+        window.addEventListener("click", () => {
+            if (!this.playingAlready){
+                soundEffectsManager.playSound("creep2", 0.1);
+                this.playingAlready=true;
+            }
+        });
+        window.addEventListener("keydown", () => {
+            if (!this.playingAlready){
+                soundEffectsManager.playSound("creep2", 0.1);
+                this.playingAlready=true;
+            }
+        });
 
         this.restartButton.addEventListener("click", this.restart.bind(this));
     }
