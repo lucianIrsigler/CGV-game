@@ -437,8 +437,8 @@ export class Level2 extends SceneBaseClass {
         this.restartButton.addEventListener("click", this.restart.bind(this));
     }
 
-    calcEuclid(x1, z1, x2, z2) {
-        const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
+    calcEuclid(x1, y1, z1, x2, y2, z2) {
+        const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2) + Math.pow(z1 - z2, 2));
         return distance <= 4;
     }
 
@@ -455,7 +455,7 @@ export class Level2 extends SceneBaseClass {
                 let valid = false;
 
                 this.points2.forEach((point) => {
-                    if (this.calcEuclid(this.playerBody.position.x, this.playerBody.position.z, point.x, point.z)) {
+                    if (this.calcEuclid(this.playerBody.position.x, this.playerBody.position.y, this.playerBody.position.z, point.x, point.y, point.z)) {
                         valid = true;
                         console.log("Player is near a light source");
                         this.heal(this.healingRate);
@@ -484,6 +484,22 @@ export class Level2 extends SceneBaseClass {
         healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
     }
 
+    // Function to handle loss condition
+    youLose() {
+        //stop animations
+        cancelAnimationFrame(this.animationId);
+
+        document.getElementById('gameOverHeader').innerText = "You Died!\nYou ran out of light and the darkness consumed you!";
+
+        console.log("You lose!"); // Display lose message if health reaches zero
+        this.gameOverScreen.style.display = "block"; // Show game over screen
+
+        document.getElementById('user-health-bar-container').style.display = 'none';
+        document.getElementById('boss-health-bar-container').style.display = 'none';
+
+        this.restartButton.addEventListener("click", this.restartGame); // Restart the game when the button is clicked
+    }
+
     restartGame() {
         location.reload(); // Reload the page to restart the game
     }
@@ -498,6 +514,10 @@ export class Level2 extends SceneBaseClass {
         if (this.cameraManager==undefined||!this.loader.isLoaded() || !this.playerLoaded){
             return;
         }
+
+        if (this.health <= 0) {
+            this.youLose(); // Call the lose condition function
+        } 
 
         this.world.step(1 / 60);
         this.objManager.update();
