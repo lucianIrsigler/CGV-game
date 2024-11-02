@@ -409,7 +409,7 @@ let ambientSound
 //#endregion AUDIO VARIABLES =========================
 
 
-const initScene = () => {
+export const initScene = () => {
 
     //#region INITIALIZATION =========================
 
@@ -865,9 +865,9 @@ const initScene = () => {
 
 // --------------------------
 
-initScene()
+// initScene()
 
-const animate = (time) => {
+export const animate = (time) => {
 
     if (gameStarted) {
 

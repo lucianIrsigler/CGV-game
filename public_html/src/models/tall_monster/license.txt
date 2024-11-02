@@ -1,0 +1,11 @@
+Model Information:
+* title:	MONSTER
+* source:	https://sketchfab.com/3d-models/monster-9adea5e8517c48d08d9d1cd9bfaf39df
+* author:	Adam Haggar (https://sketchfab.com/Adammkh1)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "MONSTER" (https://sketchfab.com/3d-models/monster-9adea5e8517c48d08d9d1cd9bfaf39df) by Adam Haggar (https://sketchfab.com/Adammkh1) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
