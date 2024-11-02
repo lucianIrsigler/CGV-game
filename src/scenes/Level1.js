@@ -75,6 +75,7 @@ export class Level1 extends SceneBaseClass {
         //sound
         this.nextSoundTime = 1000;
         this.playingAlready = false;
+        this.enemy=null;
     }
 
     /**
@@ -430,7 +431,7 @@ export class Level1 extends SceneBaseClass {
         this.renderer.render(this.scene, this.cameraManager.getCamera());
 
         //update minimap
-        this.miniMap.update(this.scene,this.target)
+        this.miniMap.update(this.scene,this.target,null)
 
     }
 
