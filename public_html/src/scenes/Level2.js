@@ -359,13 +359,7 @@ export class Level2 extends SceneBaseClass {
         });
     }
 
-    setupCharacterLight() {
-        this.characterLight = new THREE.PointLight(0xffffff, 1, 10);
-        this.characterLight.position.set(0, 2, 0); // Slightly above the character
-        this.target.add(this.characterLight); // Attach the light to the character
-
-        this.lightMechanicManager.characterLight = this.characterLight;
-    }
+    
 
     /**
      * Light to toggle the intensity to 5 for
@@ -394,50 +388,8 @@ export class Level2 extends SceneBaseClass {
         this.restartButton.addEventListener("click", this.restart.bind(this));
     }
 
-    startDamageTimer(){
-        setInterval(()=>{
-            if (this.loader.isLoaded()){
-                this.lightMechanicManager.damageTimer(this.points,this.target)
-            }
-
-            // console.log(this.lightMechanicManager.getHealth())
-            if (this.lightMechanicManager.getHealth()<=0){
-                this.handleCharacterDeath();
-            }
-        },1000);
-    }
     restartGame() {
         location.reload(); // Reload the page to restart the game
-    }
-
-    // Handle Player hit
-    handlePlayerHit(dmg) {
-        
-        this.takeDamage(dmg); // Take 10 damage when hit
-    }
-
-    takeDamage(amount) {
-        this.health -= amount;
-        this.health = Math.max(0, this.health); // Ensure health doesn't go below 0
-        // updateCharacterLight(); // Update light when health changes
-        // console.log("Player health:", this.health); // Log the player's health
-    }
-
-    updatePlayerHealthBar(){
-        const healthBar = document.getElementById('user-health-bar');
-        const healthPercentage = (this.health / this.maxHealth) * 100; // Calculate percentage
-        healthBar.style.width = `${healthPercentage}%`; // Update the width of the health bar
-    }
-
-    heal(amount) {
-        this.health += amount;
-        this.health = Math.min(100, this.health); // Cap health at 100
-        // updateCharacterLight(); // Update light when health changes
-    }
-
-    calcEuclid(x1, z1, x2, z2) {
-        const distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(z1 - z2, 2));
-        return distance <= 4;
     }
     /**
      * Animation function
@@ -472,10 +424,6 @@ export class Level2 extends SceneBaseClass {
                 this.doorPositions.checkIfOpen()
             }
         });
-        this.updatePlayerHealthBar();
-       this.takeDamage(this.damageRate);
-       this.heal(this.healingRate);
-        // this.lightMechanicManager.update();
 
         // Render the scene
         this.renderer.render(this.scene, this.cameraManager.getCamera());
@@ -487,12 +435,6 @@ export class Level2 extends SceneBaseClass {
         this.animationId=null;
     }
 
-    handleCharacterDeath() {
-        this.lightMechanicManager.resetHealth();
-        this.gameOverScreen.style.display = "block";
-        document.body.style.cursor = "pointer"
-        this.playerBody.position.set(0,0.5,0);
-    }
 
     restart() {
         this.gameOverScreen.style.display = "none";
