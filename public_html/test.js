@@ -12,7 +12,7 @@ function loadModules(directory) {
         "data/lightPos2.js",
         "data/monster3.js",
         "data/monsters.js",
-
+        "data/objPositions2.js",
         "scripts/Animation/AnimationLoopHandler.js",
 
         "scripts/Camera/FirstPersonCamera.js",

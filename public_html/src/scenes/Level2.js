@@ -59,7 +59,7 @@ export class Level2 extends SceneBaseClass {
         this.playingAlready = false;
 
         this.doorPositions = new Door(this.loader);
-        this.miniMap = new MiniMap(this.scene);
+        this.miniMap = new MiniMap(this.scene,20);
         //this.debugRenderer = new CannonDebugger(this.scene, this.world);
     }
 
@@ -233,6 +233,7 @@ export class Level2 extends SceneBaseClass {
         );
 
         this.playerLoaded = true;
+        this.miniMap.miniMapCamera.lookAt(0,0,0);
     }
 
     async loadLamps() {
