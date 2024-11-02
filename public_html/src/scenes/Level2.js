@@ -460,6 +460,8 @@ export class Level2 extends SceneBaseClass {
         //stop animations
         cancelAnimationFrame(this.animationId);
 
+        document.exitPointerLock();
+
         document.getElementById('gameOverHeader').innerText = "You Died!\nYou ran out of light and the darkness consumed you!";
 
         console.log("You lose!"); // Display lose message if health reaches zero
