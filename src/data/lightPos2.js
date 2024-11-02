@@ -1,4 +1,4 @@
-export const lampSpotlights = [
+export const lightsConfigLevel2 = [
     {
         name: "lampSpotlightOne",
         type: "SpotLight",
@@ -63,5 +63,17 @@ export const lampSpotlights = [
         position: { x: -1.05e-14, y: 48, z: 21.5 },
         target: { position: { x: -1.05e-14, y: 48, z: 21.5 } },
         helper: true
-    }
+    },
+    {
+        name: "generalLight",
+        type: "SpotLight",
+        color: 0xffffff,
+        intensity: 10,
+        distance: 40,
+        angle: Math.PI,
+        penumbra: 0.5,
+        decay: 0,
+        position: { x: -1.05e-14, y: 25, z: 21.5 },
+        target: { position: { x: 0, y: 0, z: 0 } },
+        helper: true}
 ];

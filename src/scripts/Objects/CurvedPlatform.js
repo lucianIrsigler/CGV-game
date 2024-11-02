@@ -27,12 +27,12 @@ export class CurvedPlatform extends THREE.Object3D {
         const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
         //GET TEXTURES FROM "PavingStones"
         const textureLoader = new THREE.TextureLoader();
-        const colorMap = textureLoader.load('../textures/PavingStones/Color.jpg');
-        const aoMap = textureLoader.load('../textures/PavingStones/AmbientOcclusion.jpg');
-        const displacementMap = textureLoader.load('../textures/PavingStones/Displacement.jpg');
-        const metalnessMap = textureLoader.load('../textures/PavingStones/Metalness.jpg');
-        const normalMapDX = textureLoader.load('../textures/PavingStones/NormalDX.jpg');
-        const roughnessMap = textureLoader.load('../textures/PavingStones/Roughness.jpg');
+        const colorMap = textureLoader.load('../../textures/PavingStones/Color.jpg');
+        const aoMap = textureLoader.load('../../textures/PavingStones/AmbientOcclusion.jpg');
+        const displacementMap = textureLoader.load('../../textures/PavingStones/Displacement.jpg');
+        const metalnessMap = textureLoader.load('../../textures/PavingStones/Metalness.jpg');
+        const normalMapDX = textureLoader.load('../../textures/PavingStones/NormalDX.jpg');
+        const roughnessMap = textureLoader.load('../../textures/PavingStones/Roughness.jpg');
         
         [colorMap, aoMap, displacementMap, metalnessMap, normalMapDX, roughnessMap].forEach(texture => {
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -50,7 +50,6 @@ export class CurvedPlatform extends THREE.Object3D {
             metalness: 0.1,
             roughness: 0.5
         });
-
         const mesh = new THREE.Mesh(geometry, material);
         return mesh;
     }

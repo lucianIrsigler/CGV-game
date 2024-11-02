@@ -72,7 +72,6 @@ export class Level1 extends SceneBaseClass {
         this.playerLoaded = false;
         this.objectsLoaded = false;
 
-
         //sound
         this.nextSoundTime = 1000;
         this.playingAlready = false;
