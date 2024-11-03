@@ -1,20 +1,12 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-<<<<<<< HEAD:public_html/src/levels/EndlessMode/js/endlessMode.js
 // import * as dat from 'dat.gui'
-=======
-import * as dat from 'dat.gui'
->>>>>>> 5e74bd427f2da7d80fadc7243ce7a70c0330e67a:EndlessMode/js/endlessMode.js
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 
 // import * as THREE from 'https://unpkg.com/three@0.153.0/build/three.module.js';
 // import { OrbitControls } from 'https://unpkg.com/three@0.153.0/examples/jsm/controls/OrbitControls.js';
-<<<<<<< HEAD:public_html/src/levels/EndlessMode/js/endlessMode.js
 import * as dat from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js';
-=======
-// import * as dat from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js';
->>>>>>> 5e74bd427f2da7d80fadc7243ce7a70c0330e67a:EndlessMode/js/endlessMode.js
 // import { GLTFLoader } from 'https://unpkg.com/three@0.153.0/examples/jsm/loaders/GLTFLoader.js';
 // import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 
@@ -313,19 +305,11 @@ const allJumpScareAudioLoaded = () => {
 let lavaWidth = 400;
 let lavaHeight = lavaWidth * 4;
 
-<<<<<<< HEAD:public_html/src/levels/EndlessMode/js/endlessMode.js
 const lavaTexture = textureLoader.load('../img/Lava005_4K/Lava005_4K-JPG_Color.jpg'); // Base color
 const lavaNormal = textureLoader.load('../img/Lava005_4K/Lava005_4K-JPG_NormalGL.jpg'); // Normal map (OpenGL)
 const lavaDisplacement = textureLoader.load('../img/Lava005_4K/Lava005_4K-JPG_Displacement.jpg'); // Displacement map
 const lavaEmission = textureLoader.load('../img/Lava005_4K/Lava005_4K-JPG_Emission.jpg'); // Emission map
 const lavaRoughness = textureLoader.load('../img/Lava005_4K/Lava005_4K-JPG_Roughness.jpg'); // Roughness map
-=======
-const lavaTexture = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_Color.jpg'); // Base color
-const lavaNormal = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_NormalGL.jpg'); // Normal map (OpenGL)
-const lavaDisplacement = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_Displacement.jpg'); // Displacement map
-const lavaEmission = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_Emission.jpg'); // Emission map
-const lavaRoughness = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_Roughness.jpg'); // Roughness map
->>>>>>> 5e74bd427f2da7d80fadc7243ce7a70c0330e67a:EndlessMode/js/endlessMode.js
 
 // Set wrapping mode and repeat for each texture
 [lavaTexture, lavaNormal, lavaDisplacement, lavaEmission, lavaRoughness].forEach(texture => {
@@ -1196,7 +1180,7 @@ const animate = (time) => {
                 boulders.splice(boulders.indexOf(boulder), 1)
             }
             if (boxCollision({ box1: boulder, box2: duckModel }) && boulderCanDamage) {
-                console.log('hit enemy')
+                // console.log('hit enemy')
 
                 // when hit, make playerModel red
                 duckModel.visible = true
@@ -1303,8 +1287,8 @@ const animate = (time) => {
 
                 if (!faceWasShown) {
                     currentScaryFace = getRandomNumber(0, scaryFaces.length - 1).toFixed(0) // 0 to 4
-                    console.log('currentScaryFace', currentScaryFace)
-                    console.log('scaryFaces', scaryFaces)
+                    // console.log('currentScaryFace', currentScaryFace)
+                    // console.log('scaryFaces', scaryFaces)
                     scaryFaces[currentScaryFace].visible = true
 
                     // play random jump scare sound
@@ -1332,7 +1316,7 @@ const animate = (time) => {
         // if duck is on lastGround, make it stage 4
         if (lastGround && duckModel.position.z < lastGround.front) {
             stage = 4
-            console.log('ON THE LAST GROUND')
+            // console.log('ON THE LAST GROUND')
         }
 
         if (time - previousLevelTime > stageDuration) {
@@ -1343,7 +1327,7 @@ const animate = (time) => {
             }
 
 
-            console.log(`Stage Change After ${stageDuration} milliseconds, stage ${stage}`);
+            // console.log(`Stage Change After ${stageDuration} milliseconds, stage ${stage}`);
         }
 
         switch (stage) {
@@ -1490,7 +1474,7 @@ window.addEventListener('keydown', (event) => {
 document.querySelector('.start-level-button').addEventListener('click', (event) => {
 
 
-    console.log("START LEVEL BUTTON CLICKED")
+    // console.log("START LEVEL BUTTON CLICKED")
     gameStarted = true
     ambientSound.play();
     document.querySelector('.rules-board').style.display = 'none'

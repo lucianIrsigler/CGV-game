@@ -1192,7 +1192,7 @@ const animate = (time) => {
                 boulders.splice(boulders.indexOf(boulder), 1)
             }
             if (boxCollision({ box1: boulder, box2: duckModel }) && boulderCanDamage) {
-                console.log('hit enemy')
+                // console.log('hit enemy')
 
                 // when hit, make playerModel red
                 duckModel.visible = true
@@ -1299,8 +1299,8 @@ const animate = (time) => {
 
                 if (!faceWasShown) {
                     currentScaryFace = getRandomNumber(0, scaryFaces.length - 1).toFixed(0) // 0 to 4
-                    console.log('currentScaryFace', currentScaryFace)
-                    console.log('scaryFaces', scaryFaces)
+                    // console.log('currentScaryFace', currentScaryFace)
+                    // console.log('scaryFaces', scaryFaces)
                     scaryFaces[currentScaryFace].visible = true
 
                     // play random jump scare sound
@@ -1328,7 +1328,7 @@ const animate = (time) => {
         // if duck is on lastGround, make it stage 4
         if (lastGround && duckModel.position.z < lastGround.front) {
             stage = 4
-            console.log('ON THE LAST GROUND')
+            // console.log('ON THE LAST GROUND')
         }
 
         if (time - previousLevelTime > stageDuration) {
@@ -1339,7 +1339,7 @@ const animate = (time) => {
             }
 
 
-            console.log(`Stage Change After ${stageDuration} milliseconds, stage ${stage}`);
+            // console.log(`Stage Change After ${stageDuration} milliseconds, stage ${stage}`);
         }
 
         switch (stage) {
@@ -1484,9 +1484,7 @@ window.addEventListener('keydown', (event) => {
 });
 
 document.querySelector('.start-level-button').addEventListener('click', (event) => {
-
-
-    console.log("START LEVEL BUTTON CLICKED")
+    // console.log("START LEVEL BUTTON CLICKED")
     gameStarted = true
     ambientSound.play();
     document.querySelector('.rules-board').style.display = 'none'

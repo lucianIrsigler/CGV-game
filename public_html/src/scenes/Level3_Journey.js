@@ -27,5 +27,7 @@ export class Level3_Journey{
 
     disposeLevel(){
         this.disposeLevel();
+        location.reload();
+
     }
 }

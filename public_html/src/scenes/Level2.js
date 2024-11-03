@@ -80,6 +80,7 @@ export class Level2 extends SceneBaseClass {
     }
 
     initScene(){
+
         this.scene.background = new THREE.Color(0x333333);
         this.init_lighting_();
         this.init_eventHandlers_();
@@ -90,7 +91,8 @@ export class Level2 extends SceneBaseClass {
         // this.startDamageTimer();
         const currentDoor = doorPositions.doorOne;
         this.doorPositions.init_door_(this.scene,currentDoor);
-        this.animate();
+
+        // this.animate();
     }//initalizes the scene
 
     init_camera_() {
@@ -480,12 +482,14 @@ export class Level2 extends SceneBaseClass {
         document.getElementById('user-health-bar-container').style.display = 'none';
         document.getElementById('boss-health-bar-container').style.display = 'none';
 
-        this.restartButton.addEventListener("click", this.restartGame); // Restart the game when the button is clicked
+        this.restartButton.addEventListener("click", this.restart); // Restart the game when the button is clicked
     }
 
-    restartGame() {
-        location.reload(); // Reload the page to restart the game
-    }
+    // restartGame() {
+    //     location.reload(); // Reload the page to restart the game
+    // }
+
+
     /**
      * Animation function
      * @param {} currentTime 
@@ -711,5 +715,32 @@ export class Level2 extends SceneBaseClass {
                 console.warn("Renderer's DOM element could not be removed:", e);
             }
         }
+
+
+
+        this.world = null;
+        this.playerBody= null; //cannon.js model
+        this.target= null; //player model
+
+        //LAMPS
+        this.points = null;
+        this.lampsArray= null;
+        this.playerLight= null;
+        this.points2 = null;
+        
+
+        this.characterLight= null;
+        
+        //MANAGERS
+        this.cameraManager= null;
+        this.objManager = null;
+        this.lightManager = null;
+        this.loader = null; 
+        this.lightMechanicManager = null;
+
+        this.doorPositions = null;
+        this.enemy=null;
+        location.reload();
+
     }
 }

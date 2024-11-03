@@ -651,6 +651,11 @@ export class Level3 extends SceneBaseClass{
 
         this.objManager.removeAllObjects();
         this.lightManager.removeAllLights();
+
+        if (this.miniMap){
+            this.miniMap.dispose();
+            this.miniMap=true;
+        }
     
         
         if (this.renderer) {
@@ -662,6 +667,11 @@ export class Level3 extends SceneBaseClass{
                 console.warn("Renderer's DOM element could not be removed:", e);
             }
         }
+
+
+
+        location.reload();
+
     }
 
     

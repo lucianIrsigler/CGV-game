@@ -521,6 +521,10 @@ export class Level1 extends SceneBaseClass {
      * Handles character death
      */
     handleCharacterDeath() {
+        if (this.intervalID) {
+            clearInterval(this.intervalID);
+            this.intervalID = null;
+        }
         this.lightMechanicManager.resetHealth();
         this.gameOverScreen.style.display = "block";
         document.body.style.cursor = "pointer"
@@ -546,6 +550,8 @@ export class Level1 extends SceneBaseClass {
         });
 
         document.body.style.cursor = "none"
+
+        this.startDamageTimer();
     }
 
     /**
@@ -560,8 +566,16 @@ export class Level1 extends SceneBaseClass {
      * Starts the health mechanic
      */
     startDamageTimer(){
+        if (this.intervalID) {
+            clearInterval(this.intervalID);
+        }
         
         this.intervalID = setInterval(()=>{
+
+            if (this.ended){
+                clearInterval(this.intervalID);
+            }
+
             if (this.loader.isLoaded()){
                 this.lightMechanicManager.damageTimer(this.points,this.target)
             }
@@ -626,7 +640,10 @@ export class Level1 extends SceneBaseClass {
             this.scene.remove(this.scene.children[0]);
         }
 
-        clearInterval(this.intervalID);
+        if (this.intervalID) {
+            clearInterval(this.intervalID);
+            this.intervalID = null;
+        }
 
         this.cameraManager.dispose();
         
@@ -639,5 +656,7 @@ export class Level1 extends SceneBaseClass {
         this.characterLight = null;
         this.scene = null;
         this.camera = null;
+        location.reload();
+
     }
 }

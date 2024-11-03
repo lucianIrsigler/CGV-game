@@ -190,6 +190,7 @@ function startLevel(){
 }
 
 function exitLevel(){
+    location.reload();
     document.exitPointerLock();
     animationManager.exitScene();
     document.getElementById("blank").style.display="flex";
@@ -210,6 +211,7 @@ function exitLevel(){
 
 
 function goToStartMenu(){
+    location.reload();
     document.exitPointerLock();
     animationManager.exitScene();
     document.getElementById("blank").style.display="flex";
@@ -234,6 +236,7 @@ function goToStartMenu(){
 function addButtons(){
     const blankDiv = document.getElementById("blank");
     const buttons = [
+        // { id: "lvl0", title: "Start the game"},
         { id: 'lvl1', title: 'Level 1' },
         { id: 'lvl2', title: 'Level 2' },
         { id: 'lvl3', title: 'Level 3' },
@@ -290,6 +293,13 @@ document.getElementById("start").addEventListener("click",()=>{
     playMenuClick();
     addButtons();
 
+    // document.getElementById('lvl0').addEventListener('click', function() {
+    //     playMenuClick();
+    //     isPlayingWholeGame = true;
+    //     startLevel();
+    //     animationManager.switchScene(new Level1(),0);
+    // });
+
 
     document.getElementById('lvl1').addEventListener('click', function() {
         playMenuClick();
@@ -316,9 +326,9 @@ document.getElementById("start").addEventListener("click",()=>{
 
 
     document.getElementById("endless").addEventListener("click",()=>{
+        console.log("yuh");
         document.exitPointerLock();
         playMenuClick();
-
         window.location.replace("src/levels/EndlessMode/index.html")
 
     })
@@ -465,7 +475,6 @@ document.addEventListener('levelEnded', (event) => {
 
         //if next level
         if (currentLevelId < numLevels) {
-            console.log("jere");
 
             let nextLevelId = currentLevelId + 1;
             if (nextLevelId==1){
