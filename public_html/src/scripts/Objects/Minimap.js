@@ -101,5 +101,20 @@ export class MiniMap{
         }
     }
 
+    dispose(){
+        if (this.miniMapRenderer) {
+            this.miniMapRenderer.dispose();
+            try {
+                const canvas = this.miniMapRenderer.domElement;
+                if (canvas.parentNode) {
+                    canvas.parentNode.removeChild(canvas);
+                }
+            } catch (e) {
+                console.warn("Renderer's DOM element could not be removed:", e);
+            }
+            this.miniMapRenderer = null;
+        }
+    }
+
 
 }

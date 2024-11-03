@@ -67,6 +67,7 @@ export class Level1 extends SceneBaseClass {
         //for animation
         this.lastTime = 0;
         this.animationId = null;
+        this.intervalID = null;
 
         // flags
         this.playerLoaded = false;
@@ -520,6 +521,10 @@ export class Level1 extends SceneBaseClass {
      * Restarts the level
      */
     restart() {
+        if (this.playerBody==null){
+            return;
+        }
+        
         this.gameOverScreen.style.display = "none";
 
         this.playerBody.position.set(0, 0.5, 0);
@@ -545,7 +550,8 @@ export class Level1 extends SceneBaseClass {
      * Starts the health mechanic
      */
     startDamageTimer(){
-        setInterval(()=>{
+        
+        this.intervalID = setInterval(()=>{
             if (this.loader.isLoaded()){
                 this.lightMechanicManager.damageTimer(this.points,this.target)
             }
@@ -557,13 +563,10 @@ export class Level1 extends SceneBaseClass {
         },1000);
     }
 
-    /**
-     * Disposes of assets in the level
-     */
-       /**
+    /*
      * Completely disposes of all assets and components in the level
      */
-       disposeLevel() {
+    disposeLevel() {
         if (!this.scene) return;
         
         // Stop any ongoing animations
@@ -584,24 +587,13 @@ export class Level1 extends SceneBaseClass {
         
         // Clean up minimap
         if (this.miniMap) {
-            // Remove minimap camera
             if (this.miniMap.miniMapCamera) {
                 this.scene.remove(this.miniMap.miniMapCamera);
             }
-            
-            // Remove minimap DOM element
-            const minimapElement = document.getElementById('minimap');
-            if (minimapElement) {
-                minimapElement.remove();
-            }
-            
-            // Clear minimap reference
+            this.miniMap.dispose();
             this.miniMap = null;
         }
-        
-        
-        
-        
+
         // Clean up renderer
         if (this.renderer) {
             this.renderer.dispose();
@@ -620,6 +612,8 @@ export class Level1 extends SceneBaseClass {
         while (this.scene.children.length > 0) {
             this.scene.remove(this.scene.children[0]);
         }
+
+        clearInterval(this.intervalID);
         
         // Clear all references
         this.target = null;

@@ -675,20 +675,56 @@ export class Level2 extends SceneBaseClass {
         document.body.style.cursor = "none"
     }
 
-    disposeLevel(){
+    /*
+     * Completely disposes of all assets and components in the level
+     */
+    disposeLevel() {
         if (!this.scene) return;
-
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+        window.removeEventListener('load', this.initAudio);
+        this.restartButton.removeEventListener('click', this.restart);
         this.objManager.removeAllObjects();
         this.lightManager.removeAllLights();
-    
+        
+        
+        
         if (this.renderer) {
             this.renderer.dispose();
-            // Ensure that the renderer's DOM element is removed safely
             try {
-                document.body.removeChild(this.renderer.domElement);
+                const canvas = this.renderer.domElement;
+                if (canvas.parentNode) {
+                    canvas.parentNode.removeChild(canvas);
+                }
             } catch (e) {
                 console.warn("Renderer's DOM element could not be removed:", e);
             }
+            this.renderer = null;
+        }
+
+        if (this.miniMap) {
+            // Remove minimap camera
+            if (this.miniMap.miniMapCamera) {
+                this.scene.remove(this.miniMap.miniMapCamera);
+            }
+            
+            // Remove minimap DOM element
+            const minimapElement = document.getElementById('minimap');
+            if (minimapElement) {
+                minimapElement.remove();
+            }
+            
+            // Clear minimap reference
+            this.miniMap = null;
+        }
+        
+        
+        
+        // Clear scene
+        while (this.scene.children.length > 0) {
+            this.scene.remove(this.scene.children[0]);
         }
     }
 }

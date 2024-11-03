@@ -75,7 +75,7 @@ function loadModules(directory) {
         // Append the script to the document's body or head
         document.body.appendChild(script);
 
-        console.log(`Added script: ${file}`);
+        // console.log(`Added script: ${file}`);
     });
 }
 
@@ -290,7 +290,7 @@ document.getElementById("start").addEventListener("click",()=>{
     document.getElementById('lvl1').addEventListener('click', function() {
         playMenuClick();
         startLevel();
-        animationManager.switchScene(new CustomScene(),0);
+        animationManager.switchScene(new Level1(),0);
     });
     
     document.getElementById('lvl2').addEventListener('click', function() {
@@ -422,6 +422,7 @@ window.addEventListener('keydown', function(event) {
         toggleMenu();
     }else if (event.code=="KeyH"){
         if (animationManager.getCurrentScene()!=null){
+            console.log("YEAH BABY");
             animationManager.getCurrentScene().endLevel();
         }
     }
