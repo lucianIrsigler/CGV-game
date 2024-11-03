@@ -73,7 +73,7 @@ export class GunManager{
     
             if (isActive && this.detectCollision(bullet, target)) {
                 this.enemy.handleEnemyHit();
-                console.log("hit")
+                // console.log("hit")
                 this.scene.remove(bullet.mesh);
                 this.scene.remove(bullet.light);
                 return false; // Remove this bullet after collision
@@ -91,9 +91,9 @@ export class GunManager{
                 // console.log("ouch")
                 
                 if(this.enemy.isRageMode()){
-                    this.level3.takeDamage(20); // damage player
+                    this.level3.takeDamage(40); // damage player
                 }else{
-                    this.level3.takeDamage(10); // damage player
+                    this.level3.takeDamage(20); // damage player
                 }
 
                 this.level3.updatePlayerHealthBar();

@@ -46,7 +46,7 @@ export class Level3 extends SceneBaseClass{
         this.health = this.maxHealth;
         this.loaded = false;
         this.damageRate = 0.05; // Define the damage rate
-        this.healingRate = 10; // Define the healing rate
+        this.healingRate = 5; // Define the healing rate
 
         // this.world = CANNON.World();
         this.enemyModel;

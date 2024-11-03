@@ -137,7 +137,7 @@ export class Enemy{
 
         if (!this.enemyHitCooldown){
             this.enemyHits+=1;
-            this.health-=10;
+            this.health-=10; // damage dealt by player bullet
             this.updateEnemyHealthBar();
 
             if (this.getHealth()<=0){
