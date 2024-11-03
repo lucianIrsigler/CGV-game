@@ -132,6 +132,14 @@ export class Level1 extends SceneBaseClass {
         });
 
         this.restartButton.addEventListener("click", this.restart.bind(this));
+
+        document.addEventListener("Resume",(e)=>{
+            this.startDamageTimer();
+        })
+
+        document.addEventListener("Pause",(e)=>{
+            clearInterval(this.intervalID);
+        })
     }
     
     /**
