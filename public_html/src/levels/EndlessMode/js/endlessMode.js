@@ -58,6 +58,7 @@ let lightFollowsDuck = false
 let groundsDescend = false
 let groundsOscilate = false
 let allowHaunting = true
+let showHelpers = false
 
 let boulderCanDamage = true
 
@@ -90,7 +91,7 @@ const axesHelper = new THREE.AxesHelper(6)
 scene.add(axesHelper)
 
 const gridHelper = new THREE.GridHelper(100, 100)
-scene.add(gridHelper)
+if (showHelpers) scene.add(gridHelper)
 
 camera.position.set(-10, 30, 30)
 orbit.update()
@@ -441,7 +442,7 @@ spotLight.position.z = spotLightTarget.position.z
 const spotLightSpeed = 50 // 50
 
 const sLightHelper = new THREE.SpotLightHelper(spotLight)
-scene.add(sLightHelper)
+if (showHelpers) scene.add(sLightHelper)
 
 // scene.fog = new THREE.Fog(0xffffff, 0, 200)
 scene.fog = new THREE.FogExp2(0xffffff, 0.005)
@@ -863,6 +864,11 @@ const options = {
 
 }
 
+if (!showHelpers) {
+    // hide the gui
+    gui.hide()
+}
+
 gui.add(options, 'speed', 0.01, 0.1)
 
 gui.add(options, 'angle', 0, 1)
@@ -975,7 +981,7 @@ const animate = (time) => {
         document.querySelector('.start-level-button').textContent = 'Waiting for models to load...'
         document.querySelector('.start-level-button').disabled = true
     } else {
-        document.querySelector('.start-level-button').textContent = 'Start the test!!'
+        document.querySelector('.start-level-button').textContent = 'Start Endless Mode!!'
         document.querySelector('.start-level-button').disabled = false
     }
 
