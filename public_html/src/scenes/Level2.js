@@ -546,20 +546,24 @@ export class Level2 extends SceneBaseClass {
             const platformBody = this.objManager.getPhysicsObject(platformName);
             if (platform && platformBody) {
             if(platform.name=="leftFromCentrePlatform1" && platform.position.y < 3){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01; 
+            platform.position.y += 0.01;
+            platformBody.position.y += 0.01; 
+            soundEffectsManager.playSound("concrete-sliding", 0.1);
             }
             else if(platform.name=="leftFromCentrePlatform2" && platform.position.y < 5.5){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01;
+            platform.position.y += 0.01;
+            platformBody.position.y += 0.01;
+            soundEffectsManager.playSound("concrete-sliding", 0.1);
             }
             else if(platform.name=="leftFromCentrePlatform3" && platform.position.y < 8){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01;
+            platform.position.y += 0.01;
+            platformBody.position.y += 0.01;
+            soundEffectsManager.playSound("concrete-sliding", 0.1);
             }
             else if(platform.name=="leftFromCentrePlatform4" && platform.position.y < 10.5){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01;
+            platform.position.y += 0.01;
+            platformBody.position.y += 0.01;
+            soundEffectsManager.playSound("concrete-sliding", 0.1);
             }
             }});
         }
@@ -569,61 +573,75 @@ export class Level2 extends SceneBaseClass {
             const platform = this.objManager.getObject(platformName);
             const platformBody = this.objManager.getPhysicsObject(platformName);
             if (platform && platformBody) {
-                if(platform.name=="leftFromCentrePlatform1" && platform.position.y < 12.83333){
-                    platform.position.y += 0.01;
-                    platformBody.position.y += 0.01; 
-                }
-                else if(platform.name=="leftFromCentrePlatform2" && platform.position.y < 12.83333){
-                    platform.position.y += 0.01;
-                    platformBody.position.y += 0.01;
-                }
-                else if(platform.name=="leftFromCentrePlatform3" && platform.position.y < 12.83333){
-                    platform.position.y += 0.01;
-                    platformBody.position.y += 0.01;
-                }
-                else if(platform.name=="leftFromCentrePlatform4" && platform.position.y < 12.83333){
-                    platform.position.y += 0.01;
-                    platformBody.position.y += 0.01;
-                }
-                else if(platform.name=="leftCentrePlatform" && platform.position.y < 12.83333){
-                    platform.position.y += 0.01;
-                    platformBody.position.y += 0.01; 
-                }
-                else if(platform.name=="rightCentrePlatform" && platform.position.y < 12.83333){
-                    platform.position.y += 0.0095;
-                    platformBody.position.y += 0.0095; 
-                }
-                else if(platform.name=="rightFromCentrePlatform1" && platform.position.y < 12.83333){
-                    platform.position.y += 0.009;
-                    platformBody.position.y += 0.009; 
-                }
-                else if(platform.name=="rightFromCentrePlatform2" && platform.position.y < 12.83333){
-                    platform.position.y += 0.0085;
-                    platformBody.position.y += 0.0085;
-                }
-                else if(platform.name=="rightFromCentrePlatform3" && platform.position.y < 12.83333){
-                    platform.position.y += 0.008;
-                    platformBody.position.y += 0.008;
-                }
-                else if(platform.name=="rightFromCentrePlatform4" && platform.position.y < 12.83333){
-                    platform.position.y += 0.0075;
-                    platformBody.position.y += 0.0075;
-                }
-                else if(platform.name=="frontFromCentrePlatform1" && platform.position.y < 10.5){
-                    platform.position.y += 0.01;
-                    platformBody.position.y += 0.01; 
-                }else if(platform.name=="frontFromCentrePlatform2" && platform.position.y < 8){
-                    platform.position.y += 0.01;
-                    platformBody.position.y += 0.01;
-                }
-                else if(platform.name=="frontFromCentrePlatform3" && platform.position.y < 5.5){
-                    platform.position.y += 0.01;
-                    platformBody.position.y += 0.01;
-                }
-                else if(platform.name=="frontFromCentrePlatform4" && platform.position.y < 3){
-                    platform.position.y += 0.01;
-                    platformBody.position.y += 0.01;
-                }
+            if(platform.name=="leftFromCentrePlatform1" && platform.position.y < 12.83333){
+                platform.position.y += 0.01;
+                platformBody.position.y += 0.01; 
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="leftFromCentrePlatform2" && platform.position.y < 12.83333){
+                platform.position.y += 0.01;
+                platformBody.position.y += 0.01;
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="leftFromCentrePlatform3" && platform.position.y < 12.83333){
+                platform.position.y += 0.01;
+                platformBody.position.y += 0.01;
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="leftFromCentrePlatform4" && platform.position.y < 12.83333){
+                platform.position.y += 0.01;
+                platformBody.position.y += 0.01;
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="leftCentrePlatform" && platform.position.y < 12.83333){
+                platform.position.y += 0.01;
+                platformBody.position.y += 0.01; 
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="rightCentrePlatform" && platform.position.y < 12.83333){
+                platform.position.y += 0.0095;
+                platformBody.position.y += 0.0095; 
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="rightFromCentrePlatform1" && platform.position.y < 12.83333){
+                platform.position.y += 0.009;
+                platformBody.position.y += 0.009; 
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="rightFromCentrePlatform2" && platform.position.y < 12.83333){
+                platform.position.y += 0.0085;
+                platformBody.position.y += 0.0085;
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="rightFromCentrePlatform3" && platform.position.y < 12.83333){
+                platform.position.y += 0.008;
+                platformBody.position.y += 0.008;
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="rightFromCentrePlatform4" && platform.position.y < 12.83333){
+                platform.position.y += 0.0075;
+                platformBody.position.y += 0.0075;
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="frontFromCentrePlatform1" && platform.position.y < 10.5){
+                platform.position.y += 0.01;
+                platformBody.position.y += 0.01; 
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }else if(platform.name=="frontFromCentrePlatform2" && platform.position.y < 8){
+                platform.position.y += 0.01;
+                platformBody.position.y += 0.01;
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="frontFromCentrePlatform3" && platform.position.y < 5.5){
+                platform.position.y += 0.01;
+                platformBody.position.y += 0.01;
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="frontFromCentrePlatform4" && platform.position.y < 3){
+                platform.position.y += 0.01;
+                platformBody.position.y += 0.01;
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
             }});
         }
         const rightButton = this.objManager.getObject("rightButton");
@@ -633,22 +651,26 @@ export class Level2 extends SceneBaseClass {
             const platformBody = this.objManager.getPhysicsObject(platformName);
             if (platform && platformBody) 
             {
-                if(platform.name=="backFromCentrePlatform1" && platform.position.y < 12.83333){
-                    platform.position.y += 0.01;
-                    platformBody.position.y += 0.01; 
-                }else if(platform.name=="backFromCentrePlatform2" && platform.position.y < 12.83333){
-                    platform.position.y += 0.009;
-                    platformBody.position.y += 0.009;
-                }
-                else if(platform.name=="backFromCentrePlatform3" && platform.position.y < 12.83333){
-                    platform.position.y += 0.008;
-                    platformBody.position.y += 0.008;
-                }
-                else if(platform.name=="backFromCentrePlatform4" && platform.position.y < 12.83333){
-                    platform.position.y += 0.007;
-                    platformBody.position.y += 0.007;
-                }
-                
+            if(platform.name=="backFromCentrePlatform1" && platform.position.y < 12.83333){
+                platform.position.y += 0.01;
+                platformBody.position.y += 0.01; 
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }else if(platform.name=="backFromCentrePlatform2" && platform.position.y < 12.83333){
+                platform.position.y += 0.009;
+                platformBody.position.y += 0.009;
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="backFromCentrePlatform3" && platform.position.y < 12.83333){
+                platform.position.y += 0.008;
+                platformBody.position.y += 0.008;
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            else if(platform.name=="backFromCentrePlatform4" && platform.position.y < 12.83333){
+                platform.position.y += 0.007;
+                platformBody.position.y += 0.007;
+                soundEffectsManager.playSound("concrete-sliding", 0.1);
+            }
+            
             }});
         }
         

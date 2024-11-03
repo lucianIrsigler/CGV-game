@@ -51,5 +51,9 @@ export const audioFiles = [
     {
         name: "monster_death",
         file: "monster_death.mp3"
+    },
+    {
+        name: "concrete-sliding",
+        file: "concrete-sliding.mp3"
     }
 ];
