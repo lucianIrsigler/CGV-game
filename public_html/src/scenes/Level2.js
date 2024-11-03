@@ -64,7 +64,9 @@ export class Level2 extends SceneBaseClass {
         //FLAGS
         this.playerLoaded = false;
         this.objectsLoaded = false;
-        this.playingAlready = false
+        this.playingAlready = false;
+        this.ended = false;
+
 
         //SOUND
         this.nextSoundTime = 1000;
@@ -422,7 +424,7 @@ export class Level2 extends SceneBaseClass {
     // function to heal player at lamp
     startDamageTimer(){
         setInterval(()=>{
-            if (this.loader.isLoaded() || this.playerBody==undefined){
+            if (this.loader.isLoaded()){
                 let valid = false;
 
                 this.points2.forEach((point) => {
@@ -480,6 +482,9 @@ export class Level2 extends SceneBaseClass {
      * @returns 
      */
     animate = (currentTime) => {
+        if (this.ended){
+            return;
+        }
         this.animationId = requestAnimationFrame(this.animate);
     
         if (this.cameraManager == undefined || !this.loader.isLoaded() || !this.playerLoaded) {
@@ -641,11 +646,13 @@ export class Level2 extends SceneBaseClass {
         //Handle the 'E' key press to open the door
         document.addEventListener('keydown', (e) => {
             if (e.key === 'e') {
-                const isOpen = this.doorPositions.checkIfOpen()
+                const res = this.doorPositions.checkIfOpen()
 
-                if (isOpen){
-                    this.endLevel();
-                    this.stopAnimate();
+                if (res){
+                    setTimeout(()=>{
+                        this.ended=true;
+                        this.endLevel();
+                    },1000)
                 }
             }
         });
@@ -665,9 +672,8 @@ export class Level2 extends SceneBaseClass {
 
 
     restart() {
-        console.log("here");
         this.gameOverScreen.style.display = "none";
-        this.playerBody.position.set(0, 1, 0);
+        this.playerBody.position.set(0, 0.5, 0);
         this.points.forEach(light => this.toggleLightIntensity(light));
         this.lampsArray.forEach(lampLight => {
             lampLight.intensity = 0.5; // Reset to original intensity
@@ -675,56 +681,20 @@ export class Level2 extends SceneBaseClass {
         document.body.style.cursor = "none"
     }
 
-    /*
-     * Completely disposes of all assets and components in the level
-     */
-    disposeLevel() {
+    disposeLevel(){
         if (!this.scene) return;
-        if (this.animationId) {
-            cancelAnimationFrame(this.animationId);
-            this.animationId = null;
-        }
-        window.removeEventListener('load', this.initAudio);
-        this.restartButton.removeEventListener('click', this.restart);
+
         this.objManager.removeAllObjects();
         this.lightManager.removeAllLights();
-        
-        
-        
+    
         if (this.renderer) {
             this.renderer.dispose();
+            // Ensure that the renderer's DOM element is removed safely
             try {
-                const canvas = this.renderer.domElement;
-                if (canvas.parentNode) {
-                    canvas.parentNode.removeChild(canvas);
-                }
+                document.body.removeChild(this.renderer.domElement);
             } catch (e) {
                 console.warn("Renderer's DOM element could not be removed:", e);
             }
-            this.renderer = null;
-        }
-
-        if (this.miniMap) {
-            // Remove minimap camera
-            if (this.miniMap.miniMapCamera) {
-                this.scene.remove(this.miniMap.miniMapCamera);
-            }
-            
-            // Remove minimap DOM element
-            const minimapElement = document.getElementById('minimap');
-            if (minimapElement) {
-                minimapElement.remove();
-            }
-            
-            // Clear minimap reference
-            this.miniMap = null;
-        }
-        
-        
-        
-        // Clear scene
-        while (this.scene.children.length > 0) {
-            this.scene.remove(this.scene.children[0]);
         }
     }
 }

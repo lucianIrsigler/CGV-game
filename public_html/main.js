@@ -422,7 +422,6 @@ window.addEventListener('keydown', function(event) {
         toggleMenu();
     }else if (event.code=="KeyH"){
         if (animationManager.getCurrentScene()!=null){
-            console.log("YEAH BABY");
             animationManager.getCurrentScene().endLevel();
         }
     }
@@ -445,6 +444,8 @@ document.addEventListener('levelEnded', (event) => {
 
         //if next level
         if (currentLevelId < numLevels) {
+            console.log("jere");
+
             let nextLevelId = currentLevelId + 1;
             if (nextLevelId==1){
                 animationManager.switchScene(new Level2(),1);
@@ -460,18 +461,14 @@ document.addEventListener('levelEnded', (event) => {
             switched=true;
 
             setTimeout(()=>{
-                switched = true;
-
-
-            },5000)
+                switched = false;
+            },1000)
         } else {
             console.log("All levels completed!");
             goToStartMenu()
             setTimeout(()=>{
-                switched = true;
-
-
-            },5000)
+                switched = false;
+            },1000)
         }
     }
     else{
@@ -484,17 +481,15 @@ document.addEventListener('levelEnded', (event) => {
             animationManager.pauseAnimation();
             animationManager.resumeAnimation();
             setTimeout(()=>{
-                switched = true;
+                switched = false;
 
 
-            },5000) 
+            },1000) 
         }else {
             goToStartMenu();
             setTimeout(()=>{
-                switched = true;
-
-
-            },5000)
+                switched = false;
+            },1000)
         }
     }
 });

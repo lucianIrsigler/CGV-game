@@ -72,6 +72,7 @@ export class Level1 extends SceneBaseClass {
         // flags
         this.playerLoaded = false;
         this.objectsLoaded = false;
+        this.ended = false;
 
         //sound
         this.nextSoundTime = 1000;
@@ -394,8 +395,13 @@ export class Level1 extends SceneBaseClass {
      * @returns 
      */
     animate=(currentTime)=> {
-        this.animationId = requestAnimationFrame(this.animate);
+        if (this.ended){
+            return;
+        }
 
+        this.animationId = requestAnimationFrame(this.animate);
+        
+       
         if (this.cameraManager==undefined||!this.loader.isLoaded() || !this.playerLoaded){
             return;
         }
@@ -425,16 +431,12 @@ export class Level1 extends SceneBaseClass {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'e') {
                 const res = this.door.checkIfOpen()
+                this.ended = true;
+                clearInterval(this.intervalID);
 
                 if (res==true){
                     setTimeout(()=>{
-                        this.gameOverScreen.innerHTML= "";
-                        this.gameOverScreen.innerHTML+= "<h1 id=\"gameOverHeader\">Stay in the light</h1>";
-                        this.gameOverScreen.innerHTML+= "<button id=\"restartButton\" style=\"padding: 10px 20px; font-size: 20px;\">Restart</button>";
-                        this.gameOverScreen.style.display = 'none';
-
                         this.endLevel();
-                        this.stopAnimate();
 
                     },2000)
                 }
@@ -521,10 +523,10 @@ export class Level1 extends SceneBaseClass {
      * Restarts the level
      */
     restart() {
-        if (this.playerBody==null){
+        if (this.playerBody==null || this.ended){
             return;
         }
-        
+
         this.gameOverScreen.style.display = "none";
 
         this.playerBody.position.set(0, 0.5, 0);
@@ -578,6 +580,11 @@ export class Level1 extends SceneBaseClass {
         // Clear event listeners
         window.removeEventListener('load', this.initAudio);
         this.restartButton.removeEventListener('click', this.restart);
+
+        this.gameOverScreen.innerHTML= "";
+        this.gameOverScreen.innerHTML+= "<h1 id=\"gameOverHeader\">Stay in the light</h1>";
+        this.gameOverScreen.innerHTML+= "<button id=\"restartButton\" style=\"padding: 10px 20px; font-size: 20px;\">Restart</button>";
+        this.gameOverScreen.style.display = 'none';
         
         // Dispose of object manager contents
         this.objManager.removeAllObjects();
@@ -586,12 +593,8 @@ export class Level1 extends SceneBaseClass {
         this.lightManager.removeAllLights();
         
         // Clean up minimap
-        if (this.miniMap) {
-            if (this.miniMap.miniMapCamera) {
-                this.scene.remove(this.miniMap.miniMapCamera);
-            }
+        if (this.miniMap){
             this.miniMap.dispose();
-            this.miniMap = null;
         }
 
         // Clean up renderer

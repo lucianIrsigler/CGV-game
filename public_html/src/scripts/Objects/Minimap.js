@@ -102,6 +102,10 @@ export class MiniMap{
     }
 
     dispose(){
+        if (this.miniMapCamera) {
+            this.scene.remove(this.miniMapCamera);
+        }
+
         if (this.miniMapRenderer) {
             this.miniMapRenderer.dispose();
             try {
@@ -112,8 +116,11 @@ export class MiniMap{
             } catch (e) {
                 console.warn("Renderer's DOM element could not be removed:", e);
             }
-            this.miniMapRenderer = null;
         }
+
+        this.miniMapRenderer = null;
+        this.miniMapCamera = null;
+
     }
 
 

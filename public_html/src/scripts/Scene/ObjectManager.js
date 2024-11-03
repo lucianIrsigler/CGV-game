@@ -27,13 +27,13 @@ Example:
  */
 export class ObjectManager {
     /**
-     * 
+     * Scene is the three.js scene, and world is a cannon.js world
      * @param {THREE.Scene} scene 
      * @param {CANNON.World} physicsWorld 
      */
-    constructor(scene, physicsWorld) {
+    constructor(scene,physicsWorld) {
         this.scene = scene;
-        this.physicsWorld = physicsWorld;
+        this.physicsWorld = physicsWorld
         this.objects = [];
         this.bodies = [];
         this.bodiesMapping = [];
@@ -41,7 +41,6 @@ export class ObjectManager {
         this.geometries = {};
         this.materials = {};
     }
-
 
     /**
      * Adds a three.js geometry to the list
@@ -261,31 +260,20 @@ export class ObjectManager {
         this.objects.push({ mesh, body });
     }
 
-    
-
     /**
-     * Removes all the objects from the scene and physics world
+     * Removes all the objects from the scene
      */
     removeAllObjects() {
-        // Remove visual objects from scene
-        this.objects.forEach(obj => {
-            this.scene.remove(obj);
-        });
+        this.objects.forEach(obj => this.scene.remove(obj));
 
-        // Remove physics bodies from world
-        // Clean up physics world
-        if (this.physicsWorld) {
-            // Remove all physics bodies
-            while (this.physicsWorld.bodies.length > 0) {
-                this.physicsWorld.removeBody(this.physicsWorld.bodies[0]);
-            }
+        while (this.physicsWorld.bodies.length>0){            
+            this.physicsWorld.removeBody(this.physicsWorld.bodies[0]);
         }
 
+        // this.bodies.forEach(b => this.physicsWorld.removeBody(b.body));
 
-        // Clear all arrays and objects
         this.objects = [];
         this.bodies = [];
-        this.bodiesMapping = [];
         this.materials = {};
         this.geometries = {};
     }
