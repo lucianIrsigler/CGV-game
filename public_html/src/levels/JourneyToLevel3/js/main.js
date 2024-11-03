@@ -942,6 +942,7 @@ let spotLightFollowSpeed = 50
 const clock = new THREE.Clock()
 
 const animate = (time) => {
+    
     if (playerModel && duckModel && manorTorch && horrorMask && allFacesLoaded()) {
         allModelsLoaded = true
         if (scaryFaces.length == 0) {
@@ -1153,7 +1154,7 @@ const animate = (time) => {
             // stop animation
             renderer.setAnimationLoop(null)
 
-            setTimeout(() => { location.replace("/"); }, 1000)
+            setTimeout(() => { location.replace("https://lamp.ms.wits.ac.za/~santibozobozoclub"); }, 1000)
         }
 
 
