@@ -105,6 +105,10 @@ export class Level3 extends SceneBaseClass{
             this.previousBestTime = newTime;
             }
         };
+
+        this.intervalID = null;
+
+        this.initialSpawnPosition = { x: -1, y: 2.5, z: -10 };
     }
 
 
@@ -187,11 +191,59 @@ export class Level3 extends SceneBaseClass{
             }
         });
 
+        this.restartButton.addEventListener("click",this.restart.bind(this));
+
     };
 
-    restartGame() {
-        location.reload(); // Reload the page to restart the game
+    restart() {
+        // Reset player position and health
+        this.playerBody.position.copy(new CANNON.Vec3(
+            this.initialSpawnPosition.x,
+            this.initialSpawnPosition.y,
+            this.initialSpawnPosition.z
+        ));
+        this.playerBody.velocity.set(0, 0, 0); // Reset velocity
+        this.playerBody.angularVelocity.set(0, 0, 0); // Reset rotation
+        
+        // Reset health and UI
+        this.health = 100;
+        document.getElementById('user-health-bar-container').style.display = 'block';
+        document.getElementById('boss-health-bar-container').style.display = 'block';
+        
+        // Reset enemy
+        this.enemy.reset();
+        this.enemy.resetPosition();
+        this.enemyLight.visible = true;
+        this.enemy.asleep = false;
+        
+        // Reset timer
+        this.timer = 0;
+        
+        // Reset cursor and pointer lock
+        document.body.style.cursor = "none"
+        this.gameOverScreen.style.display = "none";
+
+        
+        // Restart damage timer
+        this.startDamageTimer();
+        
+        // Clear any existing bullets
+        if (this.gunManager) {
+            this.gunManager.clearAllBullets();
+        }
+        
+
+        // Restart sound
+        if (!this.playingAlready) {
+            soundEffectsManager.playSound("ambienceLevel3", 0.3);
+            this.playingAlready = true;
+        }
+
+
     }
+
+    // Add this method to GunManager class
+    
 
     // Handle Player hit
     handlePlayerHit(dmg) {
@@ -225,7 +277,11 @@ export class Level3 extends SceneBaseClass{
 
     // function to heal player at lamp
     startDamageTimer(){
-        setInterval(()=>{
+        if (this.intervalID) {
+            clearInterval(this.intervalID);
+        }
+        
+        this.intervalID = setInterval(()=>{
             if (this.loader.isLoaded()){
                 let valid = false;
 
@@ -240,7 +296,7 @@ export class Level3 extends SceneBaseClass{
 
             // console.log(this.lightMechanicManager.getHealth())
             if (this.lightMechanicManager.getHealth()<=0){
-                this.youLose();
+                // this.youLose();
             }
         },200);
     }
@@ -352,7 +408,7 @@ export class Level3 extends SceneBaseClass{
         this.enemyBody.addShape(boxShape);
         this.world.addBody(this.enemyBody);
 
-        this.enemy = new Enemy(currentMonster.health,{x:currentMonster.positionX,y:currentMonster.positionY,z:currentMonster.positionZ},this.enemyModel,this.enemyBody,this.enemyLight);
+        this.enemy = new Enemy(currentMonster.health,{ x: 10, y: 4, z: 5 },this.enemyModel,this.enemyBody,this.enemyLight);
 
 
         
@@ -519,8 +575,6 @@ export class Level3 extends SceneBaseClass{
 
     youWin() {
         //stop animations
-        cancelAnimationFrame(this.animationId);
-
         document.exitPointerLock();
 
         let prev = localStorage.getItem('bestTime') ? parseFloat(localStorage.getItem('bestTime')) : null;
@@ -543,17 +597,18 @@ export class Level3 extends SceneBaseClass{
         document.getElementById('boss-health-bar-container').style.display = 'none';
         this.enemyLight.visible = false;
 
-        this.restartButton.addEventListener("click", this.restartGame); // Restart the game when the button is clicked
         //stop ambient sound
         soundEffectsManager.toggleLoop("ambienceLevel3")
     }
     
     // Function to handle loss condition
     youLose() {
-        //stop animations
-        cancelAnimationFrame(this.animationId);
-
         document.exitPointerLock();
+
+        //stop animations
+        // cancelAnimationFrame(this.animationId);
+
+        // document.exitPointerLock();
 
         document.getElementById('gameOverHeader').innerText = "You Died!\nYou ran out of light and the darkness consumed you!";
         this.enemy.asleep = true;
@@ -561,17 +616,21 @@ export class Level3 extends SceneBaseClass{
         console.log("You lose!"); // Display lose message if health reaches zero
         this.gameOverScreen.style.display = "block"; // Show game over screen
 
+        document.body.style.cursor = "url('public/icons/cursor.png'), auto; "
+
+
+
         document.getElementById('user-health-bar-container').style.display = 'none';
         document.getElementById('boss-health-bar-container').style.display = 'none';
         this.enemyLight.visible = false;
 
-        this.restartButton.addEventListener("click", this.restartGame); // Restart the game when the button is clicked
         //stop ambient sound
         soundEffectsManager.toggleLoop("ambienceLevel3")
     }
 
     animate=(currentTime)=> {
         this.animationId = requestAnimationFrame(this.animate);
+
 
         if (this.cameraManager==undefined||!this.loader.isLoaded()){
             return;
@@ -580,6 +639,7 @@ export class Level3 extends SceneBaseClass{
         if (this.enemy) {
             this.enemy.updateEnemyRotation(this.playerBody.position);
         }
+
 
         this.world.step(1 / 60);
         // this.debugRenderer.update(); // comment for debugging
@@ -591,6 +651,14 @@ export class Level3 extends SceneBaseClass{
 
         const timeElapsedS = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
+
+        if (this.health <= 0) {
+            this.youLose(); // Call the lose condition function
+        } 
+        else if (this.enemy.getHealth() <= 0) {
+            this.youWin(); // Call the win condition function
+        }
+
 
         
         this.updatePlayerHealthBar();
@@ -616,13 +684,7 @@ export class Level3 extends SceneBaseClass{
         // Update minimap
         this.miniMap.update(this.scene, this.target, this.enemyModel);
 
-        if (this.health <= 0) {
-            this.youLose(); // Call the lose condition function
-        } 
-        else if (this.enemy.getHealth() <= 0) {
-            this.youWin(); // Call the win condition function
-        }
-
+        
         // Start timer only when boss is awake
         if (!this.enemy.isAsleep() && this.enemy.getHealth() > 0) {
             this.timer += timeElapsedS;

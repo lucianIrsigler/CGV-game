@@ -270,6 +270,7 @@ function toggleMenu() {
     menuVisible = !menuVisible;
     const menu = document.getElementById('menu');
     if (menuVisible) {
+        document.exitPointerLock();
         document.body.style.cursor =  "url('icons/cursor.png'), auto"; 
         menu.style.display = 'block';
         animationManager.pauseAnimation();
@@ -280,7 +281,6 @@ function toggleMenu() {
         menu.style.display = 'none';
         animationManager.resumeAnimation();
         document.body.requestPointerLock();
-
     }
 }
 
