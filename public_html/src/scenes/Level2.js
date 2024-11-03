@@ -58,7 +58,7 @@ export class Level2 extends SceneBaseClass {
         this.maxHealth = 100; // Define the maximum health
         this.health = this.maxHealth;
         this.loaded = false;
-        this.damageRate = 0.05; // Define the damage rate
+        this.damageRate = 0.15; // Define the damage rate
         this.healingRate = 10; // Define the healing rate
 
         //FLAGS
@@ -494,6 +494,10 @@ export class Level2 extends SceneBaseClass {
             "backFromCentrePlatform2",
             "backFromCentrePlatform3",
             "backFromCentrePlatform4",
+            "frontFromCentrePlatform1",
+            "frontFromCentrePlatform2",
+            "frontFromCentrePlatform3",
+            "frontFromCentrePlatform4",
             "leftFromCentrePlatform1",
             "leftFromCentrePlatform2",
             "leftFromCentrePlatform3",
@@ -507,7 +511,7 @@ export class Level2 extends SceneBaseClass {
         ];
 
         const centreButton = this.objManager.getObject("centreButton");
-        if (centreButton && this.calcEuclid(this.playerBody.position.x, this.playerBody.position.y, this.playerBody.position.z, centreButton.position.x, centreButton.position.y, centreButton.position.z)) {
+        if (centreButton && this.playerBody.position.distanceTo(centreButton.position) <= 2) {
             platformsToRaise.forEach(platformName => {
             const platform = this.objManager.getObject(platformName);
             const platformBody = this.objManager.getPhysicsObject(platformName);
@@ -528,81 +532,95 @@ export class Level2 extends SceneBaseClass {
                 platform.position.y += 0.01;
                 platformBody.position.y += 0.01;
             }
-            }
-            });
+            }});
         }
         const leftButton = this.objManager.getObject("leftButton");
-        if (leftButton && this.calcEuclid(this.playerBody.position.x, this.playerBody.position.y, this.playerBody.position.z, leftButton.position.x, leftButton.position.y, leftButton.position.z)) {
+        if (leftButton && this.playerBody.position.distanceTo(leftButton.position) <= 2) {
             platformsToRaise.forEach(platformName => {
             const platform = this.objManager.getObject(platformName);
             const platformBody = this.objManager.getPhysicsObject(platformName);
             if (platform && platformBody) {
-            if(platform.name=="leftFromCentrePlatform1" && platform.position.y < 12.83333){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01; 
-            }
-            else if(platform.name=="leftFromCentrePlatform2" && platform.position.y < 12.83333){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01;
-            }
-            else if(platform.name=="leftFromCentrePlatform3" && platform.position.y < 12.83333){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01;
-            }
-            else if(platform.name=="leftFromCentrePlatform4" && platform.position.y < 12.83333){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01;
-            }
-            else if(platform.name=="leftCentrePlatform" && platform.position.y < 12.83333){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01; 
-            }
-            else if(platform.name=="rightCentrePlatform" && platform.position.y < 12.83333){
-                platform.position.y += 0.0095;
-                platformBody.position.y += 0.0095; 
-            }
-            else if(platform.name=="rightFromCentrePlatform1" && platform.position.y < 12.83333){
-                platform.position.y += 0.009;
-                platformBody.position.y += 0.009; 
-            }
-            else if(platform.name=="rightFromCentrePlatform2" && platform.position.y < 12.83333){
-                platform.position.y += 0.0085;
-                platformBody.position.y += 0.0085;
-            }
-            else if(platform.name=="rightFromCentrePlatform3" && platform.position.y < 12.83333){
-                platform.position.y += 0.008;
-                platformBody.position.y += 0.008;
-            }
-            else if(platform.name=="rightFromCentrePlatform4" && platform.position.y < 12.83333){
-                platform.position.y += 0.0075;
-                platformBody.position.y += 0.0075;
-            }
-            }
-            });
+                if(platform.name=="leftFromCentrePlatform1" && platform.position.y < 12.83333){
+                    platform.position.y += 0.01;
+                    platformBody.position.y += 0.01; 
+                }
+                else if(platform.name=="leftFromCentrePlatform2" && platform.position.y < 12.83333){
+                    platform.position.y += 0.01;
+                    platformBody.position.y += 0.01;
+                }
+                else if(platform.name=="leftFromCentrePlatform3" && platform.position.y < 12.83333){
+                    platform.position.y += 0.01;
+                    platformBody.position.y += 0.01;
+                }
+                else if(platform.name=="leftFromCentrePlatform4" && platform.position.y < 12.83333){
+                    platform.position.y += 0.01;
+                    platformBody.position.y += 0.01;
+                }
+                else if(platform.name=="leftCentrePlatform" && platform.position.y < 12.83333){
+                    platform.position.y += 0.01;
+                    platformBody.position.y += 0.01; 
+                }
+                else if(platform.name=="rightCentrePlatform" && platform.position.y < 12.83333){
+                    platform.position.y += 0.0095;
+                    platformBody.position.y += 0.0095; 
+                }
+                else if(platform.name=="rightFromCentrePlatform1" && platform.position.y < 12.83333){
+                    platform.position.y += 0.009;
+                    platformBody.position.y += 0.009; 
+                }
+                else if(platform.name=="rightFromCentrePlatform2" && platform.position.y < 12.83333){
+                    platform.position.y += 0.0085;
+                    platformBody.position.y += 0.0085;
+                }
+                else if(platform.name=="rightFromCentrePlatform3" && platform.position.y < 12.83333){
+                    platform.position.y += 0.008;
+                    platformBody.position.y += 0.008;
+                }
+                else if(platform.name=="rightFromCentrePlatform4" && platform.position.y < 12.83333){
+                    platform.position.y += 0.0075;
+                    platformBody.position.y += 0.0075;
+                }
+                else if(platform.name=="frontFromCentrePlatform1" && platform.position.y < 10.5){
+                    platform.position.y += 0.01;
+                    platformBody.position.y += 0.01; 
+                }else if(platform.name=="frontFromCentrePlatform2" && platform.position.y < 8){
+                    platform.position.y += 0.01;
+                    platformBody.position.y += 0.01;
+                }
+                else if(platform.name=="frontFromCentrePlatform3" && platform.position.y < 5.5){
+                    platform.position.y += 0.01;
+                    platformBody.position.y += 0.01;
+                }
+                else if(platform.name=="frontFromCentrePlatform4" && platform.position.y < 3){
+                    platform.position.y += 0.01;
+                    platformBody.position.y += 0.01;
+                }
+            }});
         }
         const rightButton = this.objManager.getObject("rightButton");
-        if (rightButton && this.calcEuclid(this.playerBody.position.x, this.playerBody.position.y, this.playerBody.position.z, rightButton.position.x, rightButton.position.y, rightButton.position.z)) {
+        if (rightButton && this.playerBody.position.distanceTo(rightButton.position) <= 2) {
             platformsToRaise.forEach(platformName => {
             const platform = this.objManager.getObject(platformName);
             const platformBody = this.objManager.getPhysicsObject(platformName);
-            if (platform && platformBody) {
-            if(platform.name=="backFromCentrePlatform1" && platform.position.y < 12.83333){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01; 
-            }else if(platform.name=="backFromCentrePlatform2" && platform.position.y < 12.83333){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01;
-            }
-            else if(platform.name=="backFromCentrePlatform3" && platform.position.y < 12.83333){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01;
-            }
-            else if(platform.name=="backFromCentrePlatform4" && platform.position.y < 12.83333){
-                platform.position.y += 0.01;
-                platformBody.position.y += 0.01;
-            }
-            }
-            });
+            if (platform && platformBody) 
+            {
+                if(platform.name=="backFromCentrePlatform1" && platform.position.y < 12.83333){
+                    platform.position.y += 0.01;
+                    platformBody.position.y += 0.01; 
+                }else if(platform.name=="backFromCentrePlatform2" && platform.position.y < 12.83333){
+                    platform.position.y += 0.009;
+                    platformBody.position.y += 0.009;
+                }
+                else if(platform.name=="backFromCentrePlatform3" && platform.position.y < 12.83333){
+                    platform.position.y += 0.008;
+                    platformBody.position.y += 0.008;
+                }
+                else if(platform.name=="backFromCentrePlatform4" && platform.position.y < 12.83333){
+                    platform.position.y += 0.007;
+                    platformBody.position.y += 0.007;
+                }
+                
+            }});
         }
         
         this.world.step(1 / 60);

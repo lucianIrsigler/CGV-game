@@ -287,7 +287,7 @@ export const buttonPositions = [
         name: "centreButton",
         geometry: "button",
         material: "button",
-        position: { x: 0, y: 1.75, z: -centreButtonZPositionOffset },
+        position: { x: 8, y: 1.75, z: -centreButtonZPositionOffset - 2 },
         rotation: { x: 0, y: 0, z: 0 }
     },
     {
@@ -318,13 +318,12 @@ const baseLamp = {
     positionY: 0, 
     positionZ: 0
 };
-const centreLampXPositionOffset = groundDimensions.width/15;
 const centreLampZPositionOffset = groundDimensions.width/10;
 export const lampPositions = {
     doorLamp: Object.assign({}, baseLamp, { positionX: platformDimensions.width/5, positionY: doorPlatformHeight, positionZ: doorPlatformPositionOnWall}),
     leftLamp: Object.assign({}, baseLamp, { positionX: rightPlatformPositionOnWall, positionY: doorPlatformHeight, positionZ: -platformDimensions.width/5 }),
     rightLamp: Object.assign({}, baseLamp, { positionX: leftPlatformPositionOnWall, positionY: doorPlatformHeight, positionZ: platformDimensions.width/5 }),
-    centreLamp: Object.assign({}, baseLamp, { positionX: centreLampXPositionOffset, positionY: 1.75, positionZ: -centreLampZPositionOffset })
+    centreLamp: Object.assign({}, baseLamp, { positionX: 8, positionY: 1.75, positionZ: -centreLampZPositionOffset })
 };
 //END LAMP POSITIONS---------------------------------------------------
 
