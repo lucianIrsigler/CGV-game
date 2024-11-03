@@ -267,7 +267,7 @@ function addButtons(){
 }
 
 function toggleMenu() {
-    if (document.getElementById("close-controls-button").style.display!="none"){
+    if (document.getElementById("controls-list").style.display!="none"){
         let menu = document.getElementById("menu");
         let controlsMenu = document.getElementById("controls-list")
         menu.style.display="block";
