@@ -58,6 +58,7 @@ export class AnimationManager {
     stopAnimationLoop() {
         if (this.currentScene) {
             this.currentScene.stopAnimate();
+            
         }
     }
 
@@ -65,6 +66,10 @@ export class AnimationManager {
         if (!this.isPaused) { // Only pause if not already paused
             this.isPaused = true; // Set pause state
             this.stopAnimationLoop(); // Stop the animation loop
+            const myEvent = new CustomEvent("Pause", {});
+
+            document.dispatchEvent(myEvent);
+
         }
     }
 
@@ -72,6 +77,9 @@ export class AnimationManager {
         this.isPaused = false; // Clear pause state
         if (this.currentScene!=null && this.currentScene.animationId === null) {
             this.startAnimationLoop(); // Restart the loop if it was stopped
+            const myEvent = new CustomEvent("Resume", {});
+
+            document.dispatchEvent(myEvent);
         }
     }
 

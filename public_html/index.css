@@ -13,30 +13,6 @@ body {
 
 canvas { display: block;}
 
-#menu {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    display: none; /* Initially hidden */
-    
-}
-.menu-button {
-    display: block;
-    margin: 10px 0;
-    padding: 10px 20px;
-    font-size: 24px;
-    background-color: #333;
-    color: white;
-    border: none;
-    cursor: url('public/icons/cursor.png'), auto; 
-}
-
-.menu-button:hover {
-    background-color: #555;
-}
-
 #aimingDot {
     position: absolute;
     top: 50%;
@@ -149,30 +125,7 @@ label{
 
 }
 
-#fireflies {
-    position: absolute;
-    display: block;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none; /* So it doesn't interfere with clicking */
-}
 
-.firefly {
-    position: absolute;
-    background-color: rgba(255, 255, 255, 0.8); /* Light color for fireflies */
-    border-radius: 50%;
-    width: 5px; /* Firefly size */
-    height: 5px; /* Firefly size */
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
-    animation: flicker 1.5s infinite alternate; /* Flicker effect */
-}
-
-@keyframes flicker {
-    0% { opacity: 0.5; }
-    100% { opacity: 1; }
-}
 
 #boss-health-bar-container {
     position: fixed;
@@ -212,3 +165,177 @@ label{
     object-fit: cover;
     z-index: -1;
 }
+
+
+
+/* Import a creepy font */
+@import url('https://fonts.googleapis.com/css2?family=Nosifer&display=swap');
+
+.menu{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.85);
+    padding: 2rem;
+    border: 2px solid #440000;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.2),
+                inset 0 0 30px rgba(255, 0, 0, 0.3);
+    min-width: 300px;
+    display: none;
+}
+
+
+#menu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.85);
+    padding: 2rem;
+    border: 2px solid #440000;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.2),
+                inset 0 0 30px rgba(255, 0, 0, 0.3);
+    min-width: 300px;
+    display: none;
+}
+
+.menu-button {
+    display: block;
+    margin: 25px auto;
+    padding: 15px 40px;
+    font-family: 'Nosifer', cursive;
+    font-size: 24px;
+    background: linear-gradient(45deg, #1a0000, #330000);
+    color: #bb0000;
+    border: 1px solid #440000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 5px #ff0000;
+    position: relative;
+    letter-spacing: 2px;
+}
+
+.menu-button:hover {
+    background: linear-gradient(45deg, #330000, #660000);
+    color: #ff0000;
+    transform: scale(1.05);
+    box-shadow: 
+        0 0 20px rgba(255, 0, 0, 0.3),
+        0 0 30px rgba(255, 0, 0, 0.2),
+        0 0 40px rgba(255, 0, 0, 0.1);
+    border: 1px solid #ff0000;
+}
+
+.menu-button:active {
+    transform: scale(0.98);
+}
+
+/* Add blood drip effect */
+.menu-button::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    background: #660000;
+    transition: all 0.3s ease;
+}
+
+.menu-button:hover::before {
+    width: 2px;
+    height: 15px;
+    background: #ff0000;
+}
+
+/* Flickering animation */
+@keyframes flicker {
+    0% { opacity: 1; }
+    5% { opacity: 0.8; }
+    10% { opacity: 1; }
+    15% { opacity: 0.9; }
+    20% { opacity: 1; }
+    55% { opacity: 1; }
+    60% { opacity: 0.7; }
+    65% { opacity: 1; }
+    70% { opacity: 0.8; }
+    75% { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+#menu {
+    animation: flicker 5s infinite;
+}
+
+/* Pulsing border effect */
+@keyframes pulse {
+    0% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.2),
+                     inset 0 0 30px rgba(255, 0, 0, 0.3); }
+    50% { box-shadow: 0 0 25px rgba(255, 0, 0, 0.4),
+                      inset 0 0 40px rgba(255, 0, 0, 0.5); }
+    100% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.2),
+                       inset 0 0 30px rgba(255, 0, 0, 0.3); }
+}
+
+#menu {
+    animation: 
+        flicker 5s infinite,
+        pulse 3s infinite;
+}
+
+/* Add fog effect */
+#menu::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        rgba(255, 0, 0, 0.05), 
+        transparent,
+        rgba(0, 0, 0, 0.1));
+    pointer-events: none;
+    animation: fogMove 20s infinite;
+}
+
+@keyframes fogMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+.controls-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.controls-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px 0;
+    font-size: 16px;
+    font-family: 'Nosifer';
+    color: #bb0000;
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+.key {
+    background: linear-gradient(45deg, #1a0000, #330000);
+    padding: 5px 10px;
+    border: 1px solid #440000;
+    margin-left: 10px;
+    min-width: 30px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
+}
+

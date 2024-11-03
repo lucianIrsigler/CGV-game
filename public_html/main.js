@@ -401,6 +401,27 @@ document.getElementById("endless").addEventListener("click",()=>{
 
 })
 
+
+
+
+document.getElementById("controls-button").addEventListener("click",(e)=>{
+    let menu = document.getElementById("menu");
+    let controlsMenu = document.getElementById("controls-list")
+
+    menu.style.display="none";
+    controlsMenu.style.display="block";
+})
+
+
+document.getElementById("close-controls-button").addEventListener("click",(e)=>{
+    let menu = document.getElementById("menu");
+    let controlsMenu = document.getElementById("controls-list")
+
+    menu.style.display="block";
+    controlsMenu.style.display="none";
+})
+
+
 document.getElementById("restart-button").addEventListener("click",(e)=>{
     
     playMenuClick();
