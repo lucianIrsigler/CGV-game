@@ -61,10 +61,10 @@ function loadModules(directory) {
         const script = document.createElement('script');
         script.src = `${directory}/${file}`;
         script.type = 'module';
-        
+
         // Optionally add async or defer attributes if desired
         script.async = false;
-        
+
         // Append the script to the document's body or head
         document.body.appendChild(script);
 
@@ -78,10 +78,10 @@ loadModules('/src'); // Replace 'src' with your actual base directory path if di
 
 
 // LOAD TEST
-import {CustomScene}  from "./src/scenes/testScene.js";
-import {Level1}  from "./src/scenes/Level1.js";
-import {Level2}  from "./src/scenes/Level2.js";
-import {Level3}  from "./src/scenes/Level3.js";
+import { CustomScene } from "./src/scenes/testScene.js";
+import { Level1 } from "./src/scenes/Level1.js";
+import { Level2 } from "./src/scenes/Level2.js";
+import { Level3 } from "./src/scenes/Level3.js";
 
 import { CustomScene1 } from "./src/scenes/testScene1.js";
 // import { CustomScene2 } from "./src/scenes/testScene2.js";
@@ -93,5 +93,5 @@ const animationManager = new AnimationManager();
 
 // document.getElementById("start-menu").style.display = "none";
 
-animationManager.switchScene(new Level2(),0);
+animationManager.switchScene(new Level3(), 0);
 

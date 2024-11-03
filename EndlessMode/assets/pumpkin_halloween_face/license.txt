@@ -1,0 +1,11 @@
+Model Information:
+* title:	Pumpkin Halloween Face
+* source:	https://sketchfab.com/3d-models/pumpkin-halloween-face-2d9369a0f2e847bb99803ab8709fd04b
+* author:	Sir Erdees (https://sketchfab.com/sirerdees)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Pumpkin Halloween Face" (https://sketchfab.com/3d-models/pumpkin-halloween-face-2d9369a0f2e847bb99803ab8709fd04b) by Sir Erdees (https://sketchfab.com/sirerdees) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
