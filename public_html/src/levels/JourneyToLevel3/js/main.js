@@ -15,6 +15,14 @@ const textureLoader = new THREE.TextureLoader()
 let allModelsLoaded = false;
 
 
+document.getElementById("menuButton").addEventListener("click",(e)=>{
+    setTimeout(() => { location.replace("https://lamp.ms.wits.ac.za/~santibozobozoclub"); }, 1000)
+})
+
+document.getElementById("restartButton").addEventListener("click",(e)=>{
+    setTimeout(() => { location.reload(); }, 1000)
+})
+
 
 
 
@@ -1049,7 +1057,7 @@ const animate = (time) => {
             if (document.getElementById('powerLevel').getAttribute('value') <= 0) {
                 alert("You are not ready for the boss fight!")
                 renderer.setAnimationLoop(null)
-                setTimeout(() => { location.reload(); })
+                setTimeout(() => { location.reload(); },1000)
 
             }
         }
@@ -1134,7 +1142,7 @@ const animate = (time) => {
         if (duckModel.position.y <= lavaYPosition) {
             alert("You are not ready for the boss fight! :(")
             renderer.setAnimationLoop(null)
-            setTimeout(() => { location.reload(); })
+            setTimeout(() => { location.reload(); },1000)
 
         }
         if (duckModel.position.z <= grounds[grounds.length - 1].position.z - lastStageGroundDepth / 2) {
@@ -1225,7 +1233,7 @@ const animate = (time) => {
                     alert("You are not ready for the boss fight!")
                     renderer.setAnimationLoop(null);
 
-                    setTimeout(() => { location.reload(); })
+                    setTimeout(() => { location.reload(); },1000)
                 }
             }
         })
