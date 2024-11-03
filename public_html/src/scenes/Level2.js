@@ -58,7 +58,7 @@ export class Level2 extends SceneBaseClass {
         this.maxHealth = 100; // Define the maximum health
         this.health = this.maxHealth;
         this.loaded = false;
-        this.damageRate = 0.15; // Define the damage rate
+        this.damageRate = 0.10; // Define the damage rate
         this.healingRate = 10; // Define the healing rate
 
         //FLAGS
