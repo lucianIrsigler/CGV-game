@@ -408,6 +408,16 @@ export class Level2 extends SceneBaseClass {
         });
 
         this.restartButton.addEventListener("click", this.restart.bind(this));
+
+        document.addEventListener("Resume",(e)=>{
+            this.startDamageTimer();
+        })
+
+        document.addEventListener("Pause",(e)=>{
+            clearInterval(this.intervalID);
+        })
+
+
     }
 
     calcEuclid(x1, y1, z1, x2, y2, z2) {
@@ -423,7 +433,7 @@ export class Level2 extends SceneBaseClass {
 
     // function to heal player at lamp
     startDamageTimer(){
-        setInterval(()=>{
+        this.intervalID = setInterval(()=>{
             if (this.loader.isLoaded()){
                 let valid = false;
 
@@ -644,6 +654,7 @@ export class Level2 extends SceneBaseClass {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'e') {
                 const res = this.doorPositions.checkIfOpen()
+                clearInterval(this.intervalID);
 
                 if (res){
                     setTimeout(()=>{
@@ -683,7 +694,14 @@ export class Level2 extends SceneBaseClass {
 
         this.objManager.removeAllObjects();
         this.lightManager.removeAllLights();
-    
+
+        if (this.miniMap){
+            this.miniMap.dispose();
+        }
+
+        clearInterval(this.intervalID);
+
+
         if (this.renderer) {
             this.renderer.dispose();
             // Ensure that the renderer's DOM element is removed safely

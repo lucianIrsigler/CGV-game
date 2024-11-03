@@ -589,6 +589,8 @@ export class Level1 extends SceneBaseClass {
         window.removeEventListener('load', this.initAudio);
         this.restartButton.removeEventListener('click', this.restart);
 
+        document.getElementById("doorPrompt").style.display="none";
+
         this.gameOverScreen.innerHTML= "";
         this.gameOverScreen.innerHTML+= "<h1 id=\"gameOverHeader\">Stay in the light</h1>";
         this.gameOverScreen.innerHTML+= "<button id=\"restartButton\" style=\"padding: 10px 20px; font-size: 20px;\">Restart</button>";

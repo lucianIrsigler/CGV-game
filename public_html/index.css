@@ -339,3 +339,38 @@ label{
     box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
 }
 
+
+.rules-container {
+    text-align: center;
+    padding: 2rem;
+    max-width: 600px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border: 2px solid #52006A;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(82, 0, 106, 0.8);
+    position: relative;
+    z-index: 1;
+}
+
+.rules-title {
+    font-size: 3rem;
+    color: #fff;
+    text-shadow: 0 0 10px #52006A, 0 0 20px #8000FF;
+    margin-bottom: 1.5rem;
+}
+
+.rules-list {
+    list-style: none;
+    font-size: 1.25rem;
+    line-height: 2;
+}
+
+.rules-list li {
+    margin: 0.5rem 0;
+}
+
+.highlight {
+    color: #ffffff;
+    font-weight: bold;
+    text-shadow: 0 0 5px #8000FF, 0 0 10px #D800FF;
+}

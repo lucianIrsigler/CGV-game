@@ -234,11 +234,11 @@ function goToStartMenu(){
 function addButtons(){
     const blankDiv = document.getElementById("blank");
     const buttons = [
-        { id: "lvl0", title: "Start the game"},
         { id: 'lvl1', title: 'Level 1' },
         { id: 'lvl2', title: 'Level 2' },
         { id: 'lvl3', title: 'Level 3' },
         { id: 'lvl4', title: 'Boss level' },
+        { id: 'endless', title: 'Endless' },
     ];
 
     // Clear previous content in the blank div
@@ -290,13 +290,6 @@ document.getElementById("start").addEventListener("click",()=>{
     playMenuClick();
     addButtons();
 
-    document.getElementById('lvl0').addEventListener('click', function() {
-        playMenuClick();
-        isPlayingWholeGame = true;
-        startLevel();
-        animationManager.switchScene(new Level1(),0);
-    });
-
 
     document.getElementById('lvl1').addEventListener('click', function() {
         playMenuClick();
@@ -320,6 +313,16 @@ document.getElementById("start").addEventListener("click",()=>{
         startLevel();
         animationManager.switchScene(new Level3(),0);
     });
+
+
+    document.getElementById("endless").addEventListener("click",()=>{
+        document.exitPointerLock();
+        playMenuClick();
+
+        window.location.replace("src/levels/EndlessMode/index.html")
+
+    })
+
 
 })
 
@@ -362,44 +365,16 @@ document.getElementById("how-to-play").addEventListener("click",()=>{
     document.exitPointerLock();
 
     playMenuClick();
-    
+    document.getElementById("start-menu").style.display="none";
+
     const blankDiv = document.getElementById("blank");
 
     blankDiv.innerHTML = '';
 
-
-    const title = document.createElement("h1");
-    title.classList.add("start-menu-title");
-    title.textContent = "How to play";
-    blankDiv.appendChild(title);
-
-    let text = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-    Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris 
-    nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit 
-    in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur 
-    sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`;
-
-    const newText = document.createElement("p");
-    newText.classList.add("text");
-    newText.textContent = text;
-    blankDiv.appendChild(newText);
-
-
-    document.getElementById("user-health-bar-container").style.display="none";
-    document.getElementById("start-menu").style.display="none";
-    onStartScreen = false;
-})
-
-document.getElementById("endless").addEventListener("click",()=>{
-    document.exitPointerLock();
-    playMenuClick();
-
-    window.location.replace("src/levels/EndlessMode/index.html")
-
-
+    document.getElementById("rules-board").style.display="block";
 
 })
+
 
 
 
@@ -448,6 +423,8 @@ window.addEventListener('keydown', function(event) {
             document.getElementById("blank").innerHTML = '';
             document.getElementById("start-menu").style.display="flex";
             document.getElementById("user-health-bar-container").style.display="none";
+            document.getElementById("rules-board").style.display="none";
+
             onStartScreen = false;
         }
     }
@@ -457,6 +434,8 @@ window.addEventListener('keydown', function(event) {
                 document.getElementById("blank").innerHTML = '';
                 document.getElementById("start-menu").style.display="flex";
                 document.getElementById("user-health-bar-container").style.display="none";
+                document.getElementById("rules-board").style.display="none";
+
                 onStartScreen = false;
             }
             return;

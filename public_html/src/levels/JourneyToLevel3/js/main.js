@@ -1137,6 +1137,8 @@ const animate = (time) => {
 
             // stop animation
             renderer.setAnimationLoop(null)
+
+            
             // document.location.href = '../../Level3/index.html'
         }
 

@@ -20,7 +20,7 @@
   <div class="start-menu" id="blank"></div>
 
 
-  <div class="rules-board" style="display: none;">
+  <div class="rules-board" id="rules-board" style="display: none;">
     <h1 class="rules-title">Game Rules</h1>
     <ul class="rules-list">
         <li>You need to be tested before you can face the BOSS!</li>
@@ -49,22 +49,27 @@
     <div id="user-health-bar"></div>
   </div>
 
+
   <!-- Boss health bar -->
   <div id="boss-health-bar-container" style="display: none;">
     <div id="boss-name">Boss Name</div>
     <div id="boss-health-bar"></div>
   </div>
 
+
   <div id="gameOverScreen"
     style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); color: white; text-align: center; padding-top: 20%;">
     <h1 id="gameOverHeader">Stay in the light</h1>
     <button id="restartButton" style="padding: 10px 20px; font-size: 20px;">Restart</button>
   </div>
+
+
   <div id="menu">
     <button class="menu-button" id="controls-button">Controls</button>
     <button class="menu-button" id="restart-button">Restart</button>
     <button class="menu-button" id="exit-button">Exit</button>
   </div>
+
 
   <div class="menu" id="controls-list">
     <button class="menu-button" id="close-controls-button">Close menu</button>
@@ -103,18 +108,10 @@
   </div>
 
 
-
-
-  <!-- <script type="importmap"> { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@<version>/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@<version>/examples/jsm/" } } </script> -->
-
-  <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"></script> -->
-  <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.142.0/examples/jsm/loaders/GLTFLoader.js"></script> -->
-
-
-
   <script type="importmap"> { "imports": { 
       "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js", 
         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/" } } </script>
+
 
   <!-- Import Cannon-ES from CDN -->
   <script type="module">
