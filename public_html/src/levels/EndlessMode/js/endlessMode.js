@@ -1,12 +1,20 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+<<<<<<< HEAD:public_html/src/levels/EndlessMode/js/endlessMode.js
 // import * as dat from 'dat.gui'
+=======
+import * as dat from 'dat.gui'
+>>>>>>> 5e74bd427f2da7d80fadc7243ce7a70c0330e67a:EndlessMode/js/endlessMode.js
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 
 // import * as THREE from 'https://unpkg.com/three@0.153.0/build/three.module.js';
 // import { OrbitControls } from 'https://unpkg.com/three@0.153.0/examples/jsm/controls/OrbitControls.js';
+<<<<<<< HEAD:public_html/src/levels/EndlessMode/js/endlessMode.js
 import * as dat from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js';
+=======
+// import * as dat from 'https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js';
+>>>>>>> 5e74bd427f2da7d80fadc7243ce7a70c0330e67a:EndlessMode/js/endlessMode.js
 // import { GLTFLoader } from 'https://unpkg.com/three@0.153.0/examples/jsm/loaders/GLTFLoader.js';
 // import { loadTextures, applyTextureSettings } from './TextureLoaderUtil.js';
 
@@ -305,11 +313,19 @@ const allJumpScareAudioLoaded = () => {
 let lavaWidth = 400;
 let lavaHeight = lavaWidth * 4;
 
+<<<<<<< HEAD:public_html/src/levels/EndlessMode/js/endlessMode.js
 const lavaTexture = textureLoader.load('../img/Lava005_4K/Lava005_4K-JPG_Color.jpg'); // Base color
 const lavaNormal = textureLoader.load('../img/Lava005_4K/Lava005_4K-JPG_NormalGL.jpg'); // Normal map (OpenGL)
 const lavaDisplacement = textureLoader.load('../img/Lava005_4K/Lava005_4K-JPG_Displacement.jpg'); // Displacement map
 const lavaEmission = textureLoader.load('../img/Lava005_4K/Lava005_4K-JPG_Emission.jpg'); // Emission map
 const lavaRoughness = textureLoader.load('../img/Lava005_4K/Lava005_4K-JPG_Roughness.jpg'); // Roughness map
+=======
+const lavaTexture = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_Color.jpg'); // Base color
+const lavaNormal = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_NormalGL.jpg'); // Normal map (OpenGL)
+const lavaDisplacement = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_Displacement.jpg'); // Displacement map
+const lavaEmission = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_Emission.jpg'); // Emission map
+const lavaRoughness = textureLoader.load('../img/Lava005_4k/Lava005_4K-JPG_Roughness.jpg'); // Roughness map
+>>>>>>> 5e74bd427f2da7d80fadc7243ce7a70c0330e67a:EndlessMode/js/endlessMode.js
 
 // Set wrapping mode and repeat for each texture
 [lavaTexture, lavaNormal, lavaDisplacement, lavaEmission, lavaRoughness].forEach(texture => {

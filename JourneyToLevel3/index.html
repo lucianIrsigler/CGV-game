@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Journey To Boss</title>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <script type="module" src="js/main.js"></script>
+    <!-- <script type="module" src="js/mainInitAnimate.js"></script> -->
+
+    <header class="game-header">
+        <div class="header-left">
+            <span class="level-display">Stay in the light!</span></span>
+        </div>
+        <div class="header-right">
+            <button><a href="Level2/level2.html">Level2</a> </button>
+
+            <button class="header-btn" id="menuButton">Menu</button>
+            <button class="header-btn" id="helpButton">Help</button>
+        </div>
+    </header>
+
+    <footer class="footer">
+
+        <!-- Power Level Progress Bar -->
+        <div class="progress-container">
+            <progress id="powerLevel" value="100" max="100"></progress>
+            <div class="progress-text" id="powerText">100%</div>
+        </div>
+
+    </footer>
+
+
+    <div class="rules-board">
+        <h1 class="rules-title">Game Rules</h1>
+        <ul class="rules-list">
+            <li>You need to be tested before you can face the BOSS!</li>
+            <li>Always stay in the light!</li>
+            <li>When boulders start flying, the light will follow you. Just avoid the boulders!</li>
+            <li>At the last giant platform, the light will try to escape, follow it!</li>
+            <li>Be fast! and Good Luck! (this wont help)</li>
+            <button class="start-level-button">Start the test!</button>
+        </ul>
+    </div>
+
+
+</html>
+
+<!-- 
+
+    TO RUN:
+    parcel ./src/index.html
+ -->
