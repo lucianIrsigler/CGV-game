@@ -267,6 +267,14 @@ function addButtons(){
 }
 
 function toggleMenu() {
+    if (document.getElementById("close-controls-button").style.display!="none"){
+        let menu = document.getElementById("menu");
+        let controlsMenu = document.getElementById("controls-list")
+        menu.style.display="block";
+        controlsMenu.style.display="none";
+        return;
+    }
+    
     menuVisible = !menuVisible;
     const menu = document.getElementById('menu');
     if (menuVisible) {
@@ -442,7 +450,6 @@ window.addEventListener('keydown', function(event) {
                 document.getElementById("start-menu").style.display="flex";
                 document.getElementById("user-health-bar-container").style.display="none";
                 document.getElementById("rules-board").style.display="none";
-
                 onStartScreen = false;
             }
             return;
