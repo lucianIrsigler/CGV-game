@@ -118,6 +118,10 @@ export class Level3 extends SceneBaseClass{
         // this.loadSkybox();
         this.startDamageTimer();
         this.miniMap.init_miniMap_(window,document,this.scene);
+        // Ensure the scene has fully loaded, then simulate a click
+    setTimeout(() => {
+        document.body.click(); // Simulate a click on the body
+    }, 100); // Adding a small delay to ensure everything is initialized
     }   
 
     // loadSkybox() {

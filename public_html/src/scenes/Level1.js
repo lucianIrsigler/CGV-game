@@ -96,7 +96,9 @@ export class Level1 extends SceneBaseClass {
 
         this.startDamageTimer();
         window.addEventListener('load', this.initAudio);
-       
+        setTimeout(() => {
+            document.body.click(); // Simulate a click on the body
+        }, 100); // Adding a small delay to ensure everything is initialized
     }   
 
     /**

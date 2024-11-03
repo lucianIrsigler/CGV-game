@@ -91,6 +91,9 @@ export class Level2 extends SceneBaseClass {
         // this.startDamageTimer();
         const currentDoor = doorPositions.doorOne;
         this.doorPositions.init_door_(this.scene,currentDoor);
+        setTimeout(() => {
+            document.body.click(); // Simulate a click on the body
+        }, 100); // Adding a small delay to ensure everything is initialized
 
         // this.animate();
     }//initalizes the scene
