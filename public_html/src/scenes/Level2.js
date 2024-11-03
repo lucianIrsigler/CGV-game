@@ -482,6 +482,7 @@ export class Level2 extends SceneBaseClass {
      * @returns 
      */
     animate=(currentTime)=> {
+
         this.animationId = requestAnimationFrame(this.animate);
 
         if (this.cameraManager==undefined||!this.loader.isLoaded() || !this.playerLoaded){
@@ -491,9 +492,39 @@ export class Level2 extends SceneBaseClass {
         if (this.health <= 0) {
             this.youLose(); // Call the lose condition function
         } 
-
         this.world.step(1 / 60);
         this.objManager.update();
+
+        // Check if the button is pressed
+        const buttonA = this.objManager.getObject("centreButton");
+        if (buttonA && this.playerBody.position.distanceTo(buttonA.position) <= 2) {
+            if (!this.platformsMoved) {
+                this.movePlatforms("A");
+                this.movePlatforms("B");
+                this.platformsMoved = true;
+
+                // Set a timeout to reverse the platforms after 10 seconds
+                setTimeout(() => {
+                    this.reversePlatforms("A");
+                    this.reversePlatforms("B");
+                    this.platformsMoved = false;
+                }, 10000);
+            }
+        }
+        const buttonB = this.objManager.getObject("leftButton");
+        if (buttonB && this.playerBody.position.distanceTo(buttonB.position) <= 2) {
+            if (!this.platformsMoved) {
+                this.movePlatforms("C");
+                this.platformsMoved = true;
+            }
+        }
+        const buttonC = this.objManager.getObject("rightButton");
+        if (buttonC && this.playerBody.position.distanceTo(buttonC.position) <= 2) {
+            if (!this.platformsMoved) {
+                this.movePlatforms("D");
+                this.platformsMoved = true;
+            }
+        }
 
         const timeElapsedSec = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
@@ -506,7 +537,7 @@ export class Level2 extends SceneBaseClass {
         this.lightMechanicManager.updateHealthBar();
         // Check proximity to the door
         this.doorPositions.checkDoorProximity(this.target);
-    
+
         //Handle the 'E' key press to open the door
         document.addEventListener('keydown', (e) => {
             if (e.key === 'e') {
@@ -529,7 +560,6 @@ export class Level2 extends SceneBaseClass {
         this.animationId=null;
     }
 
-
     restart() {
         this.gameOverScreen.style.display = "none";
         this.playerBody.position.set(0, 0.5, 0);
@@ -538,6 +568,7 @@ export class Level2 extends SceneBaseClass {
             lampLight.intensity = 0.5; // Reset to original intensity
         });
         document.body.style.cursor = "none"
+        this.platformsMoved = false; // Reset the platformsMoved flag
     }
 
     disposeLevel(){
@@ -545,7 +576,7 @@ export class Level2 extends SceneBaseClass {
 
         this.objManager.removeAllObjects();
         this.lightManager.removeAllLights();
-    
+
         if (this.renderer) {
             this.renderer.dispose();
             // Ensure that the renderer's DOM element is removed safely
@@ -555,5 +586,122 @@ export class Level2 extends SceneBaseClass {
                 console.warn("Renderer's DOM element could not be removed:", e);
             }
         }
+    }
+
+    movePlatforms(button) {
+        let platformsToMove = [];
+        let stepHeight = 0;
+
+        if (button === "A") {
+            platformsToMove = [
+                "leftCentrePlatform",
+                "leftFromCentrePlatform1",
+                "leftFromCentrePlatform2",
+                "leftFromCentrePlatform3",
+                "leftFromCentrePlatform4"
+            ];
+            stepHeight = 1.9;
+        } else if (button === "B") {
+            platformsToMove = [
+                "rightCentrePlatform",
+                "rightFromCentrePlatform1",
+                "rightFromCentrePlatform2",
+                "rightFromCentrePlatform3",
+                "rightFromCentrePlatform4"
+            ];
+            stepHeight = 1.9;
+        } else if (button === "C") {
+            platformsToMove = [
+                "backFromCentrePlatform1",
+                "backFromCentrePlatform2"
+            ];
+            stepHeight = 2.4;
+        } else if (button === "D") {
+            platformsToMove = [
+                "backFromCentrePlatform3",
+                "backFromCentrePlatform4"
+            ];
+            stepHeight = 2.4;
+        }
+
+        platformsToMove.forEach((platformName, index) => {
+            const platform = this.objManager.getObject(platformName);
+            const platformBody = this.objManager.getPhysicsObject(platformName);
+            if (platform && platformBody) {
+                const targetY = platform.position.y + stepHeight * (index + 1);
+                const duration = 1000000;
+                const startTime = performance.now();
+
+                const animatePlatform = (currentTime) => {
+                    const elapsedTime = currentTime - startTime;
+                    const progress = Math.min(elapsedTime / duration, 1);
+                    const newY = platform.position.y + progress * stepHeight * (index + 1);
+
+                    platform.position.y = newY;
+                    platformBody.position.y = newY;
+
+                    if (progress < 1 && platform.position.y < targetY) {
+                        requestAnimationFrame(animatePlatform);
+                    } else {
+                        platform.position.y = targetY;
+                        platformBody.position.y = targetY;
+                    }
+                };
+
+                requestAnimationFrame(animatePlatform);
+            }
+        });
+    }
+
+    reversePlatforms(button) {
+        let platformsToMove = [];
+        let stepHeight = 0;
+
+        if (button === "A") {
+            platformsToMove = [
+                "leftCentrePlatform",
+                "leftFromCentrePlatform1",
+                "leftFromCentrePlatform2",
+                "leftFromCentrePlatform3",
+                "leftFromCentrePlatform4"
+            ];
+            stepHeight = 1.9;
+        } else if (button === "B") {
+            platformsToMove = [
+                "rightCentrePlatform",
+                "rightFromCentrePlatform1",
+                "rightFromCentrePlatform2",
+                "rightFromCentrePlatform3",
+                "rightFromCentrePlatform4"
+            ];
+            stepHeight = 1.9;
+        }
+        platformsToMove.forEach((platformName, index) => {
+            const platform = this.objManager.getObject(platformName);
+            const platformBody = this.objManager.getPhysicsObject(platformName);
+            if (platform && platformBody) {
+                const targetY = platform.position.y - stepHeight * (index + 1);
+                const duration = 1000000;
+                const startTime = performance.now();
+
+                const animatePlatform = (currentTime) => {
+                    const elapsedTime = currentTime - startTime;
+                    const progress = Math.min(elapsedTime / duration, 1);
+                    const newY = platform.position.y - progress * stepHeight * (index + 1);
+
+                    platform.position.y = newY;
+                    platformBody.position.y = newY;
+
+                    if (progress < 1 && platform.position.y > targetY) {
+                        requestAnimationFrame(animatePlatform);
+                    } else {
+                        platform.position.y = targetY;
+                        platformBody.position.y = targetY;
+                    }
+                };
+
+                requestAnimationFrame(animatePlatform);
+            }
+        });
     }
 }

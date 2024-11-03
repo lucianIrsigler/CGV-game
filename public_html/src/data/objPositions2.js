@@ -108,13 +108,6 @@ export const platformPositions = [
         rotation: { x: 0, y: 0, z: 0 }
     },
     {
-        name: "rightPlatform",
-        geometry: "platform",
-        material: "platform",
-        position: { x: rightPlatformPositionOnWall, y: doorPlatformHeight, z: 0 },
-        rotation: { x: 0, y: rightAngle, z: 0 }
-    },
-    {
         name: "leftPlatform",
         geometry: "platform",
         material: "platform",
@@ -127,13 +120,6 @@ export const platformPositions = [
         material: "platform",
         position: { x: -2.5, y: 1.25, z: 0 },
         rotation: { x: 0, y: rightAngle, z: 0 }
-    },
-    {
-        name: "rightCentrePlatform",
-        geometry: "platform",
-        material: "platform",
-        position: { x: 2.5, y: 1.25, z: 0 },
-        rotation: { x: 0, y: -rightAngle, z: 0 }
     },
     {
         name: "leftFromCentrePlatform1",
@@ -169,6 +155,20 @@ export const platformPositions = [
         material: "platform",
         position: { x: -27.5, y: 1.25, z: 0 },
         rotation: { x: 0, y: rightAngle, z: 0 }
+    },
+    {
+        name: "rightPlatform",
+        geometry: "platform",
+        material: "platform",
+        position: { x: rightPlatformPositionOnWall, y: doorPlatformHeight, z: 0 },
+        rotation: { x: 0, y: rightAngle, z: 0 }
+    },
+    {
+        name: "rightCentrePlatform",
+        geometry: "platform",
+        material: "platform",
+        position: { x: 2.5, y: 1.25, z: 0 },
+        rotation: { x: 0, y: -rightAngle, z: 0 }
     },
     {
         name: "rightFromCentrePlatform1",
@@ -288,6 +288,20 @@ export const buttonPositions = [
         geometry: "button",
         material: "button",
         position: { x: 0, y: 1.75, z: -centreButtonZPositionOffset },
+        rotation: { x: 0, y: 0, z: 0 }
+    },
+    {
+        name: "leftButton",
+        geometry: "button",
+        material: "button",
+        position: { x: leftPlatformPositionOnWall, y: doorPlatformHeight + 0.5, z: 0 },
+        rotation: { x: 0, y: 0, z: 0 }
+    },
+    {
+        name: "rightButton",
+        geometry: "button",
+        material: "button",
+        position: { x: rightPlatformPositionOnWall, y: doorPlatformHeight + 0.5, z: 0 },
         rotation: { x: 0, y: 0, z: 0 }
     }
 ];
