@@ -108,7 +108,8 @@
             <li>2. Press <span class="highlight">R</span> to change the camera</li>
             <li>3. Last but not least... <span class="highlight">Stay in the LIGHT</span></li>
         </ul>
-        <button class="start-button">Enter...If You Dare</button>
+        <button class="start-button" onclick="navigateToMenu()">Return to menu</button>
+
     </div>
 
     <script>
@@ -200,6 +201,10 @@
             setTimeout(() => {
                 lightsContainer.appendChild(light);
             }, i * 50);
+        }
+
+        function navigateToMenu(){
+            location.replace("./../");
         }
     </script>
 </body>

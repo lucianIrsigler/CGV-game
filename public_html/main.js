@@ -377,11 +377,8 @@ document.getElementById("how-to-play").addEventListener("click",()=>{
     playMenuClick();
     document.getElementById("start-menu").style.display="none";
 
-    const blankDiv = document.getElementById("blank");
+    location.replace("Rules/rules.html");
 
-    blankDiv.innerHTML = '';
-
-    document.getElementById("rules-board").style.display="block";
 
 })
 
