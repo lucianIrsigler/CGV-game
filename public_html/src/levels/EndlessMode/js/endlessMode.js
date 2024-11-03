@@ -1034,7 +1034,8 @@ const animate = (time) => {
 
             if (document.getElementById('powerLevel').getAttribute('value') <= 0) {
                 alert("You are not ready for the boss fight!")
-                renderer.setAnimationLoop(null)
+                renderer.setAnimationLoop(null);
+                location.reload()
             }
         }
 
@@ -1118,6 +1119,8 @@ const animate = (time) => {
         if (duckModel.position.y <= lavaYPosition) {
             alert("You are not ready for the boss fight! :(")
             renderer.setAnimationLoop(null)
+            location.reload()
+
         }
 
         if (duckModel.position.z <= grounds[grounds.length - 1].position.z) {
@@ -1197,6 +1200,8 @@ const animate = (time) => {
                 if (document.getElementById('powerLevel').getAttribute('value') <= 0) {
                     alert("You are not ready for the boss fight!")
                     renderer.setAnimationLoop(null)
+                    location.reload()
+
                 }
             }
         })

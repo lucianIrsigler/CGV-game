@@ -435,6 +435,11 @@ export class Level2 extends SceneBaseClass {
 
     // function to heal player at lamp
     startDamageTimer(){
+        if (this.intervalID) {
+            clearInterval(this.intervalID);
+        }
+
+
         this.intervalID = setInterval(()=>{
             if (this.loader.isLoaded()){
                 let valid = false;
@@ -471,8 +476,13 @@ export class Level2 extends SceneBaseClass {
 
     // Function to handle loss condition
     youLose() {
+        document.exitPointerLock();
         //stop animations
-        cancelAnimationFrame(this.animationId);
+        // cancelAnimationFrame(this.animationId);
+        if (this.intervalID){
+            clearInterval(this.intervalID);
+            this.intervalID=null;
+        }
 
         document.getElementById('gameOverHeader').innerText = "You Died!\nYou ran out of light and the darkness consumed you!";
 
@@ -482,7 +492,6 @@ export class Level2 extends SceneBaseClass {
         document.getElementById('user-health-bar-container').style.display = 'none';
         document.getElementById('boss-health-bar-container').style.display = 'none';
 
-        this.restartButton.addEventListener("click", this.restart); // Restart the game when the button is clicked
     }
 
     // restartGame() {
@@ -683,14 +692,24 @@ export class Level2 extends SceneBaseClass {
     }
 
 
-    restart() {
-        this.gameOverScreen.style.display = "none";
-        this.playerBody.position.set(0, 0.5, 0);
+    restart(){
+        this.playerBody.position.set(0, 3, 0);
         this.points.forEach(light => this.toggleLightIntensity(light));
         this.lampsArray.forEach(lampLight => {
             lampLight.intensity = 0.5; // Reset to original intensity
         });
         document.body.style.cursor = "none"
+
+
+        this.gameOverScreen.style.display = "none";
+        document.getElementById('gameOverHeader').innerText = "";
+        this.startDamageTimer();
+        this.health = 100;
+        document.getElementById('user-health-bar-container').style.display = 'block';
+
+
+
+
     }
 
     disposeLevel(){

@@ -981,6 +981,7 @@ const animate = (time) => {
         document.querySelector('.start-level-button').disabled = false
     }
 
+
     if (lava) {
         // Base texture flow
         lavaTexture.offset.x += 0.005;
@@ -1000,6 +1001,7 @@ const animate = (time) => {
     }
 
     if (gameStarted) {
+
 
         // Ensure playerModel and duckModel are loaded before accessing their properties
         if (playerModel && duckModel) {
@@ -1037,6 +1039,8 @@ const animate = (time) => {
             if (document.getElementById('powerLevel').getAttribute('value') <= 0) {
                 alert("You are not ready for the boss fight!")
                 renderer.setAnimationLoop(null)
+                setTimeout(()=>{location.reload();})
+
             }
         }
 
@@ -1120,6 +1124,8 @@ const animate = (time) => {
         if (duckModel.position.y <= lavaYPosition) {
             alert("You are not ready for the boss fight! :(")
             renderer.setAnimationLoop(null)
+            setTimeout(()=>{location.reload();})
+
         }
         if (duckModel.position.z <= grounds[grounds.length - 1].position.z - lastStageGroundDepth / 2) {
 
@@ -1129,7 +1135,7 @@ const animate = (time) => {
             <li>Well done!</li>
             <li>You are looking quite delicious!</li>
             <li>Now gerrara here, the boss could use a good snack.</li>
-            <button class="start-level-button">Take me to him!!!</button>
+            // <button class="start-level-button">Take me to him!!!</button>
         </ul>`
 
             document.querySelector('.rules-board').innerHTML = rulesBoardInnerHtml
@@ -1138,8 +1144,7 @@ const animate = (time) => {
             // stop animation
             renderer.setAnimationLoop(null)
 
-            
-            // document.location.href = '../../Level3/index.html'
+            setTimeout(()=>{ location.replace("/");},1000)
         }
 
 
@@ -1208,7 +1213,9 @@ const animate = (time) => {
 
                 if (document.getElementById('powerLevel').getAttribute('value') <= 0) {
                     alert("You are not ready for the boss fight!")
-                    renderer.setAnimationLoop(null)
+                    renderer.setAnimationLoop(null);
+
+                    setTimeout(()=>{location.reload();})
                 }
             }
         })
