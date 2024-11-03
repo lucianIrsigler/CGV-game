@@ -265,7 +265,7 @@ export class Level2 extends SceneBaseClass {
         this.miniMap.addPlayer("#0000FF");
         const doorPlatformPos = platformPositions[0].position;
         this.miniMap.addEndGoal(doorPlatformPos,"#00FF00")
-    }//uses createObjects which uses initGeometries and initMaterials - initMaterials uses initTextures... phew, what a rabbt hole
+    }//uses createObjects which uses initGeometries and initMaterials - initMaterials uses initTextures... phew, what a rabbit hole
 
     async _init_player(){
         const gltf = await this.loader.loadModel('src/models/cute_alien_character/scene.gltf', 'player');
