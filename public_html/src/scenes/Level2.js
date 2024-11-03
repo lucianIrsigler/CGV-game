@@ -340,9 +340,9 @@ export class Level2 extends SceneBaseClass {
     init_lighting_() {
         let temp = new THREE.AmbientLight(0x101010, 0.75);
         this.lightManager.addLight("ambient", temp, null);
-        const playerLight = new THREE.PointLight(0xffffff, 1, 50); // Color, intensity, distance
-        this.lightManager.addLight("playerLight",playerLight,{x:0,y:1.5,z:0})
-        this.playerLight = this.lightManager.getLight("playerLight");
+        // const playerLight = new THREE.PointLight(0xffffff, 1, 50); // Color, intensity, distance
+        // this.lightManager.addLight("playerLight",playerLight,{x:0,y:1.5,z:0})
+        // this.playerLight = this.lightManager.getLight("playerLight");
         lightsConfig.forEach(config => {
             let light;
             if (config.type === "SpotLight") {
