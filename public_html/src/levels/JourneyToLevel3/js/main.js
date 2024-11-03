@@ -58,6 +58,7 @@ let lightFollowsDuck = false
 let groundsDescend = false
 let groundsOscilate = false
 let allowHaunting = true
+let showHelpers = false
 
 let boulderCanDamage = true
 
@@ -90,7 +91,7 @@ const axesHelper = new THREE.AxesHelper(6)
 scene.add(axesHelper)
 
 const gridHelper = new THREE.GridHelper(100, 100)
-scene.add(gridHelper)
+if (showHelpers) scene.add(gridHelper)
 
 camera.position.set(-10, 30, 30)
 orbit.update()
@@ -441,7 +442,9 @@ spotLight.position.z = spotLightTarget.position.z
 const spotLightSpeed = 50 // 50
 
 const sLightHelper = new THREE.SpotLightHelper(spotLight)
-scene.add(sLightHelper)
+
+if (showHelpers) scene.add(sLightHelper)
+
 
 // scene.fog = new THREE.Fog(0xffffff, 0, 200)
 scene.fog = new THREE.FogExp2(0xffffff, 0.005)
@@ -746,7 +749,7 @@ let groundZLocationTracker = groundDepth / 2;
 
 let numGroundsTracker = 0
 
-let maxGroundsAllowed = 40;
+let maxGroundsAllowed = 25;
 
 let previousGroundX = 0
 let previousGroundY = groundYDisplacement
@@ -854,6 +857,7 @@ duckModel.visible = false
 const gui = new dat.GUI()
 
 
+
 const options = {
     sphereColor: '#00ff00',
     wireframe: false,
@@ -864,6 +868,11 @@ const options = {
     firstPerson: false,
     followDuck: true,
 
+}
+
+if (!showHelpers) {
+    // hide the gui
+    gui.hide()
 }
 
 gui.add(options, 'speed', 0.01, 0.1)
@@ -1039,7 +1048,7 @@ const animate = (time) => {
             if (document.getElementById('powerLevel').getAttribute('value') <= 0) {
                 alert("You are not ready for the boss fight!")
                 renderer.setAnimationLoop(null)
-                setTimeout(()=>{location.reload();})
+                setTimeout(() => { location.reload(); })
 
             }
         }
@@ -1124,7 +1133,7 @@ const animate = (time) => {
         if (duckModel.position.y <= lavaYPosition) {
             alert("You are not ready for the boss fight! :(")
             renderer.setAnimationLoop(null)
-            setTimeout(()=>{location.reload();})
+            setTimeout(() => { location.reload(); })
 
         }
         if (duckModel.position.z <= grounds[grounds.length - 1].position.z - lastStageGroundDepth / 2) {
@@ -1144,7 +1153,7 @@ const animate = (time) => {
             // stop animation
             renderer.setAnimationLoop(null)
 
-            setTimeout(()=>{ location.replace("/");},1000)
+            setTimeout(() => { location.replace("/"); }, 1000)
         }
 
 
@@ -1215,7 +1224,7 @@ const animate = (time) => {
                     alert("You are not ready for the boss fight!")
                     renderer.setAnimationLoop(null);
 
-                    setTimeout(()=>{location.reload();})
+                    setTimeout(() => { location.reload(); })
                 }
             }
         })
