@@ -158,6 +158,13 @@ export class Enemy{
         }
     }
 
+    reset(){
+        this.health = this.maxHealth;
+        this.asleep=true;
+        this.enemyHitCooldown=false;
+        this.enemyShootCooldown=false;
+    }
+
 
 
     //TODO FILL OUT

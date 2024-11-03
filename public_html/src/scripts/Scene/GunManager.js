@@ -31,6 +31,31 @@ export class GunManager{
     }
 
 
+    clearAllBullets() {
+        // Remove all bullets from the scene and physics world
+        while (this.bullets.length > 0) {
+            const bullet = this.bullets.pop();
+            if (bullet.mesh) {
+                this.scene.remove(bullet.mesh);
+            }
+            if (bullet.body) {
+                this.world.removeBody(bullet.body);
+            }
+        }
+        // Clear enemy bullets as well if you have them in a separate array
+        if (this.enemyBullets) {
+            while (this.enemyBullets.length > 0) {
+                const bullet = this.enemyBullets.pop();
+                if (bullet.mesh) {
+                    this.scene.remove(bullet.mesh);
+                }
+                if (bullet.body) {
+                    this.world.removeBody(bullet.body);
+                }
+            }
+        }
+    }
+    
     updateAllBullets(){
         this.bullets.forEach((bullet)=>{
             bullet.update(this.scene);
