@@ -481,50 +481,56 @@ export class Level2 extends SceneBaseClass {
      * @param {} currentTime 
      * @returns 
      */
-    animate=(currentTime)=> {
-
+    animate = (currentTime) => {
         this.animationId = requestAnimationFrame(this.animate);
-
-        if (this.cameraManager==undefined||!this.loader.isLoaded() || !this.playerLoaded){
+    
+        if (this.cameraManager == undefined || !this.loader.isLoaded() || !this.playerLoaded) {
             return;
         }
-
+    
         if (this.health <= 0) {
             this.youLose(); // Call the lose condition function
-        } 
+        }
         this.world.step(1 / 60);
         this.objManager.update();
+    
+        // Check if the center button is pressed
+    const buttonA = this.objManager.getObject("centreButton");
+    if (buttonA && this.playerBody.position.distanceTo(buttonA.position) <= 2) {
+        if (!this.isAnimatingPlatformsA && !this.isReversingPlatformsA) {  // Prevents re-triggering while animation is running
+            this.isAnimatingPlatformsA = true;  // Flag to indicate animation in progress
+            this.movePlatforms("A");
+            this.movePlatforms("B");
 
-        // Check if the button is pressed
-        const buttonA = this.objManager.getObject("centreButton");
-        if (buttonA && this.playerBody.position.distanceTo(buttonA.position) <= 2) {
-            if (!this.platformsMoved) {
-                this.movePlatforms("A");
-                this.movePlatforms("B");
-                this.platformsMoved = true;
-
-                // Set a timeout to reverse the platforms after 10 seconds
-                setTimeout(() => {
+            // Set a timeout to reverse the platforms after 10 seconds
+            setTimeout(() => {
+                if (!this.isReversingPlatformsA) { // Prevent multiple reversals
+                    this.isReversingPlatformsA = true;
                     this.reversePlatforms("A");
                     this.reversePlatforms("B");
-                    this.platformsMoved = false;
-                }, 10000);
-            }
+                    this.isReversingPlatformsA = false;
+                }
+                this.isAnimatingPlatformsA = false;  // Allow for re-triggering after completion
+            }, 10000);
         }
-        const buttonB = this.objManager.getObject("leftButton");
-        if (buttonB && this.playerBody.position.distanceTo(buttonB.position) <= 2) {
-            if (!this.platformsMoved) {
-                this.movePlatforms("C");
-                this.platformsMoved = true;
-            }
+    }
+        // Check if the left button is pressed to move platforms "C" only once
+    const buttonB = this.objManager.getObject("leftButton");
+    if (buttonB && this.playerBody.position.distanceTo(buttonB.position) <= 2) {
+        if (!this.isPlatformCMoved) {
+            this.movePlatforms("C");
+            this.isPlatformCMoved = true;  // Mark platforms "C" as moved
         }
-        const buttonC = this.objManager.getObject("rightButton");
-        if (buttonC && this.playerBody.position.distanceTo(buttonC.position) <= 2) {
-            if (!this.platformsMoved) {
-                this.movePlatforms("D");
-                this.platformsMoved = true;
-            }
+    }
+
+    // Check if the right button is pressed to move platforms "D" only once
+    const buttonC = this.objManager.getObject("rightButton");
+    if (buttonC && this.playerBody.position.distanceTo(buttonC.position) <= 2) {
+        if (!this.isPlatformDMoved) {
+            this.movePlatforms("D");
+            this.isPlatformDMoved = true;  // Mark platforms "D" as moved
         }
+    }
 
         const timeElapsedSec = (currentTime - this.lastTime) / 1000;
         this.lastTime = currentTime;
@@ -588,120 +594,71 @@ export class Level2 extends SceneBaseClass {
         }
     }
 
-    movePlatforms(button) {
-        let platformsToMove = [];
-        let stepHeight = 0;
+    // Move platforms logic with additional boundary checks
+movePlatforms(button) {
+    let platformsToMove = [];
+    let stepHeight = 0;
 
-        if (button === "A") {
-            platformsToMove = [
-                "leftCentrePlatform",
-                "leftFromCentrePlatform1",
-                "leftFromCentrePlatform2",
-                "leftFromCentrePlatform3",
-                "leftFromCentrePlatform4"
-            ];
-            stepHeight = 1.9;
-        } else if (button === "B") {
-            platformsToMove = [
-                "rightCentrePlatform",
-                "rightFromCentrePlatform1",
-                "rightFromCentrePlatform2",
-                "rightFromCentrePlatform3",
-                "rightFromCentrePlatform4"
-            ];
-            stepHeight = 1.9;
-        } else if (button === "C") {
-            platformsToMove = [
-                "backFromCentrePlatform1",
-                "backFromCentrePlatform2"
-            ];
-            stepHeight = 2.4;
-        } else if (button === "D") {
-            platformsToMove = [
-                "backFromCentrePlatform3",
-                "backFromCentrePlatform4"
-            ];
-            stepHeight = 2.4;
-        }
-
-        platformsToMove.forEach((platformName, index) => {
-            const platform = this.objManager.getObject(platformName);
-            const platformBody = this.objManager.getPhysicsObject(platformName);
-            if (platform && platformBody) {
-                const targetY = platform.position.y + stepHeight * (index + 1);
-                const duration = 1000000;
-                const startTime = performance.now();
-
-                const animatePlatform = (currentTime) => {
-                    const elapsedTime = currentTime - startTime;
-                    const progress = Math.min(elapsedTime / duration, 1);
-                    const newY = platform.position.y + progress * stepHeight * (index + 1);
-
-                    platform.position.y = newY;
-                    platformBody.position.y = newY;
-
-                    if (progress < 1 && platform.position.y < targetY) {
-                        requestAnimationFrame(animatePlatform);
-                    } else {
-                        platform.position.y = targetY;
-                        platformBody.position.y = targetY;
-                    }
-                };
-
-                requestAnimationFrame(animatePlatform);
-            }
-        });
+    if (button === "A") {
+        platformsToMove = [
+            "leftCentrePlatform",
+            "leftFromCentrePlatform1",
+            "leftFromCentrePlatform2",
+            "leftFromCentrePlatform3",
+            "leftFromCentrePlatform4"
+        ];
+        stepHeight = 1.9;
+    } else if (button === "B") {
+        platformsToMove = [
+            "rightCentrePlatform",
+            "rightFromCentrePlatform1",
+            "rightFromCentrePlatform2",
+            "rightFromCentrePlatform3",
+            "rightFromCentrePlatform4"
+        ];
+        stepHeight = 1.9;
+    } else if (button === "C") {
+        platformsToMove = [
+            "backFromCentrePlatform1",
+            "backFromCentrePlatform2"
+        ];
+        stepHeight = 2.9;
+    } else if (button === "D") {
+        platformsToMove = [
+            "backFromCentrePlatform3",
+            "backFromCentrePlatform4"
+        ];
+        stepHeight = 4.2;
     }
 
-    reversePlatforms(button) {
-        let platformsToMove = [];
-        let stepHeight = 0;
+    platformsToMove.forEach((platformName, index) => {
+        const platform = this.objManager.getObject(platformName);
+        const platformBody = this.objManager.getPhysicsObject(platformName);
+        if (platform && platformBody) {
+            const targetY = platform.position.y + stepHeight * (index + 1);
+            if (platform.position.y >= targetY) return;
 
-        if (button === "A") {
-            platformsToMove = [
-                "leftCentrePlatform",
-                "leftFromCentrePlatform1",
-                "leftFromCentrePlatform2",
-                "leftFromCentrePlatform3",
-                "leftFromCentrePlatform4"
-            ];
-            stepHeight = 1.9;
-        } else if (button === "B") {
-            platformsToMove = [
-                "rightCentrePlatform",
-                "rightFromCentrePlatform1",
-                "rightFromCentrePlatform2",
-                "rightFromCentrePlatform3",
-                "rightFromCentrePlatform4"
-            ];
-            stepHeight = 1.9;
+            const duration = 1000000;
+            const startTime = performance.now();
+
+            const animatePlatform = (currentTime) => {
+                const elapsedTime = currentTime - startTime;
+                const progress = Math.min(elapsedTime / duration, 1);
+                const newY = platform.position.y + progress * stepHeight * (index + 1);
+
+                platform.position.y = newY;
+                platformBody.position.y = newY;
+
+                if (progress < 1 && platform.position.y < targetY) {
+                    requestAnimationFrame(animatePlatform);
+                } else {
+                    platform.position.y = targetY;
+                    platformBody.position.y = targetY;
+                }
+            };
+
+            requestAnimationFrame(animatePlatform);
         }
-        platformsToMove.forEach((platformName, index) => {
-            const platform = this.objManager.getObject(platformName);
-            const platformBody = this.objManager.getPhysicsObject(platformName);
-            if (platform && platformBody) {
-                const targetY = platform.position.y - stepHeight * (index + 1);
-                const duration = 1000000;
-                const startTime = performance.now();
-
-                const animatePlatform = (currentTime) => {
-                    const elapsedTime = currentTime - startTime;
-                    const progress = Math.min(elapsedTime / duration, 1);
-                    const newY = platform.position.y - progress * stepHeight * (index + 1);
-
-                    platform.position.y = newY;
-                    platformBody.position.y = newY;
-
-                    if (progress < 1 && platform.position.y > targetY) {
-                        requestAnimationFrame(animatePlatform);
-                    } else {
-                        platform.position.y = targetY;
-                        platformBody.position.y = targetY;
-                    }
-                };
-
-                requestAnimationFrame(animatePlatform);
-            }
-        });
-    }
+    });
+}
 }
