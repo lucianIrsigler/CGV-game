@@ -746,7 +746,7 @@ let groundZLocationTracker = groundDepth / 2;
 
 let numGroundsTracker = 0
 
-let maxGroundsAllowed = 5;
+let maxGroundsAllowed = 20;
 
 let previousGroundX = 0
 let previousGroundY = groundYDisplacement
@@ -984,16 +984,16 @@ const animate = (time) => {
 
     if (lava) {
         // Base texture flow
-        lavaTexture.offset.x += 0.01;
-        lavaTexture.offset.y += 0.005;
+        lavaTexture.offset.x += 0.005;
+        lavaTexture.offset.y += 0.002;
 
         // Normal map for dynamic surface appearance
-        lavaNormal.offset.x += 0.015;
-        lavaNormal.offset.y += 0.01;
+        lavaNormal.offset.x += 0.007;
+        lavaNormal.offset.y += 0.005;
 
         // Emission map for glowing movement
-        lavaEmission.offset.x += 0.02;
-        lavaEmission.offset.y += 0.01;
+        lavaEmission.offset.x += 0.01;
+        lavaEmission.offset.y += 0.005;
 
         // make lava move with character
         lava.position.z = duckModel.position.z
