@@ -494,6 +494,7 @@ export class Level2 extends SceneBaseClass {
 
         document.getElementById('user-health-bar-container').style.display = 'none';
         document.getElementById('boss-health-bar-container').style.display = 'none';
+        document.body.style.cursor = "url('public/icons/cursor.png'), auto; "
 
     }
 
