@@ -28,6 +28,9 @@ function loadModules(directory) {
         "scripts/Objects/Door.js",
         "scripts/Objects/Enemy.js",
         "scripts/Objects/Minimap.js",
+        "scripts/Objects/curvedPlatform.js",
+        "scripts/Objects/CPBoxLamp.js",
+        "scripts/Objects/circularPlatform.js",
 
         "scripts/Scene/CameraManager.js",
         "scripts/Scene/GunManager.js",
@@ -43,11 +46,15 @@ function loadModules(directory) {
         "scripts/util/randomInterval.js",
         "scripts/util/randomNum.js",
         "scripts/util/TextureLoaderUtil.js",
+        "scripts/Objects/gun.js",
+        "scripts/Objects/buttonPlatform.js",
+        "scripts/Objects/box.js",
+        "scripts/Objects/Fog.js",
+        "scripts/Objects/lamp.js",
 
 
         "scenes/Level1.js",
         "scenes/Level2.js",
-        "scenes/level3ahah.js",
         "scenes/Level3_Journey.js",
         "scenes/Level3.js",
         "scenes/testScene1.js",
@@ -55,7 +62,7 @@ function loadModules(directory) {
         "scenes/testScene3.js",
         "scenes/testScene.js",
     ];
-
+    
     // Loop through each file and add it as a <script> tag to the HTML page
     jsFiles.forEach(file => {
         const script = document.createElement('script');
@@ -80,6 +87,7 @@ loadModules('/src'); // Replace 'src' with your actual base directory path if di
 // LOAD TEST
 import {CustomScene}  from "./src/scenes/testScene.js";
 import {Level1}  from "./src/scenes/Level1.js";
+import {Level2}  from "./src/scenes/Level2.js";
 import { CustomScene1 } from "./src/scenes/testScene1.js";
 import { CustomScene2 } from "./src/scenes/testScene2.js";
 import { CustomScene3 } from "./src/scenes/testScene3.js";
@@ -172,6 +180,7 @@ function startLevel(){
 }
 
 function exitLevel(){
+    document.exitPointerLock();
     animationManager.exitScene();
     document.getElementById("blank").style.display="flex";
     document.getElementById("blank").innerHTML = '';
@@ -191,6 +200,7 @@ function exitLevel(){
 
 
 function goToStartMenu(){
+    document.exitPointerLock();
     animationManager.exitScene();
     document.getElementById("blank").style.display="flex";
     document.getElementById("blank").innerHTML = '';
@@ -249,10 +259,14 @@ function toggleMenu() {
         document.body.style.cursor =  "url('icons/cursor.png'), auto"; 
         menu.style.display = 'block';
         animationManager.pauseAnimation();
+        document.exitPointerLock();
+
     } else {
         document.body.style.cursor = "none"; 
         menu.style.display = 'none';
         animationManager.resumeAnimation();
+        document.body.requestPointerLock();
+
     }
 }
 
@@ -260,6 +274,8 @@ function toggleMenu() {
 
 
 document.getElementById("start").addEventListener("click",()=>{
+    document.exitPointerLock();
+
     playMenuClick();
     addButtons();
 
@@ -280,7 +296,7 @@ document.getElementById("start").addEventListener("click",()=>{
     document.getElementById('lvl2').addEventListener('click', function() {
         playMenuClick();
         startLevel();
-        animationManager.switchScene(new CustomScene1(),1);
+        animationManager.switchScene(new Level2(),1);
     });
 
     document.getElementById('lvl3').addEventListener('click', function() {
@@ -292,6 +308,8 @@ document.getElementById("start").addEventListener("click",()=>{
 
 
 document.getElementById("story").addEventListener("click",()=>{
+    document.exitPointerLock();
+
     playMenuClick();
 
 
@@ -324,6 +342,8 @@ document.getElementById("story").addEventListener("click",()=>{
 })
 
 document.getElementById("how-to-play").addEventListener("click",()=>{
+    document.exitPointerLock();
+
     playMenuClick();
     
     const blankDiv = document.getElementById("blank");
@@ -355,10 +375,13 @@ document.getElementById("how-to-play").addEventListener("click",()=>{
 })
 
 document.getElementById("endless").addEventListener("click",()=>{
+    document.exitPointerLock();
+
     playMenuClick();
 })
 
 document.getElementById("restart-button").addEventListener("click",(e)=>{
+    
     playMenuClick();
     animationManager.pauseAnimation();
     animationManager.restartScene();
@@ -423,7 +446,7 @@ document.addEventListener('levelEnded', (event) => {
         if (currentLevelId < numLevels) {
             let nextLevelId = currentLevelId + 1;
             if (nextLevelId==1){
-                animationManager.switchScene(new CustomScene1(),1);
+                animationManager.switchScene(new Level2(),1);
             }else if (nextLevelId==2){
                 animationManager.switchScene(new CustomScene2(),2);
             }else if (nextLevelId == 3){

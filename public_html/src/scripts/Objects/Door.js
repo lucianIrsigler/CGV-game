@@ -132,6 +132,8 @@ export class Door{
     checkIfOpen(){
         if (this.doorPrompt.style.display === 'block') {
             this.openDoor();
+            return true;
         }
+        return false;
     }
 }

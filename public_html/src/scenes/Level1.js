@@ -423,7 +423,20 @@ export class Level1 extends SceneBaseClass {
         //Handle the 'E' key press to open the door
         document.addEventListener('keydown', (e) => {
             if (e.key === 'e') {
-                this.door.checkIfOpen()
+                const res = this.door.checkIfOpen()
+
+                if (res==true){
+                    setTimeout(()=>{
+                        this.gameOverScreen.innerHTML= "";
+                        this.gameOverScreen.innerHTML+= "<h1 id=\"gameOverHeader\">Stay in the light</h1>";
+                        this.gameOverScreen.innerHTML+= "<button id=\"restartButton\" style=\"padding: 10px 20px; font-size: 20px;\">Restart</button>";
+                        this.gameOverScreen.style.display = 'none';
+
+                        this.endLevel();
+                        this.stopAnimate();
+
+                    },2000)
+                }
             }
         });
         
@@ -547,23 +560,75 @@ export class Level1 extends SceneBaseClass {
     /**
      * Disposes of assets in the level
      */
-    disposeLevel(){
+       /**
+     * Completely disposes of all assets and components in the level
+     */
+       disposeLevel() {
         if (!this.scene) return;
-
-        this.objManager.removeAllObjects();
-        this.lightManager.removeAllLights();
-    
         
+        // Stop any ongoing animations
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+
+        // Clear event listeners
+        window.removeEventListener('load', this.initAudio);
+        this.restartButton.removeEventListener('click', this.restart);
+        
+        // Dispose of object manager contents
+        this.objManager.removeAllObjects();
+        
+        // Dispose of all lights
+        this.lightManager.removeAllLights();
+        
+        // Clean up minimap
+        if (this.miniMap) {
+            // Remove minimap camera
+            if (this.miniMap.miniMapCamera) {
+                this.scene.remove(this.miniMap.miniMapCamera);
+            }
+            
+            // Remove minimap DOM element
+            const minimapElement = document.getElementById('minimap');
+            if (minimapElement) {
+                minimapElement.remove();
+            }
+            
+            // Clear minimap reference
+            this.miniMap = null;
+        }
+        
+        
+        
+        
+        // Clean up renderer
         if (this.renderer) {
             this.renderer.dispose();
-            // Ensure that the renderer's DOM element is removed safely
             try {
-                document.body.removeChild(this.renderer.domElement);
+                const canvas = this.renderer.domElement;
+                if (canvas.parentNode) {
+                    canvas.parentNode.removeChild(canvas);
+                }
             } catch (e) {
                 console.warn("Renderer's DOM element could not be removed:", e);
             }
+            this.renderer = null;
         }
-
-
+        
+        // Clear scene
+        while (this.scene.children.length > 0) {
+            this.scene.remove(this.scene.children[0]);
+        }
+        
+        // Clear all references
+        this.target = null;
+        this.playerBody = null;
+        this.world = null;
+        this.points = [];
+        this.lampsArray = [];
+        this.characterLight = null;
+        this.scene = null;
+        this.camera = null;
     }
 }

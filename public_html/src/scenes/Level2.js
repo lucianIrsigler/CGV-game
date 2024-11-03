@@ -1,11 +1,11 @@
-import * as THREE from 'three';
+// import * as THREE from 'three';
 import { SceneBaseClass } from "../scripts/Scene/SceneBaseClass.js";
 import { CameraManager } from "../scripts/Scene/CameraManager.js";
 import { ObjectManager } from "../scripts/Scene/ObjectManager.js";
 import { LightManager } from "../scripts/Scene/LightManager.js";
 import { LoadingManagerCustom } from "../scripts/Loaders/Loader.js";
 import { World, Body, Box, Vec3, Sphere } from 'https://unpkg.com/cannon-es@0.18.0/dist/cannon-es.js';
-import { loadTextures,applyTextureSettings } from '../scripts/util/TextureLoaderUtil.js';
+import { loadTextures,applyTextureSettings } from "../scripts/util/TextureLoaderUtil.js"
 import { SoundEffectsManager } from '../scripts/Scene/SoundEffectManger.js';
 import { MiniMap } from '../scripts/Objects/Minimap.js';
 import { Door } from '../scripts/Objects/Door.js';
@@ -422,7 +422,7 @@ export class Level2 extends SceneBaseClass {
     // function to heal player at lamp
     startDamageTimer(){
         setInterval(()=>{
-            if (this.loader.isLoaded()){
+            if (this.loader.isLoaded() || this.playerBody==undefined){
                 let valid = false;
 
                 this.points2.forEach((point) => {
@@ -641,7 +641,12 @@ export class Level2 extends SceneBaseClass {
         //Handle the 'E' key press to open the door
         document.addEventListener('keydown', (e) => {
             if (e.key === 'e') {
-                this.doorPositions.checkIfOpen()
+                const isOpen = this.doorPositions.checkIfOpen()
+
+                if (isOpen){
+                    this.endLevel();
+                    this.stopAnimate();
+                }
             }
         });
 
@@ -660,8 +665,9 @@ export class Level2 extends SceneBaseClass {
 
 
     restart() {
+        console.log("here");
         this.gameOverScreen.style.display = "none";
-        this.playerBody.position.set(0, 0.5, 0);
+        this.playerBody.position.set(0, 1, 0);
         this.points.forEach(light => this.toggleLightIntensity(light));
         this.lampsArray.forEach(lampLight => {
             lampLight.intensity = 0.5; // Reset to original intensity

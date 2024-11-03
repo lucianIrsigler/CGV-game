@@ -40,6 +40,8 @@ export class MiniMap{
             window.innerHeight / 2, window.innerHeight / -2,
             0.1, 1000
         );
+
+        
         this.miniMapCamera.position.set(0, 100, 0); // Position the mini-map camera above the scene
         //this.miniMapCamera.lookAt(0,0,15); // Look at the center of the scene
 
