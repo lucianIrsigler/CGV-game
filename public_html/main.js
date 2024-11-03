@@ -80,7 +80,7 @@ function loadModules(directory) {
 }
 
 // Call the function, specifying the base directory path
-loadModules('/src'); // Replace 'src' with your actual base directory path if different
+loadModules('./src'); // Replace 'src' with your actual base directory path if different
 
 
 
@@ -88,13 +88,23 @@ loadModules('/src'); // Replace 'src' with your actual base directory path if di
 import {CustomScene}  from "./src/scenes/testScene.js";
 import {Level1}  from "./src/scenes/Level1.js";
 import {Level2}  from "./src/scenes/Level2.js";
+import {Level3}  from "./src/scenes/Level3.js";
 import { CustomScene1 } from "./src/scenes/testScene1.js";
 import { CustomScene2 } from "./src/scenes/testScene2.js";
 import { CustomScene3 } from "./src/scenes/testScene3.js";
+// import { Level3_Journey} from "./src/scenes/Level3_Journey.js"
 
 import { AnimationManager } from "./src/scripts/Animation/AnimationLoopHandler.js";
 
+// import { animateFunction } from "./src/levels/JourneyToLevel3/js/main.js";
+
 const animationManager = new AnimationManager();
+
+
+
+// let newLevel3Journey = new Level3_Journey(()=>{},animateFunction,()=>{},()=>{},()=>{});
+
+// animationManager.switchScene(newLevel3Journey);
 
 
 
@@ -228,6 +238,7 @@ function addButtons(){
         { id: 'lvl1', title: 'Level 1' },
         { id: 'lvl2', title: 'Level 2' },
         { id: 'lvl3', title: 'Level 3' },
+        { id: 'lvl4', title: 'Boss level' },
     ];
 
     // Clear previous content in the blank div
@@ -301,9 +312,15 @@ document.getElementById("start").addEventListener("click",()=>{
 
     document.getElementById('lvl3').addEventListener('click', function() {
         playMenuClick();
-        startLevel();
-        animationManager.switchScene(new CustomScene2(),2);
+        window.location.replace("src/levels/JourneyToLevel3/index.html")
     });
+
+    document.getElementById('lvl4').addEventListener('click', function() {
+        playMenuClick();
+        startLevel();
+        animationManager.switchScene(new Level3(),0);
+    });
+
 })
 
 
@@ -314,30 +331,30 @@ document.getElementById("story").addEventListener("click",()=>{
 
 
     const blankDiv = document.getElementById("blank");
-
     blankDiv.innerHTML = '';
 
 
-    const title = document.createElement("h1");
-    title.classList.add("start-menu-title");
-    title.textContent = "The story";
-    blankDiv.appendChild(title);
+    const video = document.createElement("video");
+    video.classList.add("fullscreen-video"); // Add a class for styling
+    video.setAttribute("src", "videos/Storyline.mp4"); // Replace with your video file
+    video.setAttribute("autoplay", "true");
+    video.setAttribute("muted", "false");
+    blankDiv.appendChild(video);
 
-    let text = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-    Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris 
-    nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit 
-    in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur 
-    sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`;
-
-    const newText = document.createElement("p");
-    newText.classList.add("text");
-    newText.textContent = text;
-    blankDiv.appendChild(newText);
+    // Hide UI elements (health bar and start menu)
+    document.getElementById("user-health-bar-container").style.display = "none";
+    document.getElementById("start-menu").style.display = "none";
 
     document.getElementById("user-health-bar-container").style.display="none";
     document.getElementById("start-menu").style.display="none";
     onStartScreen = false;
+
+    video.addEventListener("ended", () => {
+        goToStartMenu();
+        onStartScreen = true;
+    });
+
+
 
 })
 
@@ -376,8 +393,12 @@ document.getElementById("how-to-play").addEventListener("click",()=>{
 
 document.getElementById("endless").addEventListener("click",()=>{
     document.exitPointerLock();
-
     playMenuClick();
+
+    window.location.replace("src/levels/EndlessMode/index.html")
+
+
+
 })
 
 document.getElementById("restart-button").addEventListener("click",(e)=>{
@@ -452,8 +473,7 @@ document.addEventListener('levelEnded', (event) => {
             }else if (nextLevelId==2){
                 animationManager.switchScene(new CustomScene2(),2);
             }else if (nextLevelId == 3){
-                animationManager.switchScene(new CustomScene3(),3);
-
+                window.location.replace("src/levels/JourneyToLevel3/index.html")
             }
             animationManager.pauseAnimation();
             animationManager.resumeAnimation();

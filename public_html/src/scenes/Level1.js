@@ -617,6 +617,8 @@ export class Level1 extends SceneBaseClass {
         }
 
         clearInterval(this.intervalID);
+
+        this.cameraManager.dispose();
         
         // Clear all references
         this.target = null;

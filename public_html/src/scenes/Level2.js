@@ -58,7 +58,7 @@ export class Level2 extends SceneBaseClass {
         this.maxHealth = 100; // Define the maximum health
         this.health = this.maxHealth;
         this.loaded = false;
-        this.damageRate = 0.15; // Define the damage rate
+        this.damageRate = 0.10; // Define the damage rate
         this.healingRate = 10; // Define the healing rate
 
         //FLAGS
@@ -87,7 +87,7 @@ export class Level2 extends SceneBaseClass {
         this.init_camera_();
         this.miniMap.init_miniMap_(window,document,this.scene);
         this.startDamageTimer();
-        this.startDamageTimer();
+        // this.startDamageTimer();
         const currentDoor = doorPositions.doorOne;
         this.doorPositions.init_door_(this.scene,currentDoor);
         this.animate();
@@ -482,9 +482,6 @@ export class Level2 extends SceneBaseClass {
      * @returns 
      */
     animate = (currentTime) => {
-        if (this.ended){
-            return;
-        }
         this.animationId = requestAnimationFrame(this.animate);
     
         if (this.cameraManager == undefined || !this.loader.isLoaded() || !this.playerLoaded) {

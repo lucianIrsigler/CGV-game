@@ -80,18 +80,22 @@ export class FirstPersonInputController {
         document.addEventListener("mouseup", (e) => this.onMouseUp_(e), false);
         document.addEventListener("mousemove", (e) => this.onMouseMove_(e), false);
 
-        document.addEventListener('click', () => {
-            document.body.requestPointerLock();
-        });
-
-        document.addEventListener('pointerlockchange', () => {
-            if (document.pointerLockElement === document.body) {
-                document.addEventListener('mousemove', this.onMouseMove_, false);
-            } else {
-                document.removeEventListener('mousemove', this.onMouseMove_, false);
-            }
-        }, false);
+        document.addEventListener('click',this.requestPointerLock);
+        document.addEventListener('pointerlockchange',this.pointerLockChangeHandler,false);
     }
+
+    requestPointerLock(){
+        document.body.requestPointerLock();
+    }
+
+    pointerLockChangeHandler() {
+        if (document.pointerLockElement === document.body) {
+            document.addEventListener("mousemove", this.onMouseMove_, false);
+        } else {
+            document.removeEventListener("mousemove", this.onMouseMove_, false);
+        }
+    }
+
 
     onMouseDown_(e) {
         switch (e.button) {
@@ -305,4 +309,15 @@ export class FirstPersonInputController {
         // console.log("target:",this.target_.position);
         this.previous_ = { ...this.current_ };
     }
+
+    dispose() {
+        document.removeEventListener("keydown", this.onKeyDown_);
+        document.removeEventListener("keyup", this.onKeyUp_);
+        document.removeEventListener("mousedown", this.onMouseDown_);
+        document.removeEventListener("mouseup", this.onMouseUp_);
+        document.removeEventListener("mousemove", this.onMouseMove_);
+        document.removeEventListener("click", this.requestPointerLock);
+        document.removeEventListener("pointerlockchange", this.pointerLockChangeHandler);
+    }
+    
 }

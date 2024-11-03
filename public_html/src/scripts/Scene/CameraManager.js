@@ -90,4 +90,9 @@ export class CameraManager{
             this.thirdPerson.update(timeElapsedS);
         }
     }
+
+    dispose(){
+        this.fps.dispose();
+        this.thirdPerson.dispose();
+    }
 }

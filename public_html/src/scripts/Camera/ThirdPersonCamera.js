@@ -79,4 +79,8 @@ export class ThirdPersonCamera{
         this.camera_.lookAt(this.currentLookat_);
         // console.log("camera:",this.currentPositon_);
     }
+
+    dispose(){
+        this.input_.dispose();
+    }
 }

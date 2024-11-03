@@ -55,4 +55,8 @@ export class FirstPersonCamera {
         this.input_.update(timeElapsedS);
         this.updateCamera_(timeElapsedS);
     }
+
+    dispose(){
+        this.input_.dispose();
+    }
 }
